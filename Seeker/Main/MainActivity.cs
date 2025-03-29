@@ -57,6 +57,7 @@ using log = Android.Util.Log;
 using Seeker.Serialization;
 using AndroidX.Activity;
 using Seeker.Transfers;
+using Seeker.Exceptions;
 
 //using System.IO;
 //readme:
@@ -106,15 +107,6 @@ namespace Seeker
         {
             return s1.Username.GetHashCode() + s1.GetElementAtAdapterPosition(hideLockedResults, 0).Filename.GetHashCode();
         }
-    }
-
-    // TODOORG exceptions
-    public class DownloadDirectoryNotSetException : System.Exception
-    {
-    }
-
-    public class FaultPropagationException : System.Exception
-    {
     }
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..

@@ -20,13 +20,12 @@
 using Seeker.Helpers;
 using Seeker.Messages;
 using Seeker.Users;
+using Seeker.Exceptions;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.Core.Graphics.Drawable;
 using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;

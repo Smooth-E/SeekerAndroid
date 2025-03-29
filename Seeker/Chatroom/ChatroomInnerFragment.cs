@@ -1,7 +1,6 @@
-﻿using Android.App;
+﻿using Seeker.Exceptions;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
@@ -9,7 +8,6 @@ using Google.Android.Material.FloatingActionButton;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Seeker.Chatroom

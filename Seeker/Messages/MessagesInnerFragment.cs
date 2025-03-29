@@ -1,8 +1,7 @@
 ﻿using Seeker.Chatroom;
-using Android.App;
+using Seeker.Exceptions;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.App;
@@ -10,7 +9,6 @@ using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Seeker.Messages

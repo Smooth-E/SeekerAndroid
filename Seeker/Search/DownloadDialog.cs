@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Exceptions;
 using Seeker.Extensions.SearchResponseExtensions;
 using Android.App;
 using Android.Content;
@@ -33,7 +34,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using log = Android.Util.Log;
 using Seeker.Helpers;
