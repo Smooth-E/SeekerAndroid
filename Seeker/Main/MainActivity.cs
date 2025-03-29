@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Seeker.Search;
@@ -68,14 +69,8 @@ using Seeker.Exceptions;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace Seeker
 {
-    // TODOORG seperate class activities?
-
-    // TODOORG activites? receivers?
-
-    // TODOORG Utils. Common. add unit test
-
-    //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    // WindowSoftInputMode = SoftInput.StateAlwaysHidden) didn't change anything...
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true)]
     public class MainActivity : 
         ThemeableActivity, 
         Seeker.MainActivity.DownloadCallback, 
@@ -85,6 +80,7 @@ namespace Seeker
         public static object SHARED_PREF_LOCK = new object();
         public const string logCatTag = "seeker";
         public static bool crashlyticsEnabled = true;
+        
         public static void LogDebug(string msg)
         {
             if (SeekerApplication.LOG_DIAGNOSTICS)
@@ -136,9 +132,7 @@ namespace Seeker
             log.Debug(logCatTag, msg);
 #endif
         }
-
-
-
+        
         public static void createNotificationChannel(Context c, string id, string name)
         {
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
@@ -155,23 +149,37 @@ namespace Seeker
 
         // TODOORG seperate class
         public class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
-        {   //oh so it just needs the Java.Lang.Object and then you can make it like a Java Anon Class where you only implement that one thing that you truly need
-            //Since C# doesn't support anonymous classes
-
+        {
+            // oh so it just needs the Java.Lang.Object and then you can make it like a Java Anon Class where you only
+            // implement that one thing that you truly need
+            // Since C# doesn't support anonymous classes
+            
             private bool alreadyOpen;
             private const int defaultKeyboardHeightDP = 100;
-            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop ? 48 : 0); //api 21
+            
+            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + 
+                                              (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop ? 48 : 0); //api 21
+            
             private View parentView;
             private Android.Graphics.Rect rect = new Android.Graphics.Rect();
+            
             public ListenerKeyboard(View _parentView)
             {
                 parentView = _parentView;
             }
 
-            public void OnGlobalLayout() //this is technically overridden and it will be called, its just weird due to the java IJavaObject, IDisposable, IJavaPeerable stuff.
+            // this is technically overridden and it will be called,
+            // its just weird due to the java IJavaObject, IDisposable, IJavaPeerable stuff.
+            public void OnGlobalLayout() 
             {
-                int estimatedKeyboardHeight = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, EstimatedKeyboardDP, parentView.Resources.DisplayMetrics);
+                int estimatedKeyboardHeight = (int)Android.Util.TypedValue.ApplyDimension(
+                    Android.Util.ComplexUnitType.Dip, 
+                    EstimatedKeyboardDP,
+                    parentView.Resources.DisplayMetrics
+                );
+                
                 parentView.GetWindowVisibleDisplayFrame(rect);//getWindowVisibleDisplayFrame(rect);
+                
                 int heightDiff = parentView.RootView.Height - (rect.Bottom - rect.Top);
                 bool isShown = heightDiff >= estimatedKeyboardHeight;
 
@@ -180,53 +188,61 @@ namespace Seeker
                     LogDebug("Keyboard state - Ignoring global layout change...");
                     return;
                 }
+                
                 alreadyOpen = isShown;
                 KeyBoardVisibilityChanged?.Invoke(null, isShown);
-                //onKeyboardVisibilityListener.onVisibilityChanged(isShown);
             }
         }
 
         public static EventHandler<bool> KeyBoardVisibilityChanged;
-
-
+        
         public void KeyboardChanged(object sender, bool isShown)
         {
+            var bottomNavigationView =
+                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+            
             if (isShown)
             {
-                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Animate().Alpha(0f).SetDuration(250).SetListener(new BottomNavigationViewAnimationListener());
-                //it will be left at 0% opacity! even when unhiding it!
-
-                //SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Gone;
+                bottomNavigationView
+                    .Animate()
+                    .Alpha(0f)
+                    .SetDuration(250)
+                    .SetListener(new BottomNavigationViewAnimationListener());
             }
             else
             {
-                //SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Animate().Alpha(100).SetDuration(250).SetListener(new BottomNavigationViewAnimationListener());
-                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Visible;
-                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Animate().Alpha(1f).SetDuration(300).SetListener(null);
-                //SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Visible;
+                bottomNavigationView.Visibility = ViewStates.Visible;
+                bottomNavigationView
+                    .Animate()
+                    .Alpha(1f)
+                    .SetDuration(300)
+                    .SetListener(null);
             }
         }
 
-        public class BottomNavigationViewAnimationListener : Java.Lang.Object, Android.Animation.Animator.IAnimatorListener
+        public class BottomNavigationViewAnimationListener : 
+            Java.Lang.Object, 
+            Android.Animation.Animator.IAnimatorListener
         {
             public void OnAnimationCancel(Animator animation)
             {
-
+                // Intentional no-op
             }
 
             public void OnAnimationEnd(Animator animation)
             {
-                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Gone;
+                var mainActivity = SeekerState.MainActivityRef;
+                mainActivity.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Gone;
             }
 
             public void OnAnimationRepeat(Animator animation)
             {
-                //throw new NotImplementedException();
+                // Intentional no-op
             }
 
             public void OnAnimationStart(Animator animation)
             {
-                //throw new NotImplementedException();
+                // Intentional no-op
             }
         }
 
@@ -264,152 +280,55 @@ namespace Seeker
 
         private void setKeyboardVisibilityListener()
         {
-            //this creates problems.  we dont really need this anymore with the new "adjust nothing if edittext is at top" fix.
-            //the only down side is on clicking the two filters there will be the nav bar.  but thats worth it since
-            //this incorrectly hides navbar all the time and its very tough to get it back...
-
-
-            //View parentView = ((ViewGroup)this.FindViewById(Android.Resource.Id.Content)).GetChildAt(0);
-            //KeyBoardVisibilityChanged -= KeyboardChanged;
-            //KeyBoardVisibilityChanged += KeyboardChanged;
-            //parentView.ViewTreeObserver.AddOnGlobalLayoutListener(new ListenerKeyboard(parentView));
-
+            // TODO: Remove this class completely
         }
-        //           View parentView = ((ViewGroup)this.FindViewById(android.R.id.content)).GetChildAt(0);
-        //            parentView.ViewTreeObserver.AddOnGlobalLayoutListener()
 
-        //                getViewTreeObserver().addOnGlobalLayoutListener
-        //            {
-
-        //        private boolean alreadyOpen;
-        //        private final int defaultKeyboardHeightDP = 100;
-        //        private final int EstimatedKeyboardDP = defaultKeyboardHeightDP + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 48 : 0);
-        //        private final Rect rect = new Rect();
-
-        //        @Override
-        //        public void onGlobalLayout()
-        //        {
-        //            int estimatedKeyboardHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, EstimatedKeyboardDP, parentView.getResources().getDisplayMetrics());
-        //            parentView.getWindowVisibleDisplayFrame(rect);
-        //            int heightDiff = parentView.getRootView().getHeight() - (rect.bottom - rect.top);
-        //            boolean isShown = heightDiff >= estimatedKeyboardHeight;
-
-        //            if (isShown == alreadyOpen)
-        //            {
-        //                Log.i("Keyboard state", "Ignoring global layout change...");
-        //                return;
-        //            }
-        //            alreadyOpen = isShown;
-        //            onKeyboardVisibilityListener.onVisibilityChanged(isShown);
-        //        }
-        //    });
-        //}
-
-        //private static void NatUtility_DeviceFound(object sender, Mono.Nat.DeviceEventArgs e)
-        //{
-        //    LogDebug("Device Found");
-        //    INatDevice device = e.Device;
-        //    LogDebug(e.Device.NatProtocol.ToString());
-        //    LogDebug(e.Device.GetExternalIP().ToString());
-        //    e.Device.CreatePortMap(new Mapping(Protocol.Tcp, 4367, 4367, 600, "android"));
-        //    //Console.WriteLine(e.Device.Get)
-        //    foreach (Mapping portMap in device.GetAllMappings())
-        //    {
-        //        LogDebug(portMap.ToString());
-        //    }
-
-        //    // Set the TcpListener on port 13000.
-        //    //Int32 port = 4234;
-        //    //IPAddress localAddr = IPAddress.Parse("192.168.0.105");
-
-        //    //// TcpListener server = new TcpListener(port);
-        //    //var server = new TcpListener(localAddr, port);
-        //    //server.Start();
-        //    //while (true)
-        //    //{
-        //    //    System.Console.Write("Waiting for a connection... ");
-
-        //    //    // Perform a blocking call to accept requests.
-        //    //    // You could also use server.AcceptSocket() here.
-        //    //    TcpClient client = server.AcceptTcpClient();
-        //    //    System.Console.WriteLine("Connected!");
-        //    //}
-        //}
-
-
-        //public static String getIPAddress(bool useIPv4)
-        //{
-        //    try
-        //    {
-
-        //        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-        //        foreach (NetworkInterface intf in interfaces)
-        //        {
-        //            var addrs = intf.GetIPProperties().
-        //            addrs.
-        //            foreach (InetAddress addr in addrs)
-        //            {
-        //                if (!addr.isLoopbackAddress())
-        //                {
-        //                    String sAddr = addr.getHostAddress();
-        //                    //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
-        //                    boolean isIPv4 = sAddr.indexOf(':') < 0;
-
-        //                    if (useIPv4)
-        //                    {
-        //                        if (isIPv4)
-        //                            return sAddr;
-        //                    }
-        //                    else
-        //                    {
-        //                        if (!isIPv4)
-        //                        {
-        //                            int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
-        //                            return delim < 0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ignored) { } // for now eat exceptions
-        //    return "";
-        //}
         /// <summary>
         /// Presentable Filename, Uri.ToString(), length
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="directoryCount"></param>
         /// <returns></returns>
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryInfo newlyAddedDirectoryIfApplicable,
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br,
-            out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> 
+            ParseSharedDirectoryFastDocContract(
+                UploadDirectoryInfo newlyAddedDirectoryIfApplicable, 
+                Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, 
+                ref int directoryCount, out BrowseResponse br,
+                out List<Tuple<string, string>> dirMappingFriendlyNameToUri,
+                out Dictionary<int, string> index, 
+                out List<Soulseek.Directory> allHiddenDirs
+            )
         {
-            //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
-            //so the presentablename should be FolderSelected/path to rest
-            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
-            //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
+            // searchable name (just folder/song), uri.ToString (to actually get it),
+            // size (for ID purposes and to send),
+            // presentablename (to send - this is the name that is supposed to show up as the folder
+            //     that the QT and nicotine clients send)
+            
+            // so the presentablename should be FolderSelected/path to rest
+            // there due to the way android separates the sdcard root (or primary:) and other OS.
+            // whereas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.
+            // If primary: is part of the presentable name then I will change 
+            // it to primary:\Foldername similar to C:\Foldername.
+            // I think this makes most sense of the things I have tried.
+            
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new();
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             List<Soulseek.Directory> allLockedDirs = new List<Soulseek.Directory>();
             allHiddenDirs = new List<Soulseek.Directory>();
             dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
 
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if (UploadDirectoryManager.AreAllFailed()) //the newly added one is always good.
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
-
             HashSet<string> volNames = UploadDirectoryManager.GetInterestedVolNames();
 
-            Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo = new();
             PopulateAllMediaStoreInfo(allMediaStoreInfo, volNames);
 
 
             index = new Dictionary<int, string>();
             int indexNum = 0;
-            var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
+            
+            // avoid race conditions and enumeration modified exceptions.
+            var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList();
+            
             foreach (var uploadDirectoryInfo in tmpUploadDirs)
             {
                 if (uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
@@ -418,19 +337,40 @@ namespace Seeker
                 }
 
                 DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                
+                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, 
+                    out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesInternal(SeekerState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
-                    pairs, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
-                    ref directoryCount, ref indexNum);
+                traverseDirectoryEntriesInternal(
+                    SeekerState.ActiveActivityRef.ContentResolver, 
+                    dir.Uri, 
+                    DocumentsContract.GetTreeDocumentId(dir.Uri), 
+                    dir.Uri,
+                    pairs, 
+                    true, 
+                    volName, 
+                    allDirs, 
+                    allLockedDirs, 
+                    allHiddenDirs, 
+                    dirMappingFriendlyNameToUri, 
+                    toStrip, 
+                    index,
+                    dir,
+                    allMediaStoreInfo,
+                    previousFileInfoToUse, 
+                    overrideCase, 
+                    overrideCase ? rootFolderDisplayName : null,
+                    ref directoryCount, 
+                    ref indexNum
+                );
             }
-
 
             br = new BrowseResponse(allDirs, allLockedDirs);
             return pairs;
         }
 
-        public static string GetPresentableName(Android.Net.Uri uri, string folderToStripForPresentableNames, string volName)
+        public static string GetPresentableName(Android.Net.Uri uri, 
+            string folderToStripForPresentableNames, string volName)
         {
             if(uri.LastPathSegment == null)
             {
@@ -440,11 +380,15 @@ namespace Seeker
 
             string presentableName = uri.LastPathSegment.Replace('/', '\\');
 
-            if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+            // this means that the primary: is in the path so at least convert it from primary: to primary:\
+            if (folderToStripForPresentableNames == null)
             {
-                if (volName != null && volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                // i.e. if it has something after it..
+                // primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                if (volName != null && volName.Length != presentableName.Length)
                 {
-                    presentableName = presentableName.Substring(0, volName.Length) + '\\' + presentableName.Substring(volName.Length);
+                    var substring = presentableName.Substring(0, volName.Length);
+                    presentableName = substring + '\\' + presentableName.Substring(volName.Length);
                 }
             }
             else
@@ -454,36 +398,32 @@ namespace Seeker
             return presentableName;
         }
 
-        public static void GetAllFolderInfo(UploadDirectoryInfo uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
+        public static void GetAllFolderInfo(
+            UploadDirectoryInfo uploadDirectoryInfo, 
+            out bool overrideCase,
+            out string volName, 
+            ut string toStrip, 
+            out string rootFolderDisplayName,
+            out string presentableNameToUse)
         {
             DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-            Android.Net.Uri uri = dir.Uri;//Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+            Android.Net.Uri uri = dir.Uri; // Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
             MainActivity.LogInfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
-            //string lastPathSegment = null;
-            //bool msdCase = false;
-            //if (uploadDirectoryInfo.UploadDirectory != null)
-            //{
+            
             string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
-            //}
-            //else
-            //{
 
-            //    lastPathSegment = uri.LastPathSegment.Replace('/', '\\');
-            //}
             toStrip = string.Empty;
-            //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
+            
+            // can be reproduced with pixel emulator API 28 (android 9).
+            // the last path segment for the downloads dir is "downloads"
+            // but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete"
+            // (note it is still a content scheme, raw: is the volume)
             volName = null;
-            if (msdCase)
-            {
-                //in this case we assume the volume is primary..
-            }
-            else
+            
+            // Otherwise we assume the volume is primary
+            if (!msdCase)
             {
                 volName = GetVolumeName(lastPathSegment, true, out _);
-                //if(volName==null)
-                //{
-                //    MainActivity.LogFirebase("volName is null: " + dir.Uri.ToString());
-                //}
                 if (lastPathSegment.Contains('\\'))
                 {
                     int stripIndex = lastPathSegment.LastIndexOf('\\');
@@ -491,18 +431,11 @@ namespace Seeker
                 }
                 else if (volName != null && lastPathSegment.Contains(volName))
                 {
-                    if (lastPathSegment == volName)
-                    {
-                        toStrip = null;
-                    }
-                    else
-                    {
-                        toStrip = volName;
-                    }
+                    toStrip = lastPathSegment == volName ? null : volName
                 }
                 else
                 {
-                    MainActivity.LogFirebase("contains neither: " + lastPathSegment); //Download (on Android 9 emu)
+                    MainActivity.LogFirebase("contains neither: " + lastPathSegment); // Download (on Android 9 emu)
                 }
             }
 
@@ -517,21 +450,23 @@ namespace Seeker
                 {
                     rootFolderDisplayName = "downloads";
                 }
-                volName = null; //i.e. nothing to strip out!
+                
+                volName = null; // i.e. nothing to strip out!
                 toStrip = string.Empty;
             }
 
             if (!string.IsNullOrEmpty(rootFolderDisplayName))
             {
                 overrideCase = true;
-                volName = null; //i.e. nothing to strip out!
+                volName = null; // i.e. nothing to strip out!
                 toStrip = string.Empty;
             }
 
             // Forcing Override Case
             // Basically there are two ways we construct the tree. One by appending each new name to the base as we go
             // (the 'Override' Case) the other by taking current.Uri minus root.Uri to get the difference.  
-            // The latter does not work because sometimes current.Uri will be say "home:" and root will be say "primary:".
+            // The latter does not work because sometimes current.Uri will be say "home:"
+            // and root will be say "primary:".
             overrideCase = true;
 
             if (!string.IsNullOrEmpty(rootFolderDisplayName))
@@ -545,7 +480,9 @@ namespace Seeker
             }
         }
 
-        public static void PopulateAllMediaStoreInfo(Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo, HashSet<string> volumeNamesOfInterest)
+        public static void PopulateAllMediaStoreInfo(
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo, 
+            HashSet<string> volumeNamesOfInterest)
         {
 
             bool hasAnyInfo = HasMediaStoreDurationColumn();
@@ -553,24 +490,29 @@ namespace Seeker
             {
                 bool hasBitRate = HasMediaStoreBitRateColumn();
                 string[] selectionColumns = null;
+                
                 if (hasBitRate)
                 {
-                    selectionColumns = new string[] {
+                    selectionColumns = new string[] 
+                    {
                         Android.Provider.MediaStore.IMediaColumns.Size,
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
 
-                        Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                    Android.Provider.MediaStore.IMediaColumns.Duration,
-                                    Android.Provider.MediaStore.IMediaColumns.Bitrate };
+                        Android.Provider.MediaStore.IMediaColumns.Data, // disambiguator if applicable
+                        Android.Provider.MediaStore.IMediaColumns.Duration,
+                        Android.Provider.MediaStore.IMediaColumns.Bitrate 
+                    };
                 }
                 else //only has duration
                 {
-                    selectionColumns = new string[] {
+                    selectionColumns = new string[]
+                    {
                         Android.Provider.MediaStore.IMediaColumns.Size,
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
 
                         Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                    Android.Provider.MediaStore.IMediaColumns.Duration };
+                        Android.Provider.MediaStore.IMediaColumns.Duration 
+                    };
                 }
 
 
@@ -586,24 +528,32 @@ namespace Seeker
                         mediaStoreUri = MediaStore.Audio.Media.ExternalContentUri;
                     }
 
-                    //metadata content resolver info
+                    // metadata content resolver info
                     Android.Database.ICursor mediaStoreInfo = null;
                     try
                     {
-                        mediaStoreInfo = SeekerState.ActiveActivityRef.ContentResolver.Query(mediaStoreUri, selectionColumns,
-                            null, null, null);
+                        mediaStoreInfo = SeekerState.ActiveActivityRef.ContentResolver.Query(mediaStoreUri, 
+                            selectionColumns, null, null, null);
+                        
                         while (mediaStoreInfo.MoveToNext())
                         {
                             string key = mediaStoreInfo.GetInt(0) + mediaStoreInfo.GetString(1);
+                            
+                            var tuple = new Tuple<string, int, int>(
+                                mediaStoreInfo.GetString(2),
+                                mediaStoreInfo.GetInt(3),
+                                hasBitRate ? mediaStoreInfo.GetInt(4) : -1
+                            );
+                            
                             if (!allMediaStoreInfo.ContainsKey(key))
                             {
                                 var list = new List<Tuple<string, int, int>>();
-                                list.Add(new Tuple<string, int, int>(mediaStoreInfo.GetString(2), mediaStoreInfo.GetInt(3), hasBitRate ? mediaStoreInfo.GetInt(4) : -1));
+                                list.Add(tuple);
                                 allMediaStoreInfo.Add(key, list);
                             }
                             else
                             {
-                                allMediaStoreInfo[key].Add(new Tuple<string, int, int>(mediaStoreInfo.GetString(2), mediaStoreInfo.GetInt(3), hasBitRate ? mediaStoreInfo.GetInt(4) : -1));
+                                allMediaStoreInfo[key].Add(tuple);
                             }
                         }
                     }
