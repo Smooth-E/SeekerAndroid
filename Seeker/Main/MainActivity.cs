@@ -3877,7 +3877,7 @@ namespace Seeker
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme)
+            new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme)
                 .SetMessage(messageResourceString)
                 .SetPositiveButton(actionResourceString, OnCloseClick)
                 .Create()
@@ -4659,15 +4659,22 @@ namespace Seeker
         }
         
         /// <summary>
-        ///     Invoked upon a remote request to download a file.    THE ORIGINAL BUT WITHOUT ITRANSFERTRACKER!!!!
+        /// Invoked upon a remote request to download a file.
+        /// THE ORIGINAL BUT WITHOUT ITRANSFERTRACKER!!!!
         /// </summary>
         /// <param name="username">The username of the requesting user.</param>
         /// <param name="endpoint">The IP endpoint of the requesting user.</param>
         /// <param name="filename">The filename of the requested file.</param>
         /// <param name="tracker">(for example purposes) the ITransferTracker used to track progress.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
-        /// <exception cref="DownloadEnqueueException">Thrown when the download is rejected.  The Exception message will be passed to the remote user.</exception>
-        /// <exception cref="Exception">Thrown on any other Exception other than a rejection.  A generic message will be passed to the remote user for security reasons.</exception>
+        /// <exception cref="DownloadEnqueueException">
+        /// Thrown when the download is rejected.
+        /// The Exception message will be passed to the remote user.
+        /// </exception>
+        /// <exception cref="Exception">
+        /// Thrown on any other Exception other than a rejection.
+        /// A generic message will be passed to the remote user for security reasons.
+        /// </exception>
         private static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
         {
             if (SeekerApplication.IsUserInIgnoreList(username))
@@ -4675,21 +4682,12 @@ namespace Seeker
                 return Task.CompletedTask;
             }
 
-            //if a user tries to download a file from our browseResponse then their filename will be
-            //  "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\y\\x\\09 Between Songs 4.mp3" 
-            //so check if it contains the uploadDataDirectoryUri
-
-            //if(filename.Contains(uploadDirfolderName))
-            //{
-            //    string newFolderName = Helpers.GetFolderNameFromFile(filename);
-            //    string newFileName = Helpers.GetFileNameFromFile(filename);
-            //    keyFilename = newFolderName + @"\" + newFileName;
-            //}
-
-            //the filename is basically "the key"
+            // the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SeekerState.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);//SeekerState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
+            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo =
+                SeekerState.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
+            
             if (ourFileInfo == null)
             {
                 LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
@@ -4701,15 +4699,15 @@ namespace Seeker
 
             if (ourFileInfo.Item4 || ourFileInfo.Item5)
             {
-                //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
-                //CHECK USER LIST
+                // locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
+                // CHECK USER LIST
                 if (!SlskHelp.CommonHelpers.UserListChecker.IsInUserList(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
                 }
             }
 
-            if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(filename)) //IsFromTree method!
+            if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(filename)) // IsFromTree method!
             {
                 ourFile = DocumentFile.FromFile(new Java.IO.File(ourUri.Path));
             }
@@ -4717,28 +4715,14 @@ namespace Seeker
             {
                 ourFile = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, ourUri);
             }
-            //var localFilename = filename.ToLocalOSPath();
-            //var fileInfo = new FileInfo(localFilename);
-
-
 
             if (!ourFile.Exists())
             {
-                //Console.WriteLine($"[UPLOAD REJECTED] File {localFilename} not found.");
                 throw new DownloadEnqueueException($"File not found.");
             }
 
-            //if (tracker.TryGet(TransferDirection.Upload, username, filename, out _))
-            //{
-            //    // in this case, a re-requested file is a no-op.  normally we'd want to respond with a 
-            //    // PlaceInQueueResponse
-            //    //Console.WriteLine($"[UPLOAD RE-REQUESTED] [{username}/{filename}]");
-            //    return Task.CompletedTask;
-            //}
-
             // create a new cancellation token source so that we can cancel the upload from the UI.
             var cts = new CancellationTokenSource();
-            //var topts = new TransferOptions(stateChanged: (e) => tracker.AddOrUpdate(e, cts), progressUpdated: (e) => tracker.AddOrUpdate(e, cts), governor: (t, c) => Task.Delay(1, c));
 
             TransferItem transferItem = new TransferItem();
             transferItem.Username = username;
@@ -4748,12 +4732,14 @@ namespace Seeker
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
-            transferItem = TransfersFragment.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
+            transferItem = TransfersFragment.TransferItemManagerUploads
+                .AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
 
-            if (!exists) //else the state will simply be updated a bit later. 
+            if (!exists) // else the state will simply be updated a bit later. 
             {
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
+            
             // accept all download requests, and begin the upload immediately.
             // normally there would be an internal queue, and uploads would be handled separately.
             Task.Run(async () =>
@@ -4761,29 +4747,39 @@ namespace Seeker
                 CancellationTokenSource oldCts = null;
                 try
                 {
-                    using var stream = SeekerState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri); //outputstream.CanRead is false...
-                    //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+                    // outputstream.CanRead is false...
+                    using var stream = SeekerState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri);
 
                     TransfersFragment.SetupCancellationToken(transferItem, cts, out oldCts);
 
-                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size, stream, options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurUploadGoverner), cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
-                                                                                                                                                                                                                                               //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
-
+                    // THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
+                    // ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS.
+                    await SeekerState.SoulseekClient.UploadAsync(
+                        username,
+                        filename,
+                        transferItem.Size,
+                        stream,
+                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurUploadGoverner), 
+                        cancellationToken: cts.Token
+                    );
                 }
                 catch (DuplicateTransferException dup) //not tested
                 {
                     LogDebug("UPLOAD DUPL - " + dup.Message);
-                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
+                    
+                    // if there is a duplicate you do not want to overwrite the good cancellation token
+                    // with a meaningless one. so restore the old one.
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _);
                 }
                 catch (DuplicateTokenException dup)
                 {
                     LogDebug("UPLOAD DUPL - " + dup.Message);
-                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
+                    
+                    // if there is a duplicate you do not want to overwrite the good cancellation token
+                    // with a meaningless one. so restore the old one.
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _);
                 }
-            }).ContinueWith(t =>
-            {
-                //Console.WriteLine($"[UPLOAD FAILED] {t.Exception}");
-            }, TaskContinuationOptions.NotOnRanToCompletion); // fire and forget
+            }).ContinueWith(t => { }, TaskContinuationOptions.NotOnRanToCompletion); // fire and forget
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
@@ -4793,24 +4789,37 @@ namespace Seeker
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
-            if (NEW_WRITE_EXTERNAL == requestCode || NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode || NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
+            if (NEW_WRITE_EXTERNAL == requestCode
+                || NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode 
+                || NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
             {
                 Action showDirectoryButton = new Action(() =>
                 {
                     ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
-                    AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
+                    AddLoggedInLayout(StaticHacks.LoginFragment.View); // TODO: nullref
                     if (!SeekerState.currentlyLoggedIn)
                     {
-                        MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
+                        MainActivity.BackToLogInLayout(
+                            StaticHacks.LoginFragment.View,
+                            (StaticHacks.LoginFragment as LoginFragment).LogInClick
+                        );
                     }
-                    if (StaticHacks.LoginFragment.View == null)//this can happen...
-                    {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
-                        ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings));
+                    
+                    if (StaticHacks.LoginFragment.View == null) // this can happen...
+                    {
+                        // .View is a method so it can return null.
+                        // I tested it on MainActivity.OnPause and it was in fact null.
+
+                        var toastMessage =
+                            SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings);
+                        ToastUI(toastMessage);
                         LogFirebase("StaticHacks.LoginFragment.View is null");
                         return;
                     }
+                    
                     Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
                     Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
+                    
                     if (bttn != null)
                     {
                         bttn.Visibility = ViewStates.Visible;
@@ -4820,11 +4829,11 @@ namespace Seeker
 
                 if (NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
                 {
-                    //the resultCode will always be Cancelled for this since you have to back out of it.
-                    //so instead we check Android.OS.Environment.IsExternalStorageManager
+                    // the resultCode will always be Cancelled for this since you have to back out of it.
+                    // so instead we check Android.OS.Environment.IsExternalStorageManager
                     if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                     {
-                        //phase 2 - actually pick a file.
+                        // phase 2 - actually pick a file.
                         FallbackFileSelection(NEW_WRITE_EXTERNAL_VIA_LEGACY);
                         return;
                     }
@@ -4838,10 +4847,10 @@ namespace Seeker
                         {
                             RunOnUiThread(showDirectoryButton);
                         }
+                        
                         return;
                     }
                 }
-
 
                 if (resultCode == Result.Ok)
                 {
@@ -4851,7 +4860,11 @@ namespace Seeker
                         SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                         SeekerState.SaveDataDirectoryUri = data.Data.ToString();
                         SeekerState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        
+                        this.ContentResolver.TakePersistableUriPermission(
+                            data.Data,
+                            ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
+                        );
                     }
                     else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
@@ -4862,7 +4875,6 @@ namespace Seeker
                 }
                 else
                 {
-
                     if (OnUIthread())
                     {
                         showDirectoryButton();
@@ -4871,8 +4883,6 @@ namespace Seeker
                     {
                         RunOnUiThread(showDirectoryButton);
                     }
-
-                    //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
             else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode ||
@@ -4893,11 +4903,11 @@ namespace Seeker
 
                 if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
                 {
-                    //the resultCode will always be Cancelled for this since you have to back out of it.
-                    //so instead we check Android.OS.Environment.IsExternalStorageManager
+                    // the resultCode will always be Cancelled for this since you have to back out of it.
+                    // so instead we check Android.OS.Environment.IsExternalStorageManager
                     if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                     {
-                        //phase 2 - actually pick a file.
+                        // phase 2 - actually pick a file.
                         FallbackFileSelection(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY);
                         return;
                     }
@@ -4914,8 +4924,7 @@ namespace Seeker
                         return;
                     }
                 }
-
-
+                
                 if (resultCode == Result.Ok)
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
@@ -4929,11 +4938,13 @@ namespace Seeker
                         SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                         SeekerState.SaveDataDirectoryUri = data.Data.ToString();
                         SeekerState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        this.ContentResolver.TakePersistableUriPermission(
+                            data.Data,
+                            ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
+                        );
                     }
-
-                    //hide the button
-
+                    
+                    // hide the button
                     if (OnUIthread())
                     {
                         hideButton();
@@ -4953,61 +4964,34 @@ namespace Seeker
                     {
                         RunOnUiThread(reiterate);
                     }
-
-                    //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
-            else if (SETTINGS_EXTERNAL == requestCode)
-            {
-                if (resultCode == Result.Ok)
-                {
-                    //get settings and set our things.
-                }
-                else if (resultCode == Result.Canceled)
-                {
-                    //do nothing...
-                }
-            }
-            //else
-            //{
-            //    base.OnActivityResult(requestCode, resultCode, data);
-            //}
         }
 
         private void MustSelectDirectoryClick(object sender, EventArgs e)
         {
             var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
+            
             var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
-            intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-            Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
+            intent.AddFlags(ActivityFlags.GrantPersistableUriPermission 
+                            | ActivityFlags.GrantReadUriPermission 
+                            | ActivityFlags.GrantWriteUriPermission 
+                            | ActivityFlags.GrantPrefixUriPermission);
+            
+            Android.Net.Uri res = null;
             if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
             {
-                //try
-                //{
-                //    //storage/emulated/0/music
-                //    Java.IO.File f = new Java.IO.File(@"/storage/emulated/0/Music");///Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
-                //    //res = f.ToURI();
-                //    res = Android.Net.Uri.FromFile(f);//Parse(f.ToURI().ToString());
-                //}
-                //catch
-                //{
-                //    res = Android.Net.Uri.Parse(defaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
-                //}
                 res = Android.Net.Uri.Parse(defaultMusicUri);
             }
             else
             {
                 res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
             }
+            
             intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
             try
             {
                 this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
-                //if(1==1)
-                //{
-                //    throw new Exception(Helpers.NoDocumentOpenTreeToHandle);
-                //}
-
             }
             catch (Exception ex)
             {
@@ -5030,138 +5014,86 @@ namespace Seeker
             hasManageAllFilesManisfestPermission = true;
 #endif
 
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() 
+                && hasManageAllFilesManisfestPermission
+                && !Android.OS.Environment.IsExternalStorageManager) // this is "step 1"
             {
-                Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+                Intent allFilesPermission = 
+                    new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+                
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
                 allFilesPermission.SetData(packageUri);
-                this.StartActivityForResult(allFilesPermission, mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen : NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen);
+                
+                this.StartActivityForResult(
+                    allFilesPermission,
+                    mustSelectDirectoryButton 
+                        ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen
+                        : NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen
+                );
             }
             else if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
             {
-                FallbackFileSelection(mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY : NEW_WRITE_EXTERNAL_VIA_LEGACY);
+                FallbackFileSelection(
+                    mustSelectDirectoryButton 
+                        ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY 
+                        : NEW_WRITE_EXTERNAL_VIA_LEGACY
+                );
             }
             else
             {
-
-
-                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() 
+                    && !hasManageAllFilesManisfestPermission)
                 {
-                    ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                    ShowSimpleAlertDialog(
+                        this, 
+                        Resource.String.error_no_file_manager_dir_manage_storage,
+                        Resource.String.okay
+                    );
                 }
                 else
                 {
-                    Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                    Toast.MakeText(
+                        this, 
+                        SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), 
+                        ToastLength.Long
+                    ).Show();
                 }
-
-
-                //Note:
-                //If your app targets Android 12 (API level 31) or higher, its toast is limited to two lines of text and shows the application icon next to the text.
-                //Be aware that the line length of this text varies by screen size, so it's good to make the text as short as possible.
-                //on Pixel 5 emulator this limit is around 78 characters.
-                //^It must BOTH target Android 12 AND be running on Android 12^
+                
+                // Note:
+                // If your app targets Android 12 (API level 31) or higher, its toast is limited to two lines of text
+                // and shows the application icon next to the text.
+                // Be aware that the line length of this text varies by screen size, so it's good to make the
+                // text as short as possible.
+                // on Pixel 5 emulator this limit is around 78 characters.
+                // ^It must BOTH target Android 12 AND be running on Android 12^
             }
         }
 
         private void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
         {
-            e.Handled = false; //make sure we still crash.. we just want to clean up..
+            e.Handled = false; // make sure we still crash.. we just want to clean up..
             try
             {
-                //save transfers state !!!
+                // save transfers state !!!
                 TransfersFragment.SaveTransferItems(sharedPreferences);
             }
             catch
             {
-
+                // Intentional no-op
             }
+            
             try
             {
-                //stop dl service..
+                // stop dl service..
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 MainActivity.LogDebug("Stop Service");
                 this.StopService(downloadServiceIntent);
             }
             catch
             {
-
+                // Intentional no-op
             }
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="e"></param>
-        ///// <param name="c"></param>
-        //public static void ShowAlert(Exception e, Context c)
-        //{
-        //    var b = new Android.App.AlertDialog.Builder(c);
-        //    b.SetTitle("An Unhandled Exception Occured"); 
-        //    b.SetMessage(e.Message + 
-        //        System.Environment.NewLine + 
-        //        System.Environment.NewLine + 
-        //        e.StackTrace);
-        //    b.Show();
-        //}
-
-        //public void LogWriter(string logMessage)
-        //{
-        //    LogWrite(logMessage);
-        //}
-        //public void LogWrite(string logMessage)
-        //{
-        //    var m_exePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        //    try
-        //    {
-        //        using (System.IO.StreamWriter w = System.IO.File.AppendText(m_exePath + "\\" + "log.txt"))
-        //        {
-        //            w.WriteLine("Testing testing testing");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //    }
-        //}
-
-        //public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
-        //{
-        //    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
-        //    {
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        FinishAndRemoveTask();
-        //    }
-        //}
-
-        //public static void SeekerState_DownloadAdded(object sender, DownloadAddedEventArgs e)
-        //{
-        //    MainActivity.LogDebug("SeekerState_DownloadAdded");
-        //    TransferItem transferItem = new TransferItem();
-        //    transferItem.Filename = Helpers.GetFileNameFromFile(e.dlInfo.fullFilename);
-        //    transferItem.FolderName = Helpers.GetFolderNameFromFile(e.dlInfo.fullFilename);
-        //    transferItem.Username = e.dlInfo.username;
-        //    transferItem.FullFilename = e.dlInfo.fullFilename;
-        //    transferItem.Size = e.dlInfo.Size;
-        //    transferItem.QueueLength = e.dlInfo.QueueLength;
-        //    e.dlInfo.TransferItemReference = transferItem;
-
-        //    TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource, out _);
-        //    //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
-        //    //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
-        //    //{
-        //    //    //likely old already exists so just replace the old one
-        //    //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
-        //    //}
-
-        //    //once task completes, write to disk
-        //    Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
-        //    e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
-
-        //    TransfersFragment.TransferItemManagerDL.Add(transferItem);
-        //    MainActivity.DownloadAddedUINotify?.Invoke(null, e);
-        //}
 
         /// <summary>
         /// This RETURNS the task for Continuewith
@@ -5170,21 +5102,24 @@ namespace Seeker
         /// <returns></returns>
         public static Action<Task> DownloadContinuationActionUI(DownloadAddedEventArgs e)
         {
-            Action<Task> continuationActionSaveFile = new Action<Task>(
-            task =>
+            Action<Task> continuationActionSaveFile = new Action<Task>(task =>
             {
                 try
                 {
                     Action action = null;
                     if (task.IsCanceled)
                     {
-                        MainActivity.LogDebug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer).ToString());
-                        if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer) > 1000)
+                        MainActivity.LogDebug((DateTimeOffset.Now.ToUnixTimeMilliseconds() 
+                                               - SeekerState.TaskWasCancelledToastDebouncer).ToString());
+                        
+                        if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() 
+                             - SeekerState.TaskWasCancelledToastDebouncer) > 1000)
                         {
                             SeekerState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         }
 
-                        if (e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                        // if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                        if (e.dlInfo.TransferItemReference.CancelAndRetryFlag)
                         {
                             e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                             try
@@ -5192,21 +5127,59 @@ namespace Seeker
                                 //retry download.
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
-                                TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, out _, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
+
+                                // else when you go to cancel you are cancelling an already cancelled useless token!!
+                                TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference,
+                                    cancellationTokenSource, out _);
+                                
+                                Task retryTask = TransfersUtil.DownloadFileAsync(
+                                    e.dlInfo.username,
+                                    e.dlInfo.fullFilename,
+                                    e.dlInfo.TransferItemReference.Size, 
+                                    cancellationTokenSource, 
+                                    out _,
+                                    1, 
+                                    e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), 
+                                    e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1()
+                                );
+                                
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(
+                                    new DownloadAddedEventArgs(
+                                        new DownloadInfo(
+                                            e.dlInfo.username,
+                                            e.dlInfo.fullFilename,
+                                            e.dlInfo.TransferItemReference.Size,
+                                            retryTask,
+                                            cancellationTokenSource,
+                                            e.dlInfo.QueueLength,
+                                            0,
+                                            task.Exception,
+                                            e.dlInfo.Depth
+                                        )
+                                    )
+                                ));
                             }
                             catch (System.Exception e)
                             {
-                                //disconnected error
-                                if (e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
+                                // disconnected error
+                                if (e is System.InvalidOperationException
+                                    && e.Message.ToLower()
+                                        .Contains("server connection must be connected and logged in"))
                                 {
-                                    action = () => { ToastUIWithDebouncer(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
+                                    action = () =>
+                                    {
+                                        ToastUIWithDebouncer(
+                                            SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL),
+                                            "_16_"
+                                        );
+                                    };
                                 }
                                 else
                                 {
-                                    MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                                    MainActivity.LogFirebase("cancel and retry creation failed: "
+                                                             + e.Message + e.StackTrace);
                                 }
+                                
                                 if (action != null)
                                 {
                                     SeekerState.ActiveActivityRef.RunOnUiThread(action);
@@ -5219,7 +5192,9 @@ namespace Seeker
                             MainActivity.LogDebug("continue with cleanup activity: " + e.dlInfo.fullFilename);
                             e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                             e.dlInfo.TransferItemReference.InProcessing = false;
-                            TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
+                            
+                            // this way we are sure that the stream is closed.
+                            TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference);
                         }
 
                         return;
@@ -5234,28 +5209,31 @@ namespace Seeker
                         // so if you send them the filename on disk they will say it is not in the cache.
                         // and if you send them the filename from cache they will say they could not find it on disk.
 
-                        //bool tryUndoMojibake = false; //this is still needed even with keeping track of encodings.
                         bool resetRetryCount = false;
                         var transferItem = e.dlInfo.TransferItemReference;
-                        //bool wasTriedToUndoMojibake = transferItem.TryUndoMojibake;
-                        //transferItem.TryUndoMojibake = false;
+                        
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
-                            action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
+                            action = () =>
+                            {
+                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer));
+                            };
                         }
                         else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
                         {
                             // THIS SHOULD NEVER HAPPEN. WE FIX THE TRANSFER SIZE MISMATCH INLINE.
 
                             // update the size and rerequest.
-                            // if we have partially downloaded the file already we need to delete it to prevent corruption.
+                            // if we have partially downloaded the file already
+                            // we need to delete it to prevent corruption.
                             MainActivity.LogDebug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
                             transferItem.Size = sizeException.RemoteSize;
                             e.dlInfo.Size = sizeException.RemoteSize;
                             retriable = true;
                             forceRetry = true;
                             resetRetryCount = true;
-                            if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri)/* && transferItem.Progress > 0*/)
+                            
+                            if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri))
                             {
                                 try
                                 {
@@ -5263,82 +5241,144 @@ namespace Seeker
                                 }
                                 catch (Exception ex)
                                 {
-                                    string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
+                                    string exceptionString = 
+                                        "Failed to delete incomplete file on TransferSizeMismatchException: " 
+                                        + ex.ToString();
+                                    
                                     MainActivity.LogDebug(exceptionString);
                                     MainActivity.LogFirebase(exceptionString);
                                 }
                             }
                         }
-                        else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
+                        else if (task.Exception.InnerException is DownloadDirectoryNotSetException 
+                                 || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
-                            action = () => { ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
+                            action = () =>
+                            {
+                                var messageString =
+                                    SeekerState.ActiveActivityRef.GetString(Resource.String
+                                        .FailedDownloadDirectoryNotSet);
+                                
+                                ToastUIWithDebouncer(messageString, "_17_");
+                            };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
                         {
-                            //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
+                            // we go here when trying to download a locked file...
+                            // (the exception only gets thrown on rejected with "not shared")
                             bool isFileNotShared = tre.Message.ToLower().Contains("file not shared");
-                            // if we request a file from a soulseek NS client such as eÌe.jpg which when encoded in UTF fails to be decoded by Latin1
-                            // soulseek NS will send TransferRejectedException "File Not Shared." with our filename (the filename will be identical).
-                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
-                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
+                            
+                            // if we request a file from a soulseek NS client such as eÌe.jpg which when encoded
+                            // in UTF fails to be decoded by Latin1
+                            // soulseek NS will send TransferRejectedException "File Not Shared."
+                            // with our filename (the filename will be identical).
+                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make
+                            // any difference and it will be just a normal retry.
+                            // we only want to try this once. and if it fails reset
+                            // it to normal and do not try it again.
                             // if we encode the same way we decode, then such a thing will not occur.
 
-                            // in the nicotine 3.1.1 and earlier, if we request a file such as "fÃ¶r", nicotine will encode it in Latin1.  We will
-                            // decode it as UTF8, encode it back as UTF8 and then they will decode it as UTF-8 resulting in för".  So even though we encoded and decoded
+                            // in the nicotine 3.1.1 and earlier, if we request a file such as
+                            // "fÃ¶r", nicotine will encode it in Latin1.  We will
+                            // decode it as UTF8, encode it back as UTF8 and then they will decode it as UTF-8
+                            // resulting in för".  So even though we encoded and decoded
                             // in the same way there can still be an issue.  If we force legacy it will be fixed.
-
-                            //if (!wasTriedToUndoMojibake && isFileNotShared && HasNonASCIIChars(transferItem.FullFilename))
-                            //{
-                            //    tryUndoMojibake = true;
-                            //    transferItem.TryUndoMojibake = true;
-                            //    retriable = true;
-                            //}
 
 
                             // always set this since it only shows if we DO NOT retry
                             if (isFileNotShared)
                             {
-                                action = () => { ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected_file_not_shared), "_2_"); }; //needed
+                                action = () =>
+                                {
+                                    var messageString =
+                                        SeekerState.ActiveActivityRef.GetString(Resource.String
+                                            .transfer_rejected_file_not_shared);
+                                    
+                                    ToastUIWithDebouncer(messageString, "_2_");
+                                }; // needed
                             }
                             else
                             {
-                                action = () => { ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                                action = () =>
+                                {
+                                    var messageString =
+                                        SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected);
+                                    ToastUIWithDebouncer(messageString, "_2_");
+                                }; // needed
                             }
+                            
                             MainActivity.LogDebug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
-                            action = () => { ToastUIWithDebouncer(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
+                            action = () =>
+                            {
+                                ToastUIWithDebouncer(
+                                    string.Format(SeekerState.ActiveActivityRef
+                                        .GetString(Resource.String.failed_to_establish_connection_to_peer),
+                                        e.dlInfo.username), 
+                                    "_1_", 
+                                    e?.dlInfo?.username ?? string.Empty
+                                );
+                            };
                         }
                         else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                         {
-                            action = () => { ToastUIWithDebouncer(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
+                            action = () =>
+                            {
+                                ToastUIWithDebouncer(
+                                    task.Exception.InnerException.Message, 
+                                    "_3_", 
+                                    e?.dlInfo?.username ?? string.Empty
+                                );
+                            }; // needed. "User x appears to be offline"
                         }
-                        else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
-                                task.Exception.InnerException.Message != null &&
-                                task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (task.Exception.InnerException is Soulseek.SoulseekClientException 
+                                 && task.Exception.InnerException.Message != null 
+                                 && task.Exception.InnerException.Message.ToLower()
+                                     .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             LogDebug("Task Exception: " + task.Exception.InnerException.Message);
-                            action = () => { ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
+                            action = () =>
+                            {
+                                ToastUIWithDebouncer(
+                                    SeekerState.ActiveActivityRef
+                                        .GetString(Resource.String.failed_to_establish_direct_or_indirect),
+                                    "_4_"
+                                );
+                            };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
+                        else if (task.Exception.InnerException.Message != null 
+                                 && task.Exception.InnerException.Message.ToLower()
+                                     .Contains("read error: remote connection closed"))
                         {
                             retriable = true;
-                            //MainActivity.LogFirebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                            action = () =>
+                            {
+                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed));
+                            };
+                            
                             if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                             {
                                 resetRetryCount = true;
                             }
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
+                        else if (task.Exception.InnerException.Message != null
+                                 && task.Exception.InnerException.Message.ToLower()
+                                     .Contains("network subsystem is down"))
                         {
-                            //MainActivity.LogFirebase("Network Subsystem is Down");
-                            if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
+                            // if we have internet again by the time we get here then its retriable.
+                            // this is often due to handoff. handoff either causes this or "remote connection closed"
+                            if (ConnectionReceiver.DoWeHaveInternet())
                             {
                                 LogDebug("we do have internet");
-                                action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                                action = () =>
+                                {
+                                    ToastUI(SeekerState.ActiveActivityRef
+                                        .GetString(Resource.String.remote_conn_closed));
+                                };
+                                
                                 retriable = true;
                                 if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                                 {
@@ -5347,180 +5387,291 @@ namespace Seeker
                             }
                             else
                             {
-                                action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.network_down)); };
+                                action = () =>
+                                {
+                                    ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.network_down));
+                                };
                             }
+                            
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
                         {
-                            // if we request a file from a soulseek NS client such as eÌÌÌe.jpg which when encoded in UTF fails to be decoded by Latin1
+                            // if we request a file from a soulseek NS client such as eÌÌÌe.jpg which when
+                            // encoded in UTF fails to be decoded by Latin1
                             // soulseek NS will send UploadFailed with our filename (the filename will be identical).
-                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
-                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
-                            //if(!wasTriedToUndoMojibake && HasNonASCIIChars(transferItem.FullFilename))
-                            //{
-                            //    tryUndoMojibake = true;
-                            //    transferItem.TryUndoMojibake = true;
-                            //    retriable = true;
-                            //}
+                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make
+                            // any difference and it will be just a normal retry.
+                            // we only want to try this once. and if it fails reset it to normal and
+                            // do not try it again.
+
                             retriable = true;
                             //MainActivity.LogFirebase("Reported as failed by uploader");
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
+                            action = () =>
+                            {
+                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed));
+                            };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (task.Exception.InnerException.Message != null 
+                                 && task.Exception.InnerException.Message.ToLower()
+                                     .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
+                            action = () =>
+                            {
+                                ToastUIWithDebouncer(
+                                    SeekerState.ActiveActivityRef
+                                        .GetString(Resource.String.failed_to_establish_direct_or_indirect),
+                                    "_5_"
+                                );
+                            };
                         }
                         else
                         {
                             retriable = true;
-                            //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
-                            //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
-                            //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
+                            
+                            // the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly")
+                            // this seems to be retry able
+                            // or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
+                            // or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
+                            
                             bool unknownException = true;
                             if (task.Exception != null && task.Exception.InnerException != null)
                             {
-                                //I get a lot of null refs from task.Exception.InnerException.Message
-
-
+                                // I get a lot of null refs from task.Exception.InnerException.Message
                                 LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                                if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
+                                
+                                // is thrown by Stream.Close()
+                                if (task.Exception.InnerException.Message.StartsWith("Disk full."))
                                 {
-                                    action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                    action = () =>
+                                    {
+                                        ToastUI(SeekerState.ActiveActivityRef
+                                            .GetString(Resource.String.error_no_space));
+                                    };
                                     unknownException = false;
                                 }
-
-
-
+                                
                                 if (task.Exception.InnerException.InnerException != null && unknownException)
                                 {
-
-                                    if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)") || task.Exception.InnerException.InnerException.Message.Contains("Read error: Disk full."))
+                                    if (task.Exception.InnerException.InnerException.Message
+                                            .Contains("ENOSPC (No space left on device)") 
+                                        || task.Exception.InnerException.InnerException.Message
+                                            .Contains("Read error: Disk full."))
                                     {
-                                        action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                        action = () =>
+                                        {
+                                            ToastUI(SeekerState.ActiveActivityRef
+                                                .GetString(Resource.String.error_no_space));
+                                        };
                                         unknownException = false;
                                     }
 
-                                    //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                                    // 1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
+                                    if (task.Exception.InnerException.InnerException.Message.ToLower()
+                                        .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                                     {
                                         unknownException = false;
                                     }
 
                                     if (unknownException)
                                     {
-                                        MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                        MainActivity.LogFirebase("InnerInnerException: " 
+                                                                 + task.Exception.InnerException.InnerException.Message 
+                                                                 + task.Exception.InnerException
+                                                                     .InnerException.StackTrace);
                                     }
-
-
-
-                                    //this is to help with the collection was modified
-                                    if (task.Exception.InnerException.InnerException.InnerException != null && unknownException)
+                                    
+                                    // this is to help with the collection was modified
+                                    if (task.Exception.InnerException.InnerException.InnerException != null 
+                                        && unknownException)
                                     {
-                                        MainActivity.LogInfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                        MainActivity.LogInfoFirebase("InnerInnerException: " 
+                                                                     + task.Exception.InnerException
+                                                                         .InnerException.Message 
+                                                                     + task.Exception.InnerException
+                                                                         .InnerException.StackTrace);
+                                        
                                         var innerInner = task.Exception.InnerException.InnerException.InnerException;
+                                        
                                         //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                        MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
-                                        //this is to help with the collection was modified
+                                        MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message 
+                                            + innerInner.StackTrace);
                                     }
                                 }
 
                                 if (unknownException)
                                 {
-                                    if (task.Exception.InnerException.StackTrace.Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
+                                    if (task.Exception.InnerException.StackTrace
+                                        .Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
                                     {
                                         if (task.Exception.InnerException.StackTrace.Length > 1201)
                                         {
-                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1000).ToString());
+                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: "
+                                                                     + task.Exception.InnerException.StackTrace
+                                                                         .Skip(1000).ToString());
                                         }
-                                        MainActivity.LogFirebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                        
+                                        MainActivity.LogFirebase("xml Unhandled task exception: " 
+                                                                 + task.Exception.InnerException.Message 
+                                                                 + task.Exception.InnerException.StackTrace);
                                     }
                                     else
                                     {
-                                        MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                        MainActivity.LogFirebase("dlcontaction Unhandled task exception: " 
+                                                                 + task.Exception.InnerException.Message
+                                                                 + task.Exception.InnerException.StackTrace);
                                     }
                                 }
                             }
                             else if (task.Exception != null && unknownException)
                             {
-                                MainActivity.LogFirebase("Unhandled task exception (little info): " + task.Exception.Message);
+                                MainActivity.LogFirebase("Unhandled task exception (little info): " 
+                                                         + task.Exception.Message);
+                                
                                 LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
                             }
                         }
 
 
-                        if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SeekerState.AutoRetryDownload) && retriable))
+                        if (forceRetry 
+                            || ((resetRetryCount || e.dlInfo.RetryCount == 0) 
+                                && (SeekerState.AutoRetryDownload) 
+                                && retriable))
                         {
                             MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
-                            //MainActivity.LogDebug("!!! try undo mojibake " + tryUndoMojibake);
                             try
                             {
-                                //retry download.
+                                // retry download.
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
-                                TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, out _, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth))));
-                                return; //i.e. dont toast anything just retry.
+                                
+                                // else when you go to cancel you are cancelling an already cancelled useless token!!
+                                TransfersFragment.SetupCancellationToken(
+                                    e.dlInfo.TransferItemReference,
+                                    cancellationTokenSource, 
+                                    out _);
+                                
+                                Task retryTask = TransfersUtil.DownloadFileAsync(
+                                    e.dlInfo.username,
+                                    e.dlInfo.fullFilename, 
+                                    e.dlInfo.Size,
+                                    cancellationTokenSource,
+                                    out _, 
+                                    1, 
+                                    e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(),
+                                    e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(
+                                    new DownloadAddedEventArgs(
+                                        new DownloadInfo(
+                                            e.dlInfo.username, 
+                                            e.dlInfo.fullFilename,
+                                            e.dlInfo.Size,
+                                            retryTask,
+                                            cancellationTokenSource, 
+                                            e.dlInfo.QueueLength, 
+                                            resetRetryCount ? 0 : 1, task.Exception, 
+                                            e.dlInfo.Depth
+                                        )
+                                    )
+                                ));
+                                
+                                return; // i.e. dont toast anything just retry.
                             }
                             catch (System.Exception e)
                             {
+                                // if this happens at least log the normal message....
                                 MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
-                                //if this happens at least log the normal message....
                             }
 
                         }
 
                         if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                         {
-                            LogFirebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
+                            LogFirebase("auto retry failed: prev exception: " 
+                                        + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() 
+                                        + "new exception: " 
+                                        + task.Exception?.InnerException?.Message?.ToString());
                         }
-
-                        //Action action2 = () => { ToastUI(task.Exception.ToString());};
-                        //this.RunOnUiThread(action2);
+                        
                         if (action == null)
                         {
-                            //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
-                            action = () => { ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_unspecified)); };
+                            action = () =>
+                            {
+                                ToastUI(SeekerState.ActiveActivityRef
+                                    .GetString(Resource.String.error_unspecified));
+                            };
                         }
+                        
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
-                        //System.Console.WriteLine(task.Exception.ToString());
                         return;
                     }
-                    //failed downloads return before getting here...
+                    
+                    // failed downloads return before getting here...
 
                     if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                     {
-                        LogFirebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
+                        LogFirebase("auto retry succeeded: prev exception: " 
+                                    + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
                     }
 
                     if (!SeekerState.DisableDownloadToastNotification)
                     {
-                        action = () => { ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
+                        action = () =>
+                        {
+                            ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) +
+                                    " " + SeekerApplication.GetString(Resource.String.FinishedDownloading));
+                        };
+                        
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
                     }
+                    
                     string finalUri = string.Empty;
                     if (task is Task<byte[]> tbyte)
                     {
-                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
+                            .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                        
+                        string path = SaveToFile(
+                            e.dlInfo.fullFilename,
+                            e.dlInfo.username,
+                            tbyte.Result,
+                            null, 
+                            null,
+                            true, 
+                            e.dlInfo.Depth,
+                            noSubfolder, 
+                            out finalUri);
+                        
                         SaveFileToMediaStore(path);
                     }
                     else if (task is Task<Tuple<string, string>> tString)
                     {
-                        //move file...
-                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        // move file...
+                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
+                            .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                        
+                        string path = SaveToFile(
+                            e.dlInfo.fullFilename,
+                            e.dlInfo.username, 
+                            null, 
+                            Android.Net.Uri.Parse(tString.Result.Item1), 
+                            Android.Net.Uri.Parse(tString.Result.Item2),
+                            false,
+                            e.dlInfo.Depth,
+                            noSubfolder,
+                            out finalUri);
+                        
                         SaveFileToMediaStore(path);
                     }
                     else
                     {
                         LogFirebase("Very bad. Task is not the right type.....");
                     }
+                    
                     e.dlInfo.TransferItemReference.FinalUri = finalUri;
                 }
                 finally
@@ -5528,10 +5679,10 @@ namespace Seeker
                     e.dlInfo.TransferItemReference.InProcessing = false;
                 }
             });
+            
             return continuationActionSaveFile;
         }
-
-
+        
         public static void ToastUI(int msgCode)
         {
             Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(msgCode), ToastLength.Long).Show();
