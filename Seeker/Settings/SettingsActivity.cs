@@ -41,6 +41,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using _Microsoft.Android.Resource.Designer;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -3035,10 +3037,13 @@ namespace Seeker
             }
             else
             {
-                //show error message...
-                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                // show error message...
+                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() 
+                    && !hasManageAllFilesManisfestPermission)
                 {
-                    MainActivity.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                    this.ShowSimpleAlertDialog(
+                        ResourceConstant.String.error_no_file_manager_dir_manage_storage, 
+                        ResourceConstant.String.okay);
                 }
                 else
                 {

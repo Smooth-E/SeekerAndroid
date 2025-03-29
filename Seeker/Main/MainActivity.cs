@@ -60,6 +60,7 @@ using AndroidX.Activity;
 using Seeker.Transfers;
 using Seeker.Exceptions;
 using Seeker.Models;
+using Seeker.Utils;
 
 //using System.IO;
 //readme:
@@ -3869,21 +3870,6 @@ namespace Seeker
             return base.OnOptionsItemSelected(item);
         }
 
-        public static void ShowSimpleAlertDialog(Context c, int messageResourceString, int actionResourceString)
-        {
-
-            void OnCloseClick(object sender, DialogClickEventArgs e)
-            {
-                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-            }
-
-            new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme)
-                .SetMessage(messageResourceString)
-                .SetPositiveButton(actionResourceString, OnCloseClick)
-                .Create()
-                .Show();
-        }
-
 
         public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
@@ -5044,8 +5030,7 @@ namespace Seeker
                 if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() 
                     && !hasManageAllFilesManisfestPermission)
                 {
-                    ShowSimpleAlertDialog(
-                        this, 
+                    this.ShowSimpleAlertDialog(
                         Resource.String.error_no_file_manager_dir_manage_storage,
                         Resource.String.okay
                     );
