@@ -73,41 +73,6 @@ namespace Seeker
     // TODOORG activites? receivers?
 
     // TODOORG Utils. Common. add unit test
-    public class SearchResponseComparer : IEqualityComparer<SearchResponse>
-    {
-        private bool hideLockedResults = true;
-
-        public SearchResponseComparer(bool _hideLocked)
-        {
-            hideLockedResults = _hideLocked;
-        }
-
-        public bool Equals(SearchResponse s1, SearchResponse s2)
-        {
-            if (s1.Username == s2.Username)
-            {
-                if (s1.Files.Count == s2.Files.Count)
-                {
-                    if (s1.Files.Count == 0)
-                    {
-                        return s1.LockedFiles.First().Filename == s2.LockedFiles.First().Filename;
-                    }
-                    if (s1.Files.First().Filename == s2.Files.First().Filename)
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-            return false;
-        }
-
-        public int GetHashCode(SearchResponse s1)
-        {
-            return s1.Username.GetHashCode() + s1.GetElementAtAdapterPosition(hideLockedResults, 0).Filename.GetHashCode();
-        }
-    }
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
