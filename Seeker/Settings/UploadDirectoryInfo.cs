@@ -23,7 +23,7 @@ namespace Seeker
 
         public string GetLastPathSegment()
         {
-            return Android.Net.Uri.Parse(this.UploadDataDirectoryUri).LastPathSegment;
+            return Android.Net.Uri.Parse(UploadDataDirectoryUri)?.LastPathSegment;
         }
 
         [JsonIgnore]

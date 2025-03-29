@@ -408,7 +408,7 @@ namespace Seeker
             out string presentableNameToUse)
         {
             DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-            Android.Net.Uri uri = dir.Uri; // Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+            Android.Net.Uri uri = dir.Uri;
             MainActivity.LogInfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
             
             string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
@@ -4224,7 +4224,7 @@ namespace Seeker
 
         public static bool IsSharingSetUpSuccessfully()
         {
-            return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized
+            return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized;
         }
 
         public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
@@ -4656,11 +4656,6 @@ namespace Seeker
             // if no results, either return null or an instance of SearchResponse with a fileList of length 0
             // in either case, no response will be sent to the requestor.
             return Task.FromResult<SearchResponse>(null);
-        }
-        
-        public static string GetLastPathSegment(string uri)
-        {
-            return Android.Net.Uri.Parse(uri).LastPathSegment;
         }
         
         /// <summary>
