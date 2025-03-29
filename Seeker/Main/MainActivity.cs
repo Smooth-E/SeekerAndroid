@@ -3192,7 +3192,7 @@ namespace Seeker
                         return;
                     }
 
-                    if (OnUIthread())
+                    if (ThreadingUtils.OnUiThread())
                     {
                         RequestNotifPermissionsLogic();
                     }
@@ -4781,7 +4781,7 @@ namespace Seeker
             {
                 Action showDirectoryButton = new Action(() =>
                 {
-                    ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                    ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
                     AddLoggedInLayout(StaticHacks.LoginFragment.View); // TODO: nullref
                     if (!SeekerState.currentlyLoggedIn)
                     {
@@ -4798,7 +4798,7 @@ namespace Seeker
 
                         var toastMessage =
                             SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings);
-                        ToastUI(toastMessage);
+                        ToastUi.Long(toastMessage);
                         LogFirebase("StaticHacks.LoginFragment.View is null");
                         return;
                     }
@@ -4825,7 +4825,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (ThreadingUtils.OnUiThread())
                         {
                             showDirectoryButton();
                         }
@@ -4861,7 +4861,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (OnUIthread())
+                    if (ThreadingUtils.OnUiThread())
                     {
                         showDirectoryButton();
                     }
@@ -4878,7 +4878,7 @@ namespace Seeker
 
                 Action reiterate = new Action(() =>
                 {
-                    ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                    ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
                 });
 
                 Action hideButton = new Action(() =>
@@ -4899,7 +4899,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (ThreadingUtils.OnUiThread())
                         {
                             reiterate();
                         }
@@ -4931,7 +4931,7 @@ namespace Seeker
                     }
                     
                     // hide the button
-                    if (OnUIthread())
+                    if (ThreadingUtils.OnUiThread())
                     {
                         hideButton();
                     }
@@ -4942,7 +4942,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (OnUIthread())
+                    if (ThreadingUtils.OnUiThread())
                     {
                         reiterate();
                     }
@@ -5201,7 +5201,7 @@ namespace Seeker
                         {
                             action = () =>
                             {
-                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer));
+                                ToastUi.Long(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer));
                             };
                         }
                         else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
@@ -5341,7 +5341,7 @@ namespace Seeker
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
-                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed));
+                                ToastUi.Long(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed));
                             };
                             
                             if (NetworkHandoffDetector.HasHandoffOccuredRecently())
@@ -5360,7 +5360,7 @@ namespace Seeker
                                 LogDebug("we do have internet");
                                 action = () =>
                                 {
-                                    ToastUI(SeekerState.ActiveActivityRef
+                                    ToastUi.Long(SeekerState.ActiveActivityRef
                                         .GetString(Resource.String.remote_conn_closed));
                                 };
                                 
@@ -5374,7 +5374,7 @@ namespace Seeker
                             {
                                 action = () =>
                                 {
-                                    ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.network_down));
+                                    ToastUi.Long(SeekerState.ActiveActivityRef.GetString(Resource.String.network_down));
                                 };
                             }
                             
@@ -5396,7 +5396,7 @@ namespace Seeker
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
-                                ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed));
+                                ToastUi.Long(SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed));
                             };
                         }
                         else if (task.Exception.InnerException.Message != null 
@@ -5433,7 +5433,7 @@ namespace Seeker
                                 {
                                     action = () =>
                                     {
-                                        ToastUI(SeekerState.ActiveActivityRef
+                                        ToastUi.Long(SeekerState.ActiveActivityRef
                                             .GetString(Resource.String.error_no_space));
                                     };
                                     unknownException = false;
@@ -5448,7 +5448,7 @@ namespace Seeker
                                     {
                                         action = () =>
                                         {
-                                            ToastUI(SeekerState.ActiveActivityRef
+                                            ToastUi.Long(SeekerState.ActiveActivityRef
                                                 .GetString(Resource.String.error_no_space));
                                         };
                                         unknownException = false;
@@ -5586,7 +5586,7 @@ namespace Seeker
                         {
                             action = () =>
                             {
-                                ToastUI(SeekerState.ActiveActivityRef
+                                ToastUi.Long(SeekerState.ActiveActivityRef
                                     .GetString(Resource.String.error_unspecified));
                             };
                         }
@@ -5607,7 +5607,7 @@ namespace Seeker
                     {
                         action = () =>
                         {
-                            ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) +
+                            ToastUi.Long(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) +
                                     " " + SeekerApplication.GetString(Resource.String.FinishedDownloading));
                         };
                         
@@ -5667,16 +5667,6 @@ namespace Seeker
             
             return continuationActionSaveFile;
         }
-        
-        public static void ToastUI(int msgCode)
-        {
-            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(msgCode), ToastLength.Long).Show();
-        }
-
-        public static void ToastUI_short(int msgCode)
-        {
-            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(msgCode), ToastLength.Short).Show();
-        }
 
         private static bool HasNonASCIIChars(string str)
         {
@@ -5715,56 +5705,11 @@ namespace Seeker
             MainActivity.LogDebug("updatedTime " + updatedTime);
             if (!stale)
             {
-                ToastUI(msgToToast);
+                
+                ToastUi.Long(msgToToast);
             }
         }
         private static System.Collections.Concurrent.ConcurrentDictionary<string, long> ToastUIDebouncer = new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
-
-        public static void ToastUI(string msg)
-        {
-            if (OnUIthread())
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Long).Show();
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Long).Show();
-                });
-            }
-        }
-
-        public static void ToastUI_short(string msg)
-        {
-            if (OnUIthread())
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
-                    });
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static bool OnUIthread()
-        {
-            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.M) //23
-            {
-                return Looper.MainLooper.IsCurrentThread;
-            }
-            else
-            {
-                return Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread();
-            }
-        }
 
         /// <summary>
         /// 
@@ -5797,7 +5742,7 @@ namespace Seeker
                 {
                     (rootView as ViewGroup).AddView(SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
                 });
-                if (OnUIthread())
+                if (ThreadingUtils.OnUiThread())
                 {
                     action1();
                 }
@@ -5898,7 +5843,7 @@ namespace Seeker
                 }
 
             });
-            if (OnUIthread())
+            if (ThreadingUtils.OnUiThread())
             {
                 action();
             }
@@ -6032,7 +5977,7 @@ namespace Seeker
                 }
 
             });
-            if (OnUIthread())
+            if (ThreadingUtils.OnUiThread())
             {
                 action();
             }
@@ -6093,7 +6038,7 @@ namespace Seeker
                 }
 
             });
-            if (OnUIthread())
+            if (ThreadingUtils.OnUiThread())
             {
                 action();
             }
@@ -6366,7 +6311,7 @@ namespace Seeker
 
                 if (rootdir == null && !SeekerState.UseLegacyStorage())
                 {
-                    SeekerState.MainActivityRef.RunOnUiThread(() => { ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
+                    SeekerState.MainActivityRef.RunOnUiThread(() => { ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
                 }
 
                 //BACKUP IF FOLDER DIR IS NULL
@@ -6687,7 +6632,7 @@ namespace Seeker
 
                 if (rootdir == null && !SeekerState.UseLegacyStorage())
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
                 }
 
                 //BACKUP IF FOLDER DIR IS NULL

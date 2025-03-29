@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -2825,7 +2826,7 @@ namespace Seeker
 
         private void MainActivity_TransferAddedUINotify(object sender, TransferItem e)
         {
-            if (MainActivity.OnUIthread())
+            if (ThreadingUtils.OnUiThread())
             {
                 if (e.IsUpload() && InUploadsMode)
                 {

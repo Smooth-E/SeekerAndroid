@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -340,7 +341,7 @@ namespace Seeker
 
         private void OnUserStatusChanged(object sender, string username)
         {
-            if (MainActivity.OnUIthread())
+            if (ThreadingUtils.OnUiThread())
             {
                 if (UserListSortOrder == SortOrder.OnlineStatus)
                 {

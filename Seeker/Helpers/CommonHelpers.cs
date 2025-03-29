@@ -14,7 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using AndroidX.Core.Util;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -37,23 +39,6 @@ namespace Seeker
         {
             if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)
             {
-                //if(!SeekerState.UseLegacyStorage())
-                //{
-                //    //this method is only for API29+
-                //    //var sm = (SeekerState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
-                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SeekerState.RootDocumentFile.Uri); //fails if not media store uri
-                //    //string uuid1 = sv1.Uuid;
-                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SeekerState.RootIncompleteDocumentFile.Uri);
-                //    //string uuid2 = sv2.Uuid;
-
-
-                //    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, out _);
-                //    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
-
-                //    return uuid1 != uuid2;
-                //}
-                //else
-                //{
                 try
                 {
                     string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
@@ -723,12 +708,15 @@ namespace Seeker
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
-                MainActivity.ToastUI_short(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
+                ToastUi.Long(string.Format(SeekerState.ActiveActivityRef
+                    .GetString(ResourceConstant.String.removed_user), usernameInQuestion));
+                
                 MainActivity.UserListRemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }
-            else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
+            
+            if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
             {
                 SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                 SearchTabHelper.SearchTargetChosenUser = usernameInQuestion;
@@ -739,16 +727,16 @@ namespace Seeker
                 activity.StartActivity(intent);
                 return true;
             }
-            else if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
+            
+            if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
             {
-                Action<View> action = new Action<View>((v) =>
+                Action<View> action = _ =>
                 {
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
                     activity.StartActivity(intent);
-                    //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                });
+                };
                 DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;
             }
@@ -1479,17 +1467,20 @@ namespace Seeker
             int numDaysInt = int.MinValue;
             if (!int.TryParse(numDays, out numDaysInt))
             {
-                MainActivity.ToastUI(Resource.String.error_days_entered_no_parse);
+                ToastUi.Long(Resource.String.error_days_entered_no_parse);
                 return false;
             }
             if (numDaysInt <= 0)
             {
-                MainActivity.ToastUI(Resource.String.error_days_entered_not_positive);
+                ToastUi.Long(Resource.String.error_days_entered_not_positive);
                 return false;
             }
             if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
             {
-                MainActivity.ToastUI(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
+                ToastUi.Long(string.Format(
+                    SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.error_insufficient_days),
+                    numDaysInt));
+                
                 return false;
             }
             if (!SeekerState.currentlyLoggedIn)
