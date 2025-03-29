@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Models;
 using Seeker.Utils;
 
 namespace Seeker
@@ -2834,16 +2835,12 @@ namespace Seeker
                     { //todo can update this to do a partial refresh... just the index..
                         if (GroupByFolder && !CurrentlyInFolder())
                         {
-                            //folderview - so we may insert or update
-                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
-                            refreshListView(); //just to be safe...
+                            refreshListView(); // just to be safe...
 
                         }
                         else
                         {
-                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
-                            //refreshListView(()=>{recyclerTransferAdapter.NotifyItemInserted(index); });
-                            refreshListView(); //just to be safe...
+                            refreshListView(); // just to be safe...
                         }
 
                     }

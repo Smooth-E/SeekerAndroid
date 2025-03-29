@@ -1,9 +1,5 @@
-﻿using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Fragment.App;
 using Common;
@@ -11,8 +7,8 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using Seeker.Models;
 
 namespace Seeker
 {
@@ -46,7 +42,10 @@ namespace Seeker
         public static bool TransferViewShowSpeed = false;
 
         public static bool MemoryBackedDownload = false;
-        public static bool AutoRetryBackOnline = true; //this is for downloads that fail with the condition "User is Offline". this will also autodownload when we first log in as well.
+        
+        // this is for downloads that fail with the condition "User is Offline".
+        // this will also autodownload when we first log in as well.
+        public static bool AutoRetryBackOnline = true;
 
         public static bool AutoRequeueDownloadsAtStartup = true;
 
