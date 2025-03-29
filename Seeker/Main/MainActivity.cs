@@ -401,8 +401,8 @@ namespace Seeker
         public static void GetAllFolderInfo(
             UploadDirectoryInfo uploadDirectoryInfo, 
             out bool overrideCase,
-            out string volName, 
-            ut string toStrip, 
+            out string volName,
+            out string toStrip,
             out string rootFolderDisplayName,
             out string presentableNameToUse)
         {
@@ -569,15 +569,6 @@ namespace Seeker
                         }
                     }
                 }
-            }
-        }
-
-        // TODOORG with other exception classes
-        public class DirectoryAccessFailure : System.Exception
-        {
-            public DirectoryAccessFailure(string msg) : base(msg)
-            {
-
             }
         }
 

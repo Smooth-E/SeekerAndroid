@@ -18,6 +18,7 @@
  */
 
 using Seeker.Helpers;
+using Seeker.Exceptions;
 using Seeker.Managers;
 using Seeker.UPnP;
 using Android.App;
@@ -26,8 +27,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-//using AndroidX.AppCompat.Widget;
-//using AndroidX.AppCompat.Widget.Helper;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
@@ -3316,7 +3315,7 @@ namespace Seeker
             UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
             if (UploadDirectoryManager.AreAllFailed())
             {
-                throw new MainActivity.DirectoryAccessFailure("All Failed");
+                throw new DirectoryAccessFailure("All Failed");
             }
 
             if (newlyAddedDirectory != null)
@@ -3371,7 +3370,7 @@ namespace Seeker
                     MainActivity.ClearLegacyParsedCacheResults();
                     MainActivity.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
                     MainActivity.SetUnsetSharingBasedOnConditions(true);
-                    if (!(e is MainActivity.DirectoryAccessFailure))
+                    if (!(e is DirectoryAccessFailure))
                     {
                         MainActivity.LogFirebase("error parsing: " + e.Message + "  " + e.StackTrace);
                     }
@@ -3379,7 +3378,7 @@ namespace Seeker
                     {
                         UpdateShareImageView();
                         SetSharedFolderView();
-                        if (!(e is MainActivity.DirectoryAccessFailure))
+                        if (!(e is DirectoryAccessFailure))
                         {
                             Toast.MakeText(this, e.Message, ToastLength.Long).Show();
                         }
@@ -3453,7 +3452,7 @@ namespace Seeker
                 {
                     ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
                 }
-                catch (MainActivity.DirectoryAccessFailure)
+                catch (DirectoryAccessFailure)
                 {
                     if (rescanClicked)
                     {
