@@ -432,7 +432,7 @@ namespace Seeker
                 }
                 else if (volName != null && lastPathSegment.Contains(volName))
                 {
-                    toStrip = lastPathSegment == volName ? null : volName
+                    toStrip = lastPathSegment == volName ? null : volName;
                 }
                 else
                 {
@@ -726,14 +726,14 @@ namespace Seeker
 
             var documentId = DocumentsContract.GetDocumentId(dirUri);
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, documentId);
-            
+
             var cursorData = new String[]
             {
-                Document.ColumnDocumentId, 
-                Document.ColumnDisplayName, 
+                Document.ColumnDocumentId,
+                Document.ColumnDisplayName,
                 Document.ColumnMimeType,
                 Document.ColumnSize
-            }
+            };
             Android.Database.ICursor c = contentResolver.Query(listChildrenUri, cursorData, null, null, null);
             
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -820,7 +820,7 @@ namespace Seeker
                     string fname = null;
                     string searchableName = null;
 
-                    var isDocumentsAuthority = dirFile.Uri.Authority == "com.android.providers.downloads.documents"
+                    var isDocumentsAuthority = dirFile.Uri.Authority == "com.android.providers.downloads.documents";
                     if (isDocumentsAuthority && !f.Uri.Path.Contains(dirFile.Uri.Path))
                     {
                         //msd, msf case
@@ -897,145 +897,196 @@ namespace Seeker
 #else
             bool convertFrom2to3 = false;
 
-            string s_stringUriPairs = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v3, string.Empty);
+            string s_stringUriPairs = 
+                SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v3, string.Empty);
+
             if (s_stringUriPairs == string.Empty)
             {
-                s_stringUriPairs = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
+                s_stringUriPairs = 
+                    SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
+
                 convertFrom2to3 = true;
             }
 
-            string s_BrowseResponse = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_v2, string.Empty);
-            string s_FriendlyDirNameMapping = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
-            string s_intHelperIndex = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_intHelperIndex_v2, string.Empty);
-            int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
-            string s_tokenIndex = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_tokenIndex_v2, string.Empty);
-            string s_BrowseResponse_hiddenPortion = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_hidden_portion, string.Empty); //this one can be empty.
+            string s_BrowseResponse = 
+                SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_v2, string.Empty);
 
-            if (s_intHelperIndex == string.Empty || s_tokenIndex == string.Empty || s_stringUriPairs == string.Empty || s_BrowseResponse == string.Empty || s_FriendlyDirNameMapping == string.Empty)
+            string s_FriendlyDirNameMapping = 
+                SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
+
+            string s_intHelperIndex = 
+                SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_intHelperIndex_v2, string.Empty);
+
+            int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
+
+            string s_tokenIndex = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_tokenIndex_v2, string.Empty);
+
+            // this one can be empty.
+            string s_BrowseResponse_hiddenPortion = 
+                SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_hidden_portion, string.Empty);
+
+            if (s_intHelperIndex == string.Empty 
+                || s_tokenIndex == string.Empty
+                || s_stringUriPairs == string.Empty
+                || s_BrowseResponse == string.Empty 
+                || s_FriendlyDirNameMapping == string.Empty)
             {
                 return null;
             }
-            else
+            
+            // deserialize...
+            try
             {
-                //deserialize..
-                try
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
+                byte[] b_stringUriPairs = Convert.FromBase64String(s_stringUriPairs);
+                byte[] b_BrowseResponse = Convert.FromBase64String(s_BrowseResponse);
+                byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
+                byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
+                byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
+
+                using (System.IO.MemoryStream m_stringUriPairs = new(b_stringUriPairs))
+                using (System.IO.MemoryStream m_BrowseResponse = new(b_BrowseResponse))
+                using (System.IO.MemoryStream m_FriendlyDirNameMapping = new(b_FriendlyDirNameMapping))
+                using (System.IO.MemoryStream m_intHelperIndex = new(b_intHelperIndex))
+                using (System.IO.MemoryStream m_tokenIndex = new(b_tokenIndex))
                 {
-                    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                    sw.Start();
-                    byte[] b_stringUriPairs = Convert.FromBase64String(s_stringUriPairs);
-                    byte[] b_BrowseResponse = Convert.FromBase64String(s_BrowseResponse);
-                    byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
-                    byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
-                    byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
-
-                    using (System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
-                    using (System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
-                    using (System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
-                    using (System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
-
-                    using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
+                    BinaryFormatter binaryFormatter = SerializationHelper.GetLegacyBinaryFormatter();
+                    CachedParseResults cachedParseResults = new CachedParseResults();
+                    if (convertFrom2to3)
                     {
-                        BinaryFormatter binaryFormatter = SerializationHelper.GetLegacyBinaryFormatter();
-                        CachedParseResults cachedParseResults = new CachedParseResults();
-                        if (convertFrom2to3)
+                        MainActivity.LogDebug("convert from v2 to v3");
+
+                        var oldKeys = binaryFormatter.Deserialize(m_stringUriPairs) 
+                                as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
+
+                        var newKeys = 
+                                new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
+
+                        if (oldKeys != null)
                         {
-                            MainActivity.LogDebug("convert from v2 to v3");
-                            var oldKeys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
-                            var newKeys = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
-                            if (oldKeys != null)
+                            foreach (var oldkeyvaluepair in oldKeys)
                             {
-                                foreach (var oldkeyvaluepair in oldKeys)
-                                {
-                                    newKeys.Add(oldkeyvaluepair.Key, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(oldkeyvaluepair.Value.Item1, oldkeyvaluepair.Value.Item2, oldkeyvaluepair.Value.Item3, false, false));
-                                }
-                            }
-                            lock (SHARED_PREF_LOCK)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
-                                using (System.IO.MemoryStream bstringUrimemoryStreamv3 = new System.IO.MemoryStream())
-                                {
-                                    BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
-                                    formatter.Serialize(bstringUrimemoryStreamv3, newKeys);
-                                    string stringUrimemoryStreamv3 = Convert.ToBase64String(bstringUrimemoryStreamv3.ToArray());
-                                    editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, stringUrimemoryStreamv3);
-                                    editor.Commit();
-                                }
-                            }
-                            cachedParseResults.keys = newKeys;
-                        }
-                        else
-                        {
-                            MainActivity.LogDebug("v3");
-                            cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>;
-                        }
-
-
-                        cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
-
-
-                        if (!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
-                        {
-                            byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
-                            using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new System.IO.MemoryStream(b_BrowseResponse_hiddenPortion))
-                            {
-                                cachedParseResults.browseResponseHiddenPortion = binaryFormatter.Deserialize(m_BrowseResponse_hiddenPortion) as List<Soulseek.Directory>;
+                                newKeys.Add(oldkeyvaluepair.Key, 
+                                    new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(
+                                        oldkeyvaluepair.Value.Item1, 
+                                        oldkeyvaluepair.Value.Item2, 
+                                        oldkeyvaluepair.Value.Item3, 
+                                        false, 
+                                        false
+                                    )
+                                );
                             }
                         }
-                        else
+
+                        lock (SHARED_PREF_LOCK)
                         {
-                            cachedParseResults.browseResponseHiddenPortion = null;
+                            var editor = SeekerState.SharedPreferences.Edit();
+                            editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
+
+                            using (System.IO.MemoryStream bstringUrimemoryStreamv3 = new System.IO.MemoryStream())
+                            {
+                                BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
+                                formatter.Serialize(bstringUrimemoryStreamv3, newKeys);
+                                var streamArray = bstringUrimemoryStreamv3.ToArray();
+                                string stringUrimemoryStreamv3 = Convert.ToBase64String(streamArray);
+
+                                editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, stringUrimemoryStreamv3);
+                                editor.Commit();
+                            }
                         }
-
-
-                        cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
-                        cachedParseResults.directoryCount = cachedParseResults.browseResponse.DirectoryCount;
-                        cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
-                        cachedParseResults.tokenIndex = binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
-                        cachedParseResults.nonHiddenFileCount = nonHiddenFileCount;
-
-                        if (cachedParseResults.keys == null || cachedParseResults.browseResponse == null || cachedParseResults.friendlyDirNameToUriMapping == null || cachedParseResults.helperIndex == null || cachedParseResults.tokenIndex == null)
-                        {
-                            return null;
-                        }
-
-                        sw.Stop();
-                        MainActivity.LogDebug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
-
-                        return cachedParseResults;
+                        cachedParseResults.keys = newKeys;
+                    }
+                    else
+                    {
+                        MainActivity.LogDebug("v3");
+                        cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) 
+                            as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>;
                     }
 
+
+                    cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
+
+
+                    if (!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
+                    {
+                        byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
+
+                        // TODO: Consider adding a using directive for System.IO.MemoryStream to make this prettier
+                        using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new(b_BrowseResponse_hiddenPortion))
+                        {
+                            cachedParseResults.browseResponseHiddenPortion = 
+                                binaryFormatter.Deserialize(m_BrowseResponse_hiddenPortion) as List<Soulseek.Directory>;
+                        }
+                    }
+                    else
+                    {
+                        cachedParseResults.browseResponseHiddenPortion = null;
+                    }
+
+
+                    cachedParseResults.friendlyDirNameToUriMapping = 
+                        binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
+
+                    cachedParseResults.directoryCount = cachedParseResults.browseResponse.DirectoryCount;
+
+                    cachedParseResults.helperIndex = 
+                        binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
+
+                    cachedParseResults.tokenIndex = 
+                        binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
+
+                    cachedParseResults.nonHiddenFileCount = nonHiddenFileCount;
+
+                    if (cachedParseResults.keys == null 
+                        || cachedParseResults.browseResponse == null 
+                        || cachedParseResults.friendlyDirNameToUriMapping == null 
+                        || cachedParseResults.helperIndex == null 
+                        || cachedParseResults.tokenIndex == null)
+                    {
+                        return null;
+                    }
+
+                    sw.Stop();
+                    MainActivity.LogDebug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
+
+                    return cachedParseResults;
                 }
-                catch (Exception e)
-                {
-                    LogDebug("error deserializing" + e.Message + e.StackTrace);
-                    LogFirebase("error deserializing" + e.Message + e.StackTrace);
-                    return null;
-                }
+
+            }
+            catch (Exception e)
+            {
+                LogDebug("error deserializing" + e.Message + e.StackTrace);
+                LogFirebase("error deserializing" + e.Message + e.StackTrace);
+                return null;
             }
 #endif
         }
 
-        //Pretty much all clients send "attributes" or limited metadata.
+        // Pretty much all clients send "attributes" or limited metadata.
         // if lossless - they send duration, bit rate, bit depth, and sample rate
         // if lossy - they send duration and bit rate.
 
         //notes:
         // for lossless - bit rate = sample rate * bit depth * num channels
         //                1411.2 kpbs = 44.1kHz * 16 * 2
-        //  --if the formula is required note that typically sample rate is in (44.1, 48, 88.2, 96) with the last too being very rare (never seen it).
+        //  --if the formula is required note that typically sample rate is in (44.1, 48, 88.2, 96)
+        //      with the last too being very rare (never seen it).
         //      and bit depth in (16, 24, 32) with 16 most common, sometimes 24, never seen 32.  
         // for both lossy and lossless - determining bit rate from file size and duration is a bit too imprecise.  
         //      for mp3 320kps cbr one will get 320.3, 314, 315, etc.
 
-        //for the pre-indexed media store (note: its possible for one to revoke the photos&media permission and for seeker to work right in all places by querying mediastore)
+        // for the pre-indexed media store (note: its possible for one to revoke the photos&media permission and for
+        // seeker to work right in all places by querying mediastore)
         //  api 29+ we have duration
         //  api 30+ we have bit rate
         //  api 31+ (Android 12) we have sample rate and bit depth - proposed change?  I dont think this made it in..
 
-        //for the built in media retreiver (which requires actually reading the file) we have duration, bit rate, with sample rate and bit depth for api31+
+        // for the built in media retreiver (which requires actually reading the file) we have duration, bit rate,
+        // with sample rate and bit depth for api31+
 
-        //the library tag lib sharp can get us everything, tho it is 1 MB extra.
+        // the library tag lib sharp can get us everything, tho it is 1 MB extra.
 
 
         private static bool HasMediaStoreDurationColumn()
@@ -1047,17 +1098,6 @@ namespace Seeker
         {
             return (int)Android.OS.Build.VERSION.SdkInt >= 30;
         }
-
-        // never made it into Android 12
-        //private static bool HasMediaStoreSampleRateBitDepthColumn()
-        //{
-        //    return (int)Android.OS.Build.VERSION.SdkInt >= 31;
-        //}
-
-        //private static bool HasMediaRetreiverSampleRateBitDepth()
-        //{
-        //    return (int)Android.OS.Build.VERSION.SdkInt >= 31;
-        //}
 
         private static bool IsUncompressed(string name)
         {
@@ -1109,10 +1149,7 @@ namespace Seeker
                     return false;
             }
         }
-
-
-
-
+        
         /// <summary>
         /// Any exceptions here get caught.  worst case, you just get no metadata...
         /// </summary>
@@ -1124,7 +1161,14 @@ namespace Seeker
         /// <param name="allMediaInfoDict"></param>
         /// <param name="prevInfoToUse"></param>
         /// <returns></returns>
-        private static Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> prevInfoToUse)
+        private static Tuple<int, int, int, int> GetAudioAttributes(
+            ContentResolver contentResolver, 
+            string displayName, 
+            long size, 
+            string presentableName, 
+            Android.Net.Uri childUri, 
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, 
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> prevInfoToUse)
         {
             try
             {
@@ -1133,31 +1177,38 @@ namespace Seeker
                     if (prevInfoToUse.ContainsKey(presentableName))
                     {
                         var tuple = prevInfoToUse[presentableName];
-                        if (tuple.Item1 == size) //this is the file...
+                        if (tuple.Item1 == size) // this is the file...
                         {
                             return tuple.Item3;
                         }
                     }
                 }
-                //get media attributes...
+                
+                // get media attributes...
                 bool supported = IsSupportedAudio(presentableName);
                 if (!supported)
                 {
                     return null;
                 }
+                
                 bool lossless = IsLossless(presentableName);
                 bool uncompressed = IsUncompressed(presentableName);
                 int duration = -1;
                 int bitrate = -1;
                 int sampleRate = -1;
                 int bitDepth = -1;
-                bool useContentResolverQuery = HasMediaStoreDurationColumn();//else it has no more additional data for us..
+                
+                // else it has no more additional data for us...
+                bool useContentResolverQuery = HasMediaStoreDurationColumn();
+                
                 if (useContentResolverQuery)
                 {
                     bool hasBitRate = HasMediaStoreBitRateColumn();
-                    //querying it every time was slow...
-                    //so now we query it all ahead of time (with 1 query request) and put it in a dict.
+                    
+                    // querying it every time was slow...
+                    // so now we query it all ahead of time (with 1 query request) and put it in a dict.
                     string key = size + displayName;
+                    
                     if (allMediaInfoDict.ContainsKey(key))
                     {
                         string nameToSearchFor = presentableName.Replace('\\', '/');
@@ -1181,9 +1232,10 @@ namespace Seeker
                         {
                             infoItem = listInfo[0];
                         }
+                        
                         if (found)
                         {
-                            duration = infoItem.Item2 / 1000; //in ms
+                            duration = infoItem.Item2 / 1000; // in ms
                             if (hasBitRate)
                             {
                                 bitrate = infoItem.Item3;
@@ -1197,12 +1249,18 @@ namespace Seeker
                     try
                     {
                         Android.Media.MediaMetadataRetriever mediaMetadataRetriever = new Android.Media.MediaMetadataRetriever();
-                        mediaMetadataRetriever.SetDataSource(SeekerState.ActiveActivityRef, childUri); //TODO: error file descriptor must not be null.
+                        
+                        // TODO: error file descriptor must not be null.
+                        mediaMetadataRetriever.SetDataSource(SeekerState.ActiveActivityRef, childUri);
+                        
                         string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
-                        string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
+                        
+                        string? durationStr = 
+                            mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
+                        
                         if (HasMediaStoreDurationColumn())
                         {
-                            mediaMetadataRetriever.Close(); //added in api 29
+                            mediaMetadataRetriever.Close(); // added in api 29
                         }
                         else
                         {
@@ -1213,6 +1271,7 @@ namespace Seeker
                         {
                             bitrate = int.Parse(bitRateStr);
                         }
+                        
                         if (durationStr != null)
                         {
                             duration = int.Parse(durationStr) / 1000;
@@ -1220,30 +1279,35 @@ namespace Seeker
                     }
                     catch (Exception e)
                     {
-                        //ape and aiff always fail with built in metadata retreiver.
+                        // ape and aiff always fail with built in metadata retreiver.
                         if (System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
                         {
-                            MicroTagReader.GetApeMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                            MicroTagReader
+                                .GetApeMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
                         }
                         else if (System.IO.Path.GetExtension(presentableName).ToLower() == ".aiff")
                         {
-                            MicroTagReader.GetAiffMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                            MicroTagReader
+                                .GetAiffMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
                         }
 
-                        //if still not fixed
+                        // if still not fixed
                         if (sampleRate == -1 || duration == -1 || bitDepth == -1)
                         {
-                            MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SeekerState.ActiveActivityRef == null) + childUri?.ToString());
+                            MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" 
+                                                     + (SeekerState.ActiveActivityRef == null) + childUri?.ToString());
                         }
                     }
                 }
 
-                //this is the mp3 vbr case, android meta data retriever and therefore also the mediastore cache fail
-                //quite badly in this case.  they often return the min vbr bitrate of 32000.
-                //if its under 128kbps then lets just double check it..
-                //I did test .m4a vbr.  android meta data retriever handled it quite well.
-                //on api 19 the vbr being reported at 32000 is reported as 128000.... both obviously quite incorrect...
-                if (System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate >= 0 && bitrate <= 128000) && size != 0)
+                // this is the mp3 vbr case, android meta data retriever and therefore also the mediastore cache fail
+                // quite badly in this case.  they often return the min vbr bitrate of 32000.
+                // if its under 128kbps then lets just double check it..
+                // I did test .m4a vbr.  android meta data retriever handled it quite well.
+                // on api 19 the vbr being reported at 32000 is reported as 128000.... both obviously quite incorrect...
+                if (System.IO.Path.GetExtension(presentableName) == ".mp3"
+                    && (bitrate >= 0 && bitrate <= 128000)
+                    && size != 0)
                 {
                     if (SeekerState.PerformDeepMetadataSearch)
                     {
@@ -1251,25 +1315,23 @@ namespace Seeker
                     }
                     else
                     {
-                        bitrate = -1; //better to have nothing than for it to be so blatantly wrong..
+                        bitrate = -1; // better to have nothing than for it to be so blatantly wrong..
                     }
                 }
-
-
-
-
-                if (SeekerState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
+                
+                if (SeekerState.PerformDeepMetadataSearch 
+                    && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
                 {
                     MicroTagReader.GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
                 }
 
-                //if uncompressed we can use this simple formula
+                // if uncompressed we can use this simple formula
                 if (uncompressed)
                 {
                     if (bitrate != -1)
                     {
-                        //bitrate = 2 * sampleRate * depth
-                        //so test pairs in order of precedence..
+                        // bitrate = 2 * sampleRate * depth
+                        // so test pairs in order of precedence..
                         if ((bitrate) / (2 * 44100) == 16)
                         {
                             sampleRate = 44100;
@@ -1292,11 +1354,18 @@ namespace Seeker
                         }
                     }
                 }
+                
                 if (duration == -1 && bitrate == -1 && bitDepth == -1 && sampleRate == -1)
                 {
                     return null;
                 }
-                return new Tuple<int, int, int, int>(duration, (lossless || bitrate == -1) ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
+                
+                return new Tuple<int, int, int, int>(
+                    duration, 
+                    // for lossless do not send bitrate!! no other client does that!!
+                    (lossless || bitrate == -1) ? -1 : (bitrate / 1000),
+                    bitDepth, 
+                    sampleRate);
             }
             catch (Exception e)
             {
@@ -1311,6 +1380,7 @@ namespace Seeker
             {
                 return true;
             }
+            
             foreach (string hiddenDir in UploadDirectoryManager.PresentableNameHiddenDirectories)
             {
                 if (presentableName == hiddenDir)
@@ -1318,6 +1388,7 @@ namespace Seeker
                     return true;
                 }
             }
+            
             return false;
         }
 
@@ -1327,6 +1398,7 @@ namespace Seeker
             {
                 return true;
             }
+            
             foreach (string lockedDir in UploadDirectoryManager.PresentableNameLockedDirectories)
             {
                 if (presentableName == lockedDir)
@@ -1334,6 +1406,7 @@ namespace Seeker
                     return true;
                 }
             }
+            
             return false;
         }
 
@@ -1341,11 +1414,12 @@ namespace Seeker
         {
             foreach (string lockedDir in UploadDirectoryManager.PresentableNameLockedDirectories)
             {
-                if (presentableName.StartsWith($"{lockedDir}\\")) //no need for == bc files
+                if (presentableName.StartsWith($"{lockedDir}\\")) // no need for == bc files
                 {
                     return true;
                 }
             }
+            
             return false;
         }
 
@@ -1358,38 +1432,72 @@ namespace Seeker
                     return true;
                 }
             }
+            
             return false;
         }
 
 
-        public static void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
-            List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase,
-            Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            bool msdMsfOrOverrideCase, string msdMsfOrOverrideBuildParentName, ref int totalDirectoryCount, ref int indexNum)
+        public static void traverseDirectoryEntriesInternal(
+            ContentResolver contentResolver, 
+            Android.Net.Uri rootUri, 
+            string parentDoc, 
+            Android.Net.Uri parentUri,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase,
+            string volName, 
+            List<Directory> listOfDirs,
+            List<Directory> listOfLockedDirs, 
+            List<Directory> listOfHiddenDirs,
+            List<Tuple<string, string>> dirMappingFriendlyNameToUri, 
+            string folderToStripForPresentableNames, 
+            Dictionary<int, string> index,
+            DocumentFile rootDirCase,
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, 
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
+            bool msdMsfOrOverrideCase, 
+            string msdMsfOrOverrideBuildParentName, 
+            ref int totalDirectoryCount,
+            ref int indexNum)
         {
-            //this should be the folder before the selected to strip away..
-
-
-
+            // this should be the folder before the selected to strip away..
+            
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
-            //Log.d(TAG, "node uri: ", childrenUri);
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
-            //c can be null... reasons are fairly opaque - if remote exception return null. if underlying content provider is null.
+
+            var queryArgs = new String[]
+            {
+                Document.ColumnDocumentId,
+                Document.ColumnDisplayName,
+                Document.ColumnMimeType,
+                Document.ColumnSize
+            };
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, queryArgs, null, null, null);
+            
+            // c can be null... reasons are fairly opaque
+            // - if remote exception return null. if underlying content provider is null.
             if (c == null)
             {
-                //diagnostic code.
+                // diagnostic code.
 
-                //would a non /children uri work?
-                bool nonChildrenWorks = contentResolver.Query(rootUri, new string[] { Document.ColumnSize }, null, null, null) != null;
+                // would a non /children uri work?
+                bool nonChildrenWorks = 
+                    contentResolver.Query(rootUri, new string[] { Document.ColumnSize }, null, null, null) != null;
 
-                //would app context work?
-                bool wouldActiveWork = SeekerState.ActiveActivityRef.ApplicationContext.ContentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null) != null;
-
+                // would app context work?
+                var args = new String[]
+                {
+                    Document.ColumnDocumentId,
+                    Document.ColumnDisplayName,
+                    Document.ColumnMimeType,
+                    Document.ColumnSize
+                };
+                var cr = SeekerState.ActiveActivityRef.ApplicationContext.ContentResolver;    
+                bool wouldActiveWork = cr.Query(listChildrenUri, args, null, null, null) != null;
+                
                 //would list files work?
                 bool docFileLegacyWork = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentUri).Exists();
 
-                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks + " activeContext: " + wouldActiveWork + " legacyWork: " + docFileLegacyWork);
+                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " 
+                                         + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks 
+                                         + " activeContext: " + wouldActiveWork + " legacyWork: " + docFileLegacyWork);
             }
 
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -1402,13 +1510,32 @@ namespace Seeker
                     string mime = c.GetString(2);
                     long size = c.GetLong(3);
                     var childUri = DocumentsContract.BuildDocumentUriUsingTree(rootUri, docId);
-                    //MainActivity.LogDebug("docId: " + docId + ", name: " + name + ", mime: " + mime);
+
                     if (isDirectory(mime))
                     {
                         totalDirectoryCount++;
-                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
-                            dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse,
-                            msdMsfOrOverrideCase, msdMsfOrOverrideCase ? msdMsfOrOverrideBuildParentName + '\\' + name : null, ref totalDirectoryCount, ref indexNum);
+                        traverseDirectoryEntriesInternal(
+                            contentResolver,
+                            rootUri,
+                            docId, 
+                            childUri, 
+                            pairs,
+                            false, 
+                            volName, 
+                            listOfDirs, 
+                            listOfLockedDirs,
+                            listOfHiddenDirs,
+                            dirMappingFriendlyNameToUri,
+                            folderToStripForPresentableNames, 
+                            index, 
+                            null, 
+                            allMediaInfoDict, 
+                            previousFileInfoToUse,
+                            msdMsfOrOverrideCase,
+                            msdMsfOrOverrideCase ? msdMsfOrOverrideBuildParentName + '\\' + name : null, 
+                            ref totalDirectoryCount,
+                            ref indexNum
+                        );
                     }
                     else
                     {
@@ -1423,40 +1550,56 @@ namespace Seeker
                         }
 
 
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" + CommonHelpers.GetFileNameFromFile(presentableName);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" 
+                            + CommonHelpers.GetFileNameFromFile(presentableName);
 
-                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
-                        if (attributes != null)
-                        {
-                            //MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
-                        }
+                        Tuple<int, int, int, int> attributes = GetAudioAttributes(
+                            contentResolver, 
+                            name, 
+                            size,
+                            presentableName, 
+                            childUri, 
+                            allMediaInfoDict, 
+                            previousFileInfoToUse
+                        );
 
-                        pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, IsLockedFile(presentableName), IsHiddenFile(presentableName)));
-                        index.Add(indexNum, presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
+                        var tuple = new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(
+                            size,
+                            childUri.ToString(),
+                            attributes,
+                            IsLockedFile(presentableName),
+                            IsHiddenFile(presentableName)
+                        );
+                        
+                        pairs.Add(presentableName, tuple);
+                        
+                        // throws on same key (the file in question ends with unicode EOT char (\u04)).
+                        index.Add(indexNum, presentableName);
                         indexNum++;
+                        
                         if (indexNum % 50 == 0)
                         {
-                            //update public status variable every so often
+                            // update public status variable every so often
                             SeekerState.NumberParsed = indexNum;
                         }
-                        //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
-                        string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                              //for the brose response should only be the filename!!! 
-                                                                                                              //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                              //bc we get a path that is:
-                                                                                                              //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                              //not quite a full URI but it does add quite a bit..
+                        // use presentable name so that the filename will not be primary:file.mp3
+                        // for the brose response should only be the filename!!!
+                        // when a user tries to download something from a browse resonse,
+                        // the soulseek client on their end must create a fully qualified path for us
+                        // bc we get a path that is:
+                        // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                        // not quite a full URI but it does add quite a bit...
+                        string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\"));
 
-                        //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
-                        //{
-                        //    searchableName = searchableName.Substring(8);
-                        //}
-
-                        var slskFile = new Soulseek.File(1, fname, size, System.IO.Path.GetExtension(childUri.Path), SharedFileCache.GetFileAttributesFromTuple(attributes)); //soulseekQT does not show attributes in browse tab, but nicotine does.
+                        // SoulseekQT does not show attributes in browse tab, but nicotine does.
+                        var fileExtension = System.IO.Path.GetExtension(childUri.Path);
+                        var fileAttributes = SharedFileCache.GetFileAttributesFromTuple(attributes);
+                        var slskFile = new Soulseek.File(1, fname, size, fileExtension, fileAttributes);
                         files.Add(slskFile);
                     }
                 }
+                
                 CommonHelpers.SortSlskDirFiles(files);
                 string lastPathSegment = null;
                 if (msdMsfOrOverrideCase)
@@ -1471,19 +1614,26 @@ namespace Seeker
                 {
                     lastPathSegment = parentUri.LastPathSegment;
                 }
+                
                 string directoryPath = lastPathSegment.Replace("/", @"\");
 
                 if (!msdMsfOrOverrideCase)
                 {
-                    if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    // this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    if (folderToStripForPresentableNames == null)
                     {
-                        if (volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                        // i.e. if it has something after it.. primary: should be primary: not primary:\
+                        // but primary:Alarms should be primary:\Alarms
+                        if (volName != null && volName.Length != directoryPath.Length)
                         {
                             if (volName.Length > directoryPath.Length)
                             {
-                                MainActivity.LogFirebase("volName > directoryPath" + volName + " -- " + directoryPath + " -- " + isRootCase);
+                                MainActivity.LogFirebase("volName > directoryPath" + volName + " -- " 
+                                                         + directoryPath + " -- " + isRootCase);
                             }
-                            directoryPath = directoryPath.Substring(0, volName.Length) + '\\' + directoryPath.Substring(volName.Length);
+                            
+                            directoryPath = directoryPath.Substring(0, volName.Length) + '\\' 
+                                + directoryPath.Substring(volName.Length);
                         }
                     }
                     else
@@ -1515,64 +1665,102 @@ namespace Seeker
         }
 
 
-        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase,
-            List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
-            string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            bool overrideCase, string msdMsfOrOverrideBuildParentName,
-            ref int totalDirectoryCount, ref int indexNum)
+        public static void traverseDirectoryEntriesLegacy(
+            DocumentFile parentDocFile, 
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, 
+            bool isRootCase,
+            List<Directory> listOfDirs, List<Directory> listOfLockedDirs, 
+            List<Directory> listOfHiddenDirs,
+            List<Tuple<string, string>> dirMappingFriendlyNameToUri,
+            string folderToStripForPresentableNames, 
+            Dictionary<int, string> index,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
+            bool overrideCase, 
+            string msdMsfOrOverrideBuildParentName,
+            ref int totalDirectoryCount, 
+            ref int indexNum)
         {
-            //this should be the folder before the selected to strip away..
+            // this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (var childDocFile in parentDocFile.ListFiles())
             {
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
-                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
-                        dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, overrideCase,
-                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount, ref indexNum);
+                    traverseDirectoryEntriesLegacy(
+                        childDocFile, pairs,
+                        false, 
+                        listOfDirs, 
+                        listOfLockedDirs, 
+                        listOfHiddenDirs,
+                        dirMappingFriendlyNameToUri,
+                        folderToStripForPresentableNames, 
+                        index, 
+                        previousFileInfoToUse, 
+                        overrideCase,
+                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, 
+                        ref totalDirectoryCount, 
+                        ref indexNum
+                    );
                 }
                 else
                 {
-                    //for subAPI21 last path segment is:
-                    //".android_secure" so just the filename whereas Path is more similar to last part segment:
-                    //"/storage/sdcard/.android_secure"
+                    // for subAPI21 last path segment is:
+                    // ".android_secure" so just the filename whereas Path is more similar to last part segment:
+                    // "/storage/sdcard/.android_secure"
                     string presentableName = childDocFile.Uri.Path.Replace('/', '\\');
+                    
                     if (overrideCase)
                     {
                         presentableName = msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name;
                     }
-                    else if (folderToStripForPresentableNames != null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    // this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    else if (folderToStripForPresentableNames != null)
                     {
                         presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
                     }
 
-                    Tuple<int, int, int, int> attributes = GetAudioAttributes(SeekerState.ActiveActivityRef.ContentResolver, childDocFile.Name, childDocFile.Length(), presentableName, childDocFile.Uri, null, previousFileInfoToUse);
-                    if (attributes != null)
-                    {
-                        //MainActivity.LogDebug("fname: " + childDocFile.Name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
-                    }
+                    Tuple<int, int, int, int> attributes = GetAudioAttributes(
+                        SeekerState.ActiveActivityRef.ContentResolver, 
+                        childDocFile.Name, 
+                        childDocFile.Length(), 
+                        presentableName, 
+                        childDocFile.Uri,
+                        null, 
+                        previousFileInfoToUse
+                    );
 
-                    pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(childDocFile.Length(), childDocFile.Uri.ToString(), attributes, IsLockedFile(presentableName), IsHiddenFile(presentableName))); //todo attributes was null here???? before
+                    // todo attributes was null here???? before
+                    var tuple = new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(
+                        childDocFile.Length(),
+                        childDocFile.Uri.ToString(),
+                        attributes, IsLockedFile(presentableName),
+                        IsHiddenFile(presentableName)
+                    );
+                    pairs.Add(presentableName, tuple);
+                    
                     index.Add(indexNum, presentableName);
                     indexNum++;
+                    
                     if (indexNum % 50 == 0)
                     {
-                        //update public status variable every so often
+                        // update public status variable every so often
                         SeekerState.NumberParsed = indexNum;
                     }
-                    string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                          //for the brose response should only be the filename!!! 
-                                                                                                          //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                          //bc we get a path that is:
-                                                                                                          //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                          //not quite a full URI but it does add quite a bit..
+                    
+                    // TODO: I've seen this comment a couple of times already.
+                    //       Seems like there is some code repetition or code similarity, at least
+                    
+                    // use presentable name so that the filename will not be primary:file.mp3
+                    // for the brose response should only be the filename!!!
+                    // when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                    // bc we get a path that is:
+                    // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                    // not quite a full URI but it does add quite a bit..
+                    string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\"));
 
-                    //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
-                    //{
-                    //    searchableName = searchableName.Substring(8);
-                    //}
-                    var slskFile = new Soulseek.File(1, fname, childDocFile.Length(), System.IO.Path.GetExtension(childDocFile.Uri.Path));
+                    var extension = System.IO.Path.GetExtension(childDocFile.Uri.Path);
+                    var slskFile = new Soulseek.File(1, fname, childDocFile.Length(), extension);
                     files.Add(slskFile);
                 }
             }
@@ -1629,15 +1817,14 @@ namespace Seeker
                 }
             }
         }
-
-
-
+        
         /// <summary>
         /// Check Cache should be false if setting a new dir.. true if on startup.
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public static bool InitializeDatabase(UploadDirectoryInfo newlyAddedDirectoryIfApplicable, bool checkCache, out string errorMsg)
+        public static bool InitializeDatabase(UploadDirectoryInfo newlyAddedDirectoryIfApplicable, 
+            bool checkCache, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
@@ -1669,7 +1856,10 @@ namespace Seeker
                     int directoryCount = 0;
 
 
-                    //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
+                    // optimization
+                    // - if new directory is a subdir we can skip this part.
+                    // !!!! but we still have things to do like make all files
+                    // that start with said presentableDir to be locked / hidden. etc.
 
                     UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
                     if (UploadDirectoryManager.AreAllFailed())
@@ -1678,30 +1868,57 @@ namespace Seeker
                     }
                     if (SeekerState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        keys = ParseSharedDirectoryLegacy(null, SeekerState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
+                        keys = ParseSharedDirectoryLegacy(
+                            null,
+                            SeekerState.SharedFileCache?.FullInfo,
+                            ref directoryCount, 
+                            out browseResponse, 
+                            out dirMappingFriendlyNameToUri, 
+                            out helperIndex, 
+                            out hiddenDirectories
+                        );
                     }
                     else
                     {
-                        keys = ParseSharedDirectoryFastDocContract(null, SeekerState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
+                        keys = ParseSharedDirectoryFastDocContract(
+                            null,
+                            SeekerState.SharedFileCache?.FullInfo, 
+                            ref directoryCount, 
+                            out browseResponse,
+                            out dirMappingFriendlyNameToUri, 
+                            out helperIndex,
+                            out hiddenDirectories
+                        );
                     }
 
                     int nonHiddenCountForServer = keys.Count(pair1 => !pair1.Value.Item5);
                     MainActivity.LogDebug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
-                    SeekerState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
+                    SeekerState.NumberParsed = int.MaxValue; // our signal that we are finishing up...
                     s.Stop();
-                    MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", keys.Keys.Count, s.ElapsedMilliseconds));
+                    
+                    MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", 
+                        keys.Keys.Count, s.ElapsedMilliseconds));
+                    
                     s.Reset();
+                    
                     s.Start();
 
                     Dictionary<string, List<int>> tokenIndex = new Dictionary<string, List<int>>();
                     var reversed = helperIndex.ToDictionary(x => x.Value, x => x.Key);
+                    
                     foreach (string presentableName in keys.Keys)
                     {
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
+                        var folderName = Common.Helpers.GetFolderNameFromFile(presentableName);
+                        var extension = System.IO.Path
+                            .GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
+                        
+                        string searchableName = folderName + " " + extension;
+                        
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                         int code = reversed[presentableName];
-                        foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                        
+                        foreach (string token in searchableName.ToLower().Split(null)) // null means whitespace
                         {
                             if (token == string.Empty)
                             {
@@ -1718,17 +1935,11 @@ namespace Seeker
                             }
                         }
                     }
+                    
                     s.Stop();
 
-                    //foreach(string token in tokenIndex.Keys)
-                    //{
-                    //    MainActivity.LogDebug(token);
-                    //}
-
-                    MainActivity.LogDebug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
-
-                    //s.Stop();
-                    //LogDebug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
+                    MainActivity
+                        .LogDebug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
 
                     var newCachedResults = new CachedParseResults(
                         keys,
@@ -1743,108 +1954,98 @@ namespace Seeker
 
                     UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences); 
 
-
-                    ////5 searches a second = 18,000 per hour.
-                    //System.Random rand = new System.Random();
-                    //List<string> searchTerms = new List<string>();
-                    //for (int i = 0; i < 18000; i++)
-                    //{
-                    //    int a = rand.Next();
-                    //    searchTerms.Add("item" + a.ToString() + " " + "item2" + a.ToString());
-                    //}
-
-                    //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                    //sw.Reset();
-                    //sw.Start();
-                    //foreach (string search in searchTerms)
-                    //{
-                    //    foreach (string file in stringUriPairs.Keys)
-                    //    {
-                    //        if (file.Contains(search))
-                    //        {
-                    //            System.Console.WriteLine("true");
-                    //        }
-                    //    }
-                    //}
-                    //sw.Stop();
-                    //MainActivity.LogDebug(string.Format("linear search .5 million: {0}", sw.ElapsedMilliseconds));
-                    //sw.Reset();
-                    //sw.Start();
-                    ////5ms vs 27000ms for 100k searches over 10k files.
-                    ////0ms vs 600ms for 5k searches over 2k files.
-
-                    //foreach (string search in searchTerms)
-                    //{
-                    //    if (tokenIndex.ContainsKey(search))
-                    //    {
-                    //        System.Console.WriteLine("true");
-                    //    }
-                    //}
-
-                    //sw.Stop();
-                    //MainActivity.LogDebug(string.Format("term index search .5 million: {0}", sw.ElapsedMilliseconds));
-
-                    // TODO we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
+                    // TODO: we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
                     // would it ever be different?
 
-                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(keys, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, helperIndex, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
-                    SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount));
+                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(
+                        keys, 
+                        directoryCount, 
+                        browseResponse, 
+                        dirMappingFriendlyNameToUri, 
+                        tokenIndex,
+                        helperIndex, 
+                        hiddenDirectories,
+                        nonHiddenCountForServer
+                    );
+
+                    var argsTuple =
+                    (
+                        sharedFileCache.DirectoryCount,
+                        nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount
+                    );
+                    SharedFileCache_Refreshed(null, argsTuple);
                     SeekerState.SharedFileCache = sharedFileCache;
 
-                    //*********Profiling********* for 2252 files - 13s initial parsing, 1.9 MB total
-                    //2552 Files parsed in 13,161 milliseconds  - if the phone is locked it takes twice as long
-                    //Token index created in 370 milliseconds   - if the phone is locked it takes twice as long
-                    //Browse Response is 379,963 bytes
-                    //File Dictionary is 769,386 bytes
-                    //Directory Dictionary is 137,518 bytes
-                    //int(helper) index is 258,237 bytes
-                    //token index is 393,354 bytes
-                    //cache:
-                    //time to deserialize all sharing helpers is 664 ms for 2k files...
-
-                    //searching an hour (18,000) worth of terms
-                    //linear - 22,765 ms
-                    //dictionary based - 27ms
-
-                    //*********Profiling********* for 807 files - 3s initial parsing, .66 MB total
-                    //807 Files parsed in 2,935 milliseconds
-                    //Token index created in 182 milliseconds
-                    //Browse Response is 114,432 bytes
-                    //File Dictionary is 281,610 bytes
-                    //Directory Dictionary is 38,250 bytes
-                    //int(helper) index is 78,589 bytes
-                    //token index is 156,274 bytes
-
-                    //searching an hour (18,000) worth of terms
-                    //linear - 6,570 ms
-                    //dictionary based - 22ms
-
-                    //*********Profiling********* for 807 files -- deep metadata retreival off. (i.e. only whats indexed in MediaStore) - 
-                    //*********Profiling********* for 807 files -- metadata for flac and those not in MediaStore - 12,234
-                    //*********Profiling********* for 807 files -- mediaretreiver for everything.  metadata for flac and those not in MediaStore - 38,063
-
-
-
+                    // *********Profiling********* for 2252 files - 13s initial parsing, 1.9 MB total
+                    // 2552 Files parsed in 13,161 milliseconds  - if the phone is locked it takes twice as long
+                    // Token index created in 370 milliseconds   - if the phone is locked it takes twice as long
+                    // Browse Response is 379,963 bytes
+                    // File Dictionary is 769,386 bytes
+                    // Directory Dictionary is 137,518 bytes
+                    // int(helper) index is 258,237 bytes
+                    // token index is 393,354 bytes
+                    // cache:
+                    // time to deserialize all sharing helpers is 664 ms for 2k files...
+                       
+                    // searching an hour (18,000) worth of terms
+                    // linear - 22,765 ms
+                    // dictionary based - 27ms
+                       
+                    // *********Profiling********* for 807 files - 3s initial parsing, .66 MB total
+                    // 807 Files parsed in 2,935 milliseconds
+                    // Token index created in 182 milliseconds
+                    // Browse Response is 114,432 bytes
+                    // File Dictionary is 281,610 bytes
+                    // Directory Dictionary is 38,250 bytes
+                    // int(helper) index is 78,589 bytes
+                    // token index is 156,274 bytes
+                       
+                    // searching an hour (18,000) worth of terms
+                    // linear - 6,570 ms
+                    // dictionary based - 22ms
+                       
+                    // *********Profiling********* for 807 files -- deep metadata retreival off.
+                    //                                              (i.e. only whats indexed in MediaStore) - 
+                    // *********Profiling********* for 807 files -- metadata for flac
+                    //                                              and those not in MediaStore - 12,234
+                    // *********Profiling********* for 807 files -- mediaretreiver for everything.
+                    //                                              metadata for flac
+                    //                                              and those not in MediaStore - 38,063
                 }
                 else
                 {
                     LogDebug("Using cached results");
                     UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    
                     if (UploadDirectoryManager.AreAllFailed())
                     {
                         throw new DirectoryAccessFailure("All Failed");
                     }
                     else
                     {
-                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, // todo new constructor
-                            cachedParseResults.directoryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
-                            cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion,
-                            cachedParseResults.nonHiddenFileCount);
+                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(
+                            cachedParseResults.keys, // TODO: new constructor
+                            cachedParseResults.directoryCount, 
+                            cachedParseResults.browseResponse, 
+                            cachedParseResults.friendlyDirNameToUriMapping,
+                            cachedParseResults.tokenIndex, 
+                            cachedParseResults.helperIndex,
+                            cachedParseResults.browseResponseHiddenPortion,
+                            cachedParseResults.nonHiddenFileCount
+                        );
 
-                        SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, sharedFileCache.GetNonHiddenFileCountForServer() != -1 ? sharedFileCache.GetNonHiddenFileCountForServer() : sharedFileCache.FileCount));
+                        var argsTuple =
+                        (
+                            sharedFileCache.DirectoryCount,
+                            sharedFileCache.GetNonHiddenFileCountForServer() != -1
+                                ? sharedFileCache.GetNonHiddenFileCountForServer()
+                                : sharedFileCache.FileCount
+                        );
+                        SharedFileCache_Refreshed(null, argsTuple);
                         SeekerState.SharedFileCache = sharedFileCache;
                     }
                 }
+                
                 success = true;
                 SeekerState.FailedShareParse = false;
                 SeekerState.SharedFileCache.SuccessfullyInitialized = true;
@@ -1853,14 +2054,15 @@ namespace Seeker
             {
                 string defaultUnspecified = "Shared Folder Error - Unspecified Error";
                 errorMsg = defaultUnspecified;
+                
                 if (e.GetType().FullName == "Java.Lang.SecurityException" || e is Java.Lang.SecurityException)
                 {
                     errorMsg = SeekerApplication.GetString(Resource.String.PermissionsIssueShared);
                 }
+                
                 success = false;
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
-
-
+                
                 if (e is DirectoryAccessFailure)
                 {
                     errorMsg = "Shared Folder Error - " + UploadDirectoryManager.GetCompositeErrorString();
@@ -1874,12 +2076,13 @@ namespace Seeker
                 {
                     try
                     {
-                        LogFirebase("Possible encoding issue: " + ShowCodePoints(e.Message.Substring(e.Message.Length - 7)));
+                        var codePoints = ShowCodePoints(e.Message.Substring(e.Message.Length - 7));
+                        LogFirebase("Possible encoding issue: " + codePoints);
                         errorMsg = "Path Conflict. Same Name?";
                     }
                     catch
                     {
-                        //just in case
+                        // just in case
                     }
                 }
 
@@ -1892,15 +2095,9 @@ namespace Seeker
             {
                 if (!success)
                 {
-                    //if(newlyAddedDirectoryIfApplicable!=null)
-                    //{
-                    //    UploadDirectoryManager.UploadDirectories.Remove(newlyAddedDirectoryIfApplicable);
-                    //    UploadDirectoryChanged?.Invoke(null, new EventArgs());
-                    //}
-                    //SeekerState.UploadDataDirectoryUri = null;
-                    //SeekerState.UploadDataDirectoryUriIsFromTree = true;
                     SeekerState.FailedShareParse = true;
-                    //if success if false then SeekerState.SharedFileCache might be null still causing a crash!
+                    
+                    // if success if false then SeekerState.SharedFileCache might be null still causing a crash!
                     if (SeekerState.SharedFileCache != null)
                     {
                         SeekerState.SharedFileCache.SuccessfullyInitialized = false;
@@ -1908,12 +2105,13 @@ namespace Seeker
                 }
             }
             return success;
-            //SeekerState.SoulseekClient.SearchResponseDelivered += SoulseekClient_SearchResponseDelivered;
-            //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
-
-
-        static T deserializeFromDisk<T>(Context c, Java.IO.File dir, string filename, MessagePack.MessagePackSerializerOptions options = null) where T : class
+        
+        static T deserializeFromDisk<T>(
+            Context c, 
+            Java.IO.File dir, 
+            string filename,
+            MessagePack.MessagePackSerializerOptions options = null) where T : class
         {
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, filename);
 
@@ -1922,7 +2120,8 @@ namespace Seeker
                 return null;
             }
 
-            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(
+                       AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
             {
                 return MessagePack.MessagePackSerializer.Deserialize<T>(inputStream, options);
             }
@@ -1939,23 +2138,50 @@ namespace Seeker
             try
             {
                 var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, KeyConsts.M_HelperIndex_Filename);
-                var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, KeyConsts.M_TokenIndex_Filename);
-                var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, KeyConsts.M_Keys_Filename);
-                var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
-                var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
-                var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, KeyConsts.M_FriendlyDirNameToUri_Filename);
+                
+                var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(
+                    c,
+                    fileshare_dir,
+                    KeyConsts.M_TokenIndex_Filename
+                );
+                
+                var keys =
+                    deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(
+                        c,
+                        fileshare_dir, 
+                        KeyConsts.M_Keys_Filename
+                    );
+                
+                var browseResponse = deserializeFromDisk<BrowseResponse>(
+                    c, 
+                    fileshare_dir, 
+                    KeyConsts.M_BrowseResponse_Filename, 
+                    SerializationHelper.BrowseResponseOptions
+                );
+                
+                var browseResponseHidden = deserializeFromDisk<List<Directory>>(
+                    c,
+                    fileshare_dir,
+                    KeyConsts.M_BrowseResponse_Hidden_Filename,
+                    SerializationHelper.BrowseResponseOptions
+                );
+                
+                var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir,
+                    KeyConsts.M_FriendlyDirNameToUri_Filename);
 
-                int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
+                int nonHiddenFileCount = 
+                    SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
 
                 var cachedParseResults = new CachedParseResults(
                     keys,
-                    browseResponse.DirectoryCount, //todo
+                    browseResponse.DirectoryCount, // TODO: This line needs some attention
                     browseResponse,
                     browseResponseHidden,
                     friendlyDirToUri,
                     tokenIndex,
                     helperIndex,
                     nonHiddenFileCount);
+                
                 return cachedParseResults;
             }
             catch(Exception e)
@@ -1972,6 +2198,7 @@ namespace Seeker
             {
                 return;
             }
+            
             foreach(var file in fileshare_dir.ListFiles())
             {
                 file.Delete();
@@ -1994,13 +2221,17 @@ namespace Seeker
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.tokenIndex);
             CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_TokenIndex_Filename);
 
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); //TODO directoryCount
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); // TODO: directoryCount
             CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_Keys_Filename);
 
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: SerializationHelper.BrowseResponseOptions);
+            data = MessagePack.MessagePackSerializer
+                .Serialize(cachedParseResults.browseResponse, options: SerializationHelper.BrowseResponseOptions);
+            
             CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Filename);
 
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, 
+                options: SerializationHelper.BrowseResponseOptions);
+            
             CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Hidden_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
@@ -2010,14 +2241,13 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, cachedParseResults.nonHiddenFileCount);
-                //editor.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-                //editor.PutBoolean(KeyConsts.M_UploadDirectoryUriIsFromTree, SeekerState.UploadDataDirectoryUriIsFromTree);
+                
+                // TODO: save upload dirs ---- do this now might as well....
 
-
-                //TODO TODO save upload dirs ---- do this now might as well....
-
-                //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
-                //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
+                // before this line ^ ,its possible for the saved UploadDirectoryUri
+                // and the actual browse response to be different.
+                // this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder
+                // and then press home and then swipe up. never having saved uploadirectoryUri.
                 editor.Commit();
             }
         }
@@ -2034,25 +2264,24 @@ namespace Seeker
 
         private void SoulseekClient_SearchResponseDeliveryFailed(object sender, SearchRequestResponseEventArgs e)
         {
-            //throw new NotImplementedException();
+            // Intentional no-op
         }
 
         private void SoulseekClient_SearchResponseDelivered(object sender, SearchRequestResponseEventArgs e)
         {
-
+            // Intentional no-op
         }
 
         public static void SharedFileCache_Refreshed(object sender, (int Directories, int Files) e)
         {
-            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
-                SeekerState.NumberOfSharedDirectoriesIsStale = false;
-            }
-            else
+            if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 SeekerState.NumberOfSharedDirectoriesIsStale = true;
+                return;
             }
+
+            SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
+            SeekerState.NumberOfSharedDirectoriesIsStale = false;
         }
 
         /// <summary>
@@ -2063,15 +2292,25 @@ namespace Seeker
         {
             try
             {
-                if (SeekerState.SoulseekClient != null && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+                if (SeekerState.SoulseekClient != null 
+                    && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
                     if (MeetsCurrentSharingConditions())
                     {
                         if (SeekerState.SharedFileCache != null)
                         {
-                            MainActivity.LogDebug("Tell server we are sharing " + SeekerState.SharedFileCache.DirectoryCount + " dirs and " + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
-                            SeekerState.SoulseekClient.SetSharedCountsAsync(SeekerState.SharedFileCache.DirectoryCount,
-                                SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() : SeekerState.SharedFileCache.FileCount);
+                            MainActivity.LogDebug("Tell server we are sharing " 
+                                                  + SeekerState.SharedFileCache.DirectoryCount 
+                                                  + " dirs and " 
+                                                  + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() 
+                                                  + " files");
+                            
+                            SeekerState.SoulseekClient.SetSharedCountsAsync(
+                                SeekerState.SharedFileCache.DirectoryCount,
+                                SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 
+                                    ? SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() 
+                                    : SeekerState.SharedFileCache.FileCount
+                            );
                         }
                         else
                         {
@@ -2083,6 +2322,7 @@ namespace Seeker
                         MainActivity.LogDebug("Tell server we are sharing 0 dirs and 0 files");
                         SeekerState.SoulseekClient.SetSharedCountsAsync(0, 0);
                     }
+                    
                     SeekerState.NumberOfSharedDirectoriesIsStale = false;
                 }
                 else
@@ -2091,17 +2331,24 @@ namespace Seeker
                     {
                         if (SeekerState.SharedFileCache != null)
                         {
-                            MainActivity.LogDebug("We need to Tell server we are sharing " + SeekerState.SharedFileCache.DirectoryCount + " dirs and " + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
+                            MainActivity.LogDebug("We need to Tell server we are sharing " 
+                                                  + SeekerState.SharedFileCache.DirectoryCount 
+                                                  + " dirs and " 
+                                                  + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() 
+                                                  + " files on next log in");
                         }
                         else
                         {
-                            MainActivity.LogDebug("we meet sharing conditions but our shared file cache is not successfully set up");
+                            MainActivity.LogDebug("we meet sharing conditions " +
+                                                  "but our shared file cache is not successfully set up");
                         }
                     }
                     else
                     {
-                        MainActivity.LogDebug("We need to Tell server we are sharing 0 dirs and 0 files on next log in");
+                        MainActivity.LogDebug("We need to Tell server we are sharing 0 dirs" +
+                                              " and 0 files on next log in");
                     }
+                    
                     SeekerState.NumberOfSharedDirectoriesIsStale = true;
                 }
             }
@@ -2113,11 +2360,18 @@ namespace Seeker
         }
 
         /// <summary>
-        /// returns a list of searchable names (final dir + filename) for other's searches, and then the URI so android can actually get that file.
+        /// returns a list of searchable names (final dir + filename) for other's searches,
+        /// and then the URI so android can actually get that file.
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string, long, string>> pairs, Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
+        public void traverseDocumentFile(
+            DocumentFile dir, 
+            List<Tuple<string, string, long, string>> pairs, 
+            Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicatesList, 
+            bool isRootCase,
+            string volName, 
+            ref int directoryCount)
         {
             if (dir.Exists())
             {
@@ -2132,28 +2386,29 @@ namespace Seeker
                     }
                     else
                     {
-                        // do something here with the file
-                        //LogDebug(file.Uri.ToString()); //encoded string representation //content://com.android.externalstorage.documents/tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3
-                        //LogDebug(file.Uri.Path.ToString()); //gets decoded path // /tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
-                        //LogDebug(Android.Net.Uri.Decode(file.Uri.ToString())); // content://com.android.externalstorage.documents/tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
-                        //LogDebug(file.Uri.EncodedPath);  // /tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3 
-                        //LogDebug(file.Uri.LastPathSegment); // primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
-
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" + CommonHelpers.GetFileNameFromFile(fullPath);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" 
+                            + CommonHelpers.GetFileNameFromFile(fullPath);
+                        
                         if (isRootCase && (volName != null))
                         {
                             if (searchableName.Substring(0, volName.Length) == volName)
                             {
-                                if (searchableName.Length != volName.Length) //i.e. if its just "primary:"
+                                if (searchableName.Length != volName.Length) // i.e. if its just "primary:"
                                 {
                                     searchableName = searchableName.Substring(volName.Length);
                                 }
                             }
                         }
-                        pairs.Add(new Tuple<string, string, long, string>(searchableName, file.Uri.ToString(), file.Length(), presentableName));
+                        
+                        pairs.Add(new Tuple<string, string, long, string>(
+                            searchableName,
+                            file.Uri.ToString(), 
+                            file.Length(), 
+                            presentableName
+                        ));
                     }
                 }
             }
@@ -2181,8 +2436,10 @@ namespace Seeker
                 }
             }
         }
-
-
+        
+        // TODO: Move these constants to the top of the file
+        //       or move them to a separate file along with some of the utility methods below and above
+        
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
         public const int SETTINGS_EXTERNAL = 0x430;
         public const int DEFAULT_SEARCH_RESULTS = 250;
@@ -2206,10 +2463,12 @@ namespace Seeker
             {
                 CpuKeepAlive_Transfer.Release();
             }
+            
             if (WifiKeepAlive_Transfer != null)
             {
                 WifiKeepAlive_Transfer.Release();
             }
+            
             KeepAliveInactivityKillTimer.Stop();
         }
 
@@ -2222,48 +2481,52 @@ namespace Seeker
                 LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
                 try
                 {
-                    //DocumentFile docFile = null;
-                    //if (SeekerState.PreOpenDocumentTree() || !SeekerState.UploadDataDirectoryUriIsFromTree)
-                    //{
-                    //    docFile = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(SeekerState.UploadDataDirectoryUri).Path));
-                    //}
-                    //else
-                    //{
-                    //    docFile = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(SeekerState.UploadDataDirectoryUri));
-                    //}
-                    success = InitializeDatabase(null, true, out errorMessage); //we check the cache which has ALL of the parsed results in it. much different from rescanning.
+                    // we check the cache which has ALL of the parsed results in it. much different from rescanning.
+                    success = InitializeDatabase(null, true, out errorMessage);
                 }
                 catch (Exception e)
                 {
                     LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
-                    //SeekerState.UploadDataDirectoryUri = null;
-                    //SeekerState.UploadDataDirectoryUriIsFromTree = true;
                     SetUnsetSharingBasedOnConditions(false, true);
+                    
                     if (!(e is DirectoryAccessFailure))
                     {
                         MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
                     }
+                    
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Long).Show();
+                        Toast.MakeText(
+                            SeekerState.ActiveActivityRef, 
+                            SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), 
+                            ToastLength.Long
+                        ).Show();
                     }));
                 }
 
-                if (success && SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized)
+                if (success 
+                    && SeekerState.SharedFileCache != null 
+                    && SeekerState.SharedFileCache.SuccessfullyInitialized)
                 {
                     LogDebug("database full initialized.");
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing), ToastLength.Short).Show();
+                        Toast.MakeText(
+                            SeekerState.ActiveActivityRef, 
+                            SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing),
+                            ToastLength.Short
+                        ).Show();
                     }));
+                    
                     try
                     {
-                        //setup soulseek client with handlers if all conditions met
+                        // setup soulseek client with handlers if all conditions met
                         SetUnsetSharingBasedOnConditions(false);
                     }
                     catch (Exception e)
                     {
-                        MainActivity.LogFirebase("MainActivity error setting handlers: " + e.Message + "  " + e.StackTrace);
+                        MainActivity.LogFirebase("MainActivity error setting handlers: " 
+                                                 + e.Message + "  " + e.StackTrace);
                     }
                 }
                 else if (!success)
@@ -2272,7 +2535,11 @@ namespace Seeker
                     {
                         if (string.IsNullOrEmpty(errorMessage))
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Short).Show();
+                            Toast.MakeText(
+                                SeekerState.ActiveActivityRef, 
+                                SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), 
+                                ToastLength.Short
+                            ).Show();
                         }
                         else
                         {
@@ -2292,13 +2559,17 @@ namespace Seeker
 
         private ISharedPreferences sharedPreferences;
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
 
-            //basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
-            //however, if we say rotate the device or leave and come back to it (and the activity got destroyed in the mean time) then
-            //it will re-handle the activity each time.  We can check if it is truly "new" by looking at the savedInstanceState.
+            // basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
+            // however, if we say rotate the device or leave
+            // and come back to it (and the activity got destroyed in the mean time) then
+            // it will re-handle the activity each time.
+            // We can check if it is truly "new" by looking at the savedInstanceState.
             bool reborn = false;
+            
             if (savedInstanceState == null)
             {
                 LogDebug("Main Activity On Create NEW");
@@ -2308,18 +2579,21 @@ namespace Seeker
                 reborn = true;
                 LogDebug("Main Activity On Create REBORN");
             }
-
-
+            
             try
             {
                 if (CpuKeepAlive_Transfer == null)
                 {
-                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
+                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService))
+                        .NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
+                    
                     CpuKeepAlive_Transfer.SetReferenceCounted(false);
                 }
                 if (WifiKeepAlive_Transfer == null)
                 {
-                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
+                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService))
+                        .CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
+                    
                     WifiKeepAlive_Transfer.SetReferenceCounted(false);
                 }
             }
@@ -2327,59 +2601,41 @@ namespace Seeker
             {
                 LogFirebase("error init keepalives: " + e.Message + e.StackTrace);
             }
+            
             if (KeepAliveInactivityKillTimer == null)
             {
-                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
-                                                                                        //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
+                // kill after 10 mins of no activity..
+                // remember that this is a fallback. for when foreground service is still running
+                // but nothing is happening otherwise.
+                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10);
+                
                 KeepAliveInactivityKillTimer.Elapsed += KeepAliveInactivityKillTimerEllapsed;
                 KeepAliveInactivityKillTimer.AutoReset = false;
             }
-
-            //FirebaseCrash.Report();
-            //MainActivity.LogFirebase("This happened......"));
-
-            //this.Window.SetSoftInputMode();
-
+            
             base.OnCreate(savedInstanceState);
-            //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
+
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState); // this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
-
-            //SerializationTests.TestInflateAll(this);
-
-            //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
-            //SetSupportActionBar(myToolbar);
+            
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
 
 
-            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = 
+                (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
+            
             myToolbar.Title = this.GetString(Resource.String.home_tab);
             myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
-            myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
-
-
+            myToolbar.InflateMenu(Resource.Menu.account_menu); // twice??
+            
             var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             System.Console.WriteLine("Testing.....");
 
             sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs", 0);
-
-            //if (uiModeManager.NightMode == UiModeManager.ModeNightYes)
-            //{
-            //    // System is in Night mode
-            //}
-            //else if (uiModeManager.NightMode == Android.App.UiNightMode.Yes)
-            //{
-            //    // System is in Day mode
-            //}
-
-
-            //this.RequestPostNotificationPermissionsIfApplicable();
-
-            //restoreSeekerState(savedInstanceState);
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
 
@@ -2390,25 +2646,13 @@ namespace Seeker
             tabs.TabSelected += Tabs_TabSelected;
             pager.Adapter = adapter;
             pager.AddOnPageChangeListener(new OnPageChangeLister1());
-            //tabs.SetupWithViewPager(pager);
-            //this is a relatively safe way that prevents rotates from redoing the intent.
+
+            // this is a relatively safe way that prevents rotates from redoing the intent.
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
-            //Intent = i;
+            
             if (Intent != null)
             {
-                //if(Intent.Flags == (ActivityFlags.LaunchedFromHistory | ActivityFlags.NewTask))
-                //{
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY | FLAG_ACTIVITY_NEW_TASK
-                //    //-back button then resumed from history
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                //    //-home button then resumed from history
-                //    //FLAG_ACTIVITY_NEW_TASK
-                //    //-clicking app icon or intent filter
-                //    MainActivity.LogDebug("new task | launched from history");
-                //}
-
-
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
                     pager.SetCurrentItem(2, false);
@@ -2423,26 +2667,28 @@ namespace Seeker
                 }
                 else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
                 {
-                    //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                    //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
-                    //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
-                    //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
                     pager.SetCurrentItem(1, false);
                 }
                 else if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)
                 {
                     pager.SetCurrentItem(1, false);
                 }
-                else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
+                // if its not reborn then the OnNewIntent will handle it...
+                else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn)
                 {
-                    SeekerState.MainActivityRef = this; //set these early. they are needed
+                    SeekerState.MainActivityRef = this; // set these early. they are needed
                     SeekerState.ActiveActivityRef = this;
 
-                    MainActivity.LogInfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
+                    MainActivity.LogInfoFirebase("is resumed: " 
+                                                 + (SearchFragment.Instance?.IsResumed ?? false).ToString());
+                    
                     MainActivity.LogInfoFirebase("from wishlist clicked");
+                    
                     int currentPage = pager.CurrentItem;
                     int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-                    if (currentPage == 1) //this is the case even if process previously got am state killed.
+                    
+                    // this is the case even if process previously got am state killed.
+                    if (currentPage == 1)
                     {
                         MainActivity.LogInfoFirebase("from wishlist clicked - current page");
                         if (tabID == int.MaxValue)
@@ -2452,14 +2698,18 @@ namespace Seeker
                         else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                         {
                             LogFirebase("doesnt contain key");
-                            Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long).Show();
+                            
+                            Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
+                                .Show();
                         }
                         else
                         {
-                            if (SearchFragment.Instance?.IsResumed ?? false) //!??! this logic is backwards...
+                            if (SearchFragment.Instance?.IsResumed ?? false) // !??! this logic is backwards...
                             {
-                                MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
-                                goToSearchTab = tabID; //we read this we resume
+                                MainActivity.LogDebug("we are on the search page " +
+                                                      "but we need to wait for OnResume search frag");
+                                
+                                goToSearchTab = tabID; // we read this we resume
                             }
                             else
                             {
@@ -2470,12 +2720,15 @@ namespace Seeker
                     else
                     {
                         MainActivity.LogInfoFirebase("from wishlist clicked - different page");
-                        //when we move to the page, lets move to our tab, if its not the current one..
+                        
+                        // when we move to the page, lets move to our tab, if its not the current one..
                         goToSearchTab = tabID; //we read this when we move tab...
                         pager.SetCurrentItem(1, false);
                     }
                 }
-                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
+                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) 
+                          || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) 
+                         && !alreadyHandled) // else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
@@ -2484,12 +2737,15 @@ namespace Seeker
                     MainActivity.LogInfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
                 }
-                else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
+                // this will always create a new instance,
+                // so if its reborn then its an old intent that we already followed.
+                else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn)
                 {
                     SeekerState.MainActivityRef = this;
                     SeekerState.ActiveActivityRef = this;
                     MainActivity.LogDebug("MainActivity action send intent");
-                    //give us a new fresh tab if the current one has a search in it...
+                    
+                    // give us a new fresh tab if the current one has a search in it...
                     if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
                     {
                         MainActivity.LogDebug("lets go to a new fresh tab");
@@ -2504,31 +2760,35 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
-                            goToSearchTab = newTabToGoTo; //we read this we resume
+                            MainActivity.LogDebug("we are on the search page but we need to wait " +
+                                                  "for OnResume search frag");
+                            
+                            goToSearchTab = newTabToGoTo; // we read this we resume
                         }
                     }
 
-                    //go to search tab
+                    // go to search tab
                     MainActivity.LogDebug("prev search term: " + SearchDialog.SearchTerm);
                     SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
                     SearchDialog.IsFollowingLink = false;
                     pager.SetCurrentItem(1, false);
+                    
                     if (SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
                     {
-                        //we are done parsing the intent
+                        // we are done parsing the intent
                         SearchDialog.SearchTerm = searchTermFound;
                     }
                     else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
                     {
                         SearchDialog.IsFollowingLink = true;
                     }
-                    //close previous instance
+                    
+                    // close previous instance
                     if (SearchDialog.Instance != null)
                     {
                         MainActivity.LogDebug("previous instance exists");
-                        //SearchDialog.Instance.Dismiss(); //throws exception, cannot perform this action after onSaveInstanceState
                     }
+
                     var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
                     searchDialog.Show(SupportFragmentManager, "Search Dialog");
                 }
@@ -2537,97 +2797,56 @@ namespace Seeker
 
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
-
-
-            //UploadDirectoryManager.UploadDirectories = new List<UploadDirectoryInfo>();
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20x/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirix", true, true, false, null));
-            //UploadDirectoryManager.//UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/primary%3AMusic/document/primary%3AMusic", true, false, false, null));
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
-
-
-            //if we have all the conditions to share, then set sharing up.
+            
+            // if we have all the conditions to share, then set sharing up.
             if (MeetsSharingConditions() && !SeekerState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
             {
-                SetUpSharing(); //TODO why is this tied to the MainActivity !!
+                SetUpSharing(); // TODO: why is this tied to the MainActivity !!
             }
             else if (SeekerState.NumberOfSharedDirectoriesIsStale)
             {
                 InformServerOfSharedFiles();
                 SeekerState.AttemptedToSetUpSharing = true;
             }
-
-
-            //this.DeleteSharedPreferences("SoulSeekPrefs");
-
-            //Mono.Nat.NatUtility.DeviceFound += NatUtility_DeviceFound; //error bad message parsePAL_UPNP_SOAP_E_INVALID_ARGS. was able to look at all the current wifi port mappings however :)
-            //Mono.Nat.NatUtility.StartDiscovery();
-
-
-            //InternetGatewayDevice[] IGDs = InternetGatewayDevice.getDevices(60000);
-            //if (IGDs != null)
-            //{
-            //    for (int i = 0; i < IGDs.Length; i++)
-            //    {
-
-            //    }
-            //}
-            //Android.Net.Wifi.WifiManager wm = this.GetSystemService(WifiService);
-            //wm.
-            //Mono.Nat.NatUtility.UnknownDeviceFound += NatUtility_DeviceFound;
-
-
-
+            
             SeekerState.SharedPreferences = sharedPreferences;
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
 
             UpdateForScreenSize();
 
-            //#if DEBUG //todo remove
-
-            //WishlistController.SearchIntervalMilliseconds = 1000*30;
-            //WishlistController.Initialize();
-
-            //#endif
-
-
             if (SeekerState.UseLegacyStorage())
             {
-                if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
+                var permissionName = Manifest.Permission.WriteExternalStorage;
+                if (ContextCompat.CheckSelfPermission(this, permissionName) == Android.Content.PM.Permission.Denied)
                 {
-                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
+                    ActivityCompat.RequestPermissions(this, new string[] { permissionName }, WRITE_EXTERNAL);
                 }
-                //file picker with legacy case
+                
+                // file picker with legacy case
                 if (!string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    // an example of a random bad url that passes parsing but fails FromTreeUri:
+                    // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
                     bool canWrite = false;
+                    
                     try
                     {
-                        //a phone failed 4 times with //POCO X3 Pro
-                        //Android 11(SDK 30)
-                        //Caused by: java.lang.IllegalArgumentException: 
-                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                        // a phone failed 4 times with //POCO X3 Pro
+                        // Android 11(SDK 30)
+                        // Caused by: java.lang.IllegalArgumentException: 
+                        // at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                        // at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
                         if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                         }
                         else
                         {
-                            //on changing the code and restarting for api 22 
-                            //persistenduripermissions is empty
-                            //and exists is false, cannot list files
-
-                            //var list1 = this.ContentResolver.PersistedUriPermissions;
-                            //foreach(var item1 in list1)
-                            //{
-                            //    string content1 = item1.Uri.Path;
-                            //}
-
-
+                            // on changing the code and restarting for api 22 
+                            // persistenduripermissions is empty
+                            // and exists is false, cannot list files
                             canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
                         }
                     }
@@ -2661,11 +2880,15 @@ namespace Seeker
                     }
                 }
 
-                //now for incomplete
+                // TODO: This is practically duplicate code from what is above
+                // now for incomplete
                 if (!string.IsNullOrEmpty(SeekerState.ManualIncompleteDataDirectoryUri))
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
+                    // an example of a random bad url that passes parsing but fails FromTreeUri:
+                    // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    Android.Net.Uri chosenIncompleteUri = 
+                        Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
+                    
                     bool canWrite = false;
                     try
                     {
@@ -2674,23 +2897,16 @@ namespace Seeker
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() 
+                            || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
                         }
                         else
                         {
-                            //on changing the code and restarting for api 22 
-                            //persistenduripermissions is empty
-                            //and exists is false, cannot list files
-
-                            //var list1 = this.ContentResolver.PersistedUriPermissions;
-                            //foreach(var item1 in list1)
-                            //{
-                            //    string content1 = item1.Uri.Path;
-                            //}
-
-
+                            // on changing the code and restarting for api 22 
+                            // persistenduripermissions is empty
+                            // and exists is false, cannot list file
                             canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri).CanWrite();
                         }
                     }
@@ -2698,22 +2914,26 @@ namespace Seeker
                     {
                         if (chosenIncompleteUri != null)
                         {
-                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with URI: " + chosenIncompleteUri.ToString() + " " + e.Message);
+                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with URI: " 
+                                        + chosenIncompleteUri.ToString() + " " + e.Message);
                         }
                         else
                         {
                             LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with null URI");
                         }
                     }
+                    
                     if (canWrite)
                     {
                         if (SeekerState.PreOpenDocumentTree())
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path));
+                            SeekerState.RootIncompleteDocumentFile = 
+                                DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path));
                         }
                         else
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, chosenIncompleteUri);
+                            SeekerState.RootIncompleteDocumentFile = 
+                                DocumentFile.FromTreeUri(this, chosenIncompleteUri);
                         }
                     }
                     else
@@ -2727,45 +2947,31 @@ namespace Seeker
             else
             {
 
-                Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
+                Android.Net.Uri res = null;
                 if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
                 {
-                    //try
-                    //{
-                    //    //storage/emulated/0/music
-                    //    Java.IO.File f = new Java.IO.File(@"/storage/emulated/0/Music");///Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
-                    //    //res = f.ToURI();
-                    //    res = Android.Net.Uri.FromFile(f);//Parse(f.ToURI().ToString());
-                    //}
-                    //catch
-                    //{
-                    //    res = Android.Net.Uri.Parse(defaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
-                    //}
                     res = Android.Net.Uri.Parse(defaultMusicUri);
                 }
                 else
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    // an example of a random bad url that passes parsing but fails FromTreeUri:
+                    // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
                 }
 
-                //string path  = res.Path; 
-                //string lastPath = res.LastPathSegment;
-                //var segs = res.PathSegments;
-                //DocumentFile f = DocumentFile.FromTreeUri(this, res);
-                //string name = f.Name;
-                //bool isEmulated = Android.OS.Environment.IsExternalStorageEmulated;
-                //bool isRemovable = Android.OS.Environment.IsExternalStorageRemovable;
-
+                // TODO: Below code seems to be duplicate from what is above, as even the comment is the same
                 bool canWrite = false;
                 try
                 {
-                    //a phone failed 4 times with //POCO X3 Pro
-                    //Android 11(SDK 30)
-                    //Caused by: java.lang.IllegalArgumentException: 
-                    //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                    //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree) //this will never get hit..
+                    // a phone failed 4 times with //POCO X3 Pro
+                    // Android 11(SDK 30)
+                    // Caused by: java.lang.IllegalArgumentException: 
+                    // at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                    // at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                    
+                    // this will never get hit..
+                    // TODO: If this is never hit, why check for it?
+                    if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree) 
                     {
                         canWrite = DocumentFile.FromFile(new Java.IO.File(res.Path)).CanWrite();
                     }
@@ -2773,21 +2979,6 @@ namespace Seeker
                     {
                         canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
                     }
-
-                    // if canwrite is false then if we try to create a file we get null.
-                    //if (SeekerState.SaveDataDirectoryUriIsFromTree)
-                    //{
-                    //    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-
-                    //}
-                    //else
-                    //{
-                    //    SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
-                    //}
-
-                    //var file1 = SeekerState.RootDocumentFile.CreateFile("text/plain", "testing_1234.txt");
-
-
                 }
                 catch (Exception e)
                 {
@@ -2800,20 +2991,27 @@ namespace Seeker
                         LogFirebase("DocumentFile.FromTreeUri failed with null URI");
                     }
                 }
-                //if (DocumentFile.FromTreeUri(this, Uri.TryCreate("",UriKind.Absolute)))
+
                 if (!canWrite)
                 {
 
                     var b = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
                     b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
                     b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                    
                     ManualResetEvent mre = new ManualResetEvent(false);
-                    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+                    EventHandler<DialogClickEventArgs> eventHandler = new(
+                        (object sender, DialogClickEventArgs okayArgs) =>
                     {
                         var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
                         var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
                         intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
-                        intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
+                        
+                        intent.AddFlags(ActivityFlags.GrantPersistableUriPermission 
+                                        | ActivityFlags.GrantReadUriPermission 
+                                        | ActivityFlags.GrantWriteUriPermission 
+                                        | ActivityFlags.GrantPrefixUriPermission);
+                        
                         try
                         {
                             this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
@@ -2830,12 +3028,10 @@ namespace Seeker
                             }
                         }
                     });
+                    
                     b.SetPositiveButton(Resource.String.okay, eventHandler);
                     b.SetCancelable(false);
                     b.Show();
-
-
-                    //this.SendBroadcast(storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent());
                 }
                 else
                 {
@@ -2851,12 +3047,17 @@ namespace Seeker
                 }
 
                 bool manualSet = false;
-                //for incomplete case
-                Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
+                
+                // TODO: Some dfuplcate code below again, consider revisiting
+                
+                // for incomplete case
+                Android.Net.Uri incompleteRes = null;
+                
                 if (!string.IsNullOrEmpty(SeekerState.ManualIncompleteDataDirectoryUri))
                 {
                     manualSet = true;
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    // an example of a random bad url that passes parsing but fails FromTreeUri:
+                    // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     incompleteRes = Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
                 }
                 else
@@ -2869,12 +3070,13 @@ namespace Seeker
                     bool canWriteIncomplete = false;
                     try
                     {
-                        //a phone failed 4 times with //POCO X3 Pro
-                        //Android 11(SDK 30)
-                        //Caused by: java.lang.IllegalArgumentException: 
-                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        // a phone failed 4 times with //POCO X3 Pro
+                        // Android 11(SDK 30)
+                        // Caused by: java.lang.IllegalArgumentException: 
+                        // at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                        // at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                        if (SeekerState.PreOpenDocumentTree() 
+                            || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
                         }
@@ -2887,18 +3089,22 @@ namespace Seeker
                     {
                         if (incompleteRes != null)
                         {
-                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: " + incompleteRes.ToString() + " " + e.Message);
+                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: " 
+                                        + incompleteRes.ToString() + " " + e.Message);
                         }
                         else
                         {
                             LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
                         }
                     }
+                    
                     if (canWriteIncomplete)
                     {
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() 
+                            || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
+                            SeekerState.RootIncompleteDocumentFile = 
+                                DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
                         }
                         else
                         {
@@ -2911,106 +3117,30 @@ namespace Seeker
 
 
             }
-
-
-
-            //testing
-
-            //var s = System.IO.Path.GetInvalidFileNameChars();
-            //var s2 = System.IO.Path.GetInvalidPathChars();
-            //DocumentFile d = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri)).CreateDirectory("-+\\/\0");
-            //if(d==null)
-            //{
-
-            //}
-            //else
-            //{
-            //    bool x = d.Exists();
-            //}
-
-
-
-            //    //logging code for unit tests / diagnostic..
-            //    var root = DocumentFile.FromTreeUri(SeekerState.MainActivityRef , Android.Net.Uri.Parse( SeekerState.SaveDataDirectoryUri) );
-            //    DocumentFile f = root.FindFile("" + "_dir_response");
-
-            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(f.Uri);
-            //    BrowseResponse br = null;
-
-            //    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //    br = formatter.Deserialize(stream) as BrowseResponse;
-
-            ////var br = SeekerState.SoulseekClient.BrowseAsync("");
-            ////br.Wait();
-
-            //    DownloadDialog.CreateTree(br,false, null, null, "",out _);
-
-            //if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
-            //{
-            //    errorMsgToToast = "User is only sharing locked directories";
-            //    return null;
-            //}
-            //else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
-            //{
-            //    errorMsgToToast = "User is not sharing any directories";
-            //    return null;
-            //}
-
-
-            //setKeyboardVisibilityListener();
-
-            //OneTimeWorkRequest otwr = OneTimeWorkRequest.Builder.From<DownloadWorkerTest>().Build();
-            //WorkManager.GetInstance(this).Enqueue(otwr); //will this keep use alive for 30 mins....  FAILURE - does not keep alive connections.
-
-
-            //TEST CODE //TEST CODE
-            //SERVICE STARTED BUT THREAD IS STILL AN ACTIVITY THREAD: 36+ mins. :) - after killing it it went on for 20+ mins (ps -A shows it + you get notifications). after restarting device its gone :(
-
-
-            //Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-            //this.StartService(downloadServiceIntent);
-
-
-            //In the non service case it still goes on for 19+ mins..  but after you kill it by swiping up then its gone (no more notifications and ps -A shows nothing)
-            //Thread t1 = new Thread(() => { 
-            //    while(true)
-            //    {
-            //        this.RunOnUiThread(() => {Toast.MakeText(this,"we are running",ToastLength.Long).Show(); });
-            //        System.Threading.Thread.Sleep(1000*30);
-            //    }
-
-            //    });
-            //t1.Start();
-
-            //END TEST
-            //AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
-            //string pkgname = this.ApplicationInfo.PackageName; //these all return com.companyname.androidapp1
-            //string pkgnameunique = this.PackageName;
-            //string pkgnameunique2 = Application.Context.PackageName;
-
-            // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
         }
 
         public void FallbackFileSelection(int requestCode)
         {
-            //Create FolderOpenDialog
-            SimpleFileDialog fileDialog = new SimpleFileDialog(SeekerState.ActiveActivityRef, SimpleFileDialog.FileSelectionMode.FolderChoose);
-            fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath).ContinueWith(
-                (Task<string> t) =>
-                {
-                    if (t.Result == null || t.Result == string.Empty)
+            // Create FolderOpenDialog
+            SimpleFileDialog fileDialog = 
+                new(SeekerState.ActiveActivityRef, SimpleFileDialog.FileSelectionMode.FolderChoose);
+            
+            fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath)
+                .ContinueWith((Task<string> t) =>
                     {
-                        this.OnActivityResult(requestCode, Result.Canceled, new Intent());
-                        return;
-                    }
-                    else
-                    {
-                        var intent = new Intent();
-                        DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result));
-                        intent.SetData(f.Uri);
-                        this.OnActivityResult(requestCode, Result.Ok, intent);
-                    }
-                });
+                        if (t.Result == null || t.Result == string.Empty)
+                        {
+                            this.OnActivityResult(requestCode, Result.Canceled, new Intent());
+                            return;
+                        }
+                        else
+                        {
+                            var intent = new Intent();
+                            DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result));
+                            intent.SetData(f.Uri);
+                            this.OnActivityResult(requestCode, Result.Ok, intent);
+                        }
+                    });
         }
 
         public static Action<Task> GetPostNotifPermissionTask()
@@ -3026,6 +3156,7 @@ namespace Seeker
         }
 
         private static bool postNotficationAlreadyRequestedInSession = false;
+        
         /// <summary>
         /// As far as where to place this, doing it on launch is no good (as they will already
         ///   see yet another though more important permission in the background behind them).
@@ -3037,6 +3168,7 @@ namespace Seeker
             {
                 return;
             }
+            
             postNotficationAlreadyRequestedInSession = true;
 
             if ((int)Android.OS.Build.VERSION.SdkInt < 33)
@@ -3046,9 +3178,14 @@ namespace Seeker
 
             try
             {
-                if (ContextCompat.CheckSelfPermission(SeekerState.ActiveActivityRef, Manifest.Permission.PostNotifications) == Android.Content.PM.Permission.Denied)
+                var permissionState = ContextCompat
+                    .CheckSelfPermission(SeekerState.ActiveActivityRef, Manifest.Permission.PostNotifications);
+                    
+                if (permissionState == Android.Content.PM.Permission.Denied)
                 {
-                    bool alreadyShown = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, false);
+                    bool alreadyShown = SeekerState.SharedPreferences
+                        .GetBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, false);
+                    
                     if (alreadyShown)
                     {
                         return;
@@ -3066,11 +3203,13 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
+                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: "
+                                         + e.Message + e.StackTrace);
             }
         }
 
-        // recommended way, if user only denies once then next time (ShouldShowRequestPermissionRationale lets us know this)
+        // recommended way, if user only denies once then next time
+        // (ShouldShowRequestPermissionRationale lets us know this)
         //   then show a blurb on what the permissions are used for and ask a second (and last) time.
         private static void RequestNotifPermissionsLogic()
         {
@@ -3086,54 +3225,36 @@ namespace Seeker
                     }
                 }
 
-                ActivityCompat.RequestPermissions(SeekerState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
+                ActivityCompat.RequestPermissions(
+                    SeekerState.ActiveActivityRef,
+                    new string[] { Manifest.Permission.PostNotifications }, 
+                    POST_NOTIFICATION_PERMISSION
+                );
+                
                 setAlreadyShown();
-
-                // better to not bother the user.. they know what notifications are and they know how to turn them on in settings after the fact.
-                // also the dialog asking someone "okay" to then show the android "yes"/"no" dialog feels weird (even if recommended way).
-                //if (ActivityCompat.ShouldShowRequestPermissionRationale(SeekerState.ActiveActivityRef, Manifest.Permission.PostNotifications))
-                //{
-                //    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-                //    b.SetTitle("Allow Notifications?");
-                //    b.SetMessage("Seeker provides push notifications to keep you updated on file uploads/downloads and incoming user messages.");
-                //    ManualResetEvent mre = new ManualResetEvent(false);
-
-                //    // make sure we never prompt the user for these permissions again
-
-                //    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
-                //    {
-                //        ActivityCompat.RequestPermissions(SeekerState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
-                //        setAlreadyShown();
-                //    });
-                //    b.SetPositiveButton(Resource.String.okay, eventHandler);
-
-                //    EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs noArgs) =>
-                //    {
-                //        setAlreadyShown();
-                //    });
-                //    b.SetNegativeButton("No thanks", eventHandlerCancel);
-
-                //    b.SetCancelable(false);
-                //    b.Show();
-                //}
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
+                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: "
+                                         + e.Message + e.StackTrace);
             }
         }
 
         protected override void OnStart()
         {
-            //this fixes a bug as follows:
-            //previously we only set MainActivityRef on Create.
-            //therefore if one launches MainActivity via a new intent (i.e. go to user list, then search users files) it will be set with the new search user activity.
-            //then if you press back twice you will see the original activity but the MainActivityRef will still be set to the now destroyed activity since it was last to call onCreate.
-            //so then the FragmentManager will be null among other things...
+            // this fixes a bug as follows:
+            // previously we only set MainActivityRef on Create.
+            // therefore if one launches MainActivity via a new intent (i.e. go to user list, then search users files)
+            // it will be set with the new search user activity.
+            // then if you press back twice you will see the original activity but the MainActivityRef will still be set
+            // to the now destroyed activity since it was last to call onCreate.
+            // so then the FragmentManager will be null among other things...
             SeekerState.MainActivityRef = this;
+            
             base.OnStart();
         }
         public static bool fromNotificationMoveToUploads = false;
+        
         protected override void OnNewIntent(Intent intent)
         {
             MainActivity.LogDebug("OnNewIntent");
@@ -3141,10 +3262,15 @@ namespace Seeker
             Intent = intent.PutExtra("ALREADY_HANDLED", true);
             if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
             {
-                MainActivity.LogInfoFirebase("is null: " + (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
+                MainActivity.LogInfoFirebase("is null: " 
+                                             + (SearchFragment.Instance?.Activity == null 
+                                                || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
+                
                 MainActivity.LogInfoFirebase("from wishlist clicked");
+                
                 int currentPage = pager.CurrentItem;
                 int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
+                
                 if (currentPage == 1)
                 {
                     if (tabID == int.MaxValue)
@@ -3153,14 +3279,17 @@ namespace Seeker
                     }
                     else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                     {
-                        Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long).Show();
+                        Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
+                            .Show();
                     }
                     else
                     {
                         if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
                         {
-                            MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
-                            goToSearchTab = tabID; //we read this we resume
+                            MainActivity.LogDebug("we are on the search page but we need to wait " +
+                                                  "for OnResume search frag");
+                            
+                            goToSearchTab = tabID; // we read this we resume
                         }
                         else
                         {
@@ -3170,12 +3299,14 @@ namespace Seeker
                 }
                 else
                 {
-                    //when we move to the page, lets move to our tab, if its not the current one..
-                    goToSearchTab = tabID; //we read this when we move tab...
+                    // when we move to the page, lets move to our tab, if its not the current one..
+                    goToSearchTab = tabID; // we read this when we move tab...
                     pager.SetCurrentItem(1, false);
                 }
             }
-            else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))) //else every rotation will change Downloads to Uploads.
+            // else every rotation will change Downloads to Uploads.
+            else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) 
+                      || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)))
             {
                 HandleFromNotificationUploadIntent();
             }
@@ -3190,10 +3321,6 @@ namespace Seeker
             }
             else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
             {
-                //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
-                //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
-                //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
                 pager.SetCurrentItem(1, false);
             }
             else if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
@@ -3208,27 +3335,27 @@ namespace Seeker
 
         private void HandleFromNotificationUploadIntent()
         {
-            //either we change to uploads mode now (if resumed), or we wait for on resume to do it.
-
+            // either we change to uploads mode now (if resumed), or we wait for on resume to do it.
             MainActivity.LogInfoFirebase("from uploads clicked");
             int currentPage = pager.CurrentItem;
+            
             if (currentPage == 2)
             {
                 if (StaticHacks.TransfersFrag?.Activity == null || (StaticHacks.TransfersFrag?.IsResumed ?? false))
                 {
                     MainActivity.LogInfoFirebase("we need to wait for on resume");
-                    fromNotificationMoveToUploads = true; //we read this in onresume
+                    fromNotificationMoveToUploads = true; // we read this in onresume
                 }
                 else
                 {
-                    //we can change to uploads mode now
+                    // we can change to uploads mode now
                     MainActivity.LogDebug("go to upload now");
                     StaticHacks.TransfersFrag.MoveToUploadForNotif();
                 }
             }
             else
             {
-                fromNotificationMoveToUploads = true; //we read this in onresume
+                fromNotificationMoveToUploads = true; // we read this in onresume
                 pager.SetCurrentItem(2, false);
             }
         }
@@ -3241,23 +3368,20 @@ namespace Seeker
         private void SoulseekClient_PrivateMessageReceived(object sender, PrivateMessageReceivedEventArgs e)
         {
             AddMessage(e);
-            //string msg = e.Message;
-            //throw new NotImplementedException();
         }
 
         private void AddMessage(PrivateMessageReceivedEventArgs messageEvent)
         {
-
+            // Intentional no-op
         }
 
         private void Navigator_ViewAttachedToWindow(object sender, View.ViewAttachedToWindowEventArgs e)
         {
-            // throw new NotImplementedException();
+            // Intentional no-op
         }
 
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
-
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
@@ -3267,19 +3391,13 @@ namespace Seeker
                     {
                         if (t.IsFaulted)
                         {
-                            //if(!silent) //always silent..
-                            //{
-                            //    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            //    {
-                            //        if (SeekerState.ActiveActivityRef != null)
-                            //        {
-                            //            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                            //        }
-                            //    });
-                            //}
                             return;
                         }
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded); });
+                        
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
+                            GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded);
+                        });
                     }));
                 }
             }
@@ -3290,16 +3408,31 @@ namespace Seeker
         }
 
 
-        public static void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded, Func<TransferItem, object> actionOnComplete = null)
+        public static void GetDownloadPlaceInQueueBatchLogic(
+            List<TransferItem> transferItems, 
+            bool addIfNotAdded, 
+            Func<TransferItem, object> actionOnComplete = null)
         {
             foreach (TransferItem transferItem in transferItems)
             {
-                GetDownloadPlaceInQueueLogic(transferItem.Username, transferItem.FullFilename, addIfNotAdded, true, transferItem, null);
+                GetDownloadPlaceInQueueLogic(
+                    transferItem.Username, 
+                    transferItem.FullFilename,
+                    addIfNotAdded, 
+                    true, 
+                    transferItem,
+                    null
+                );
             }
         }
-
-
-        public static void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
+        
+        public static void GetDownloadPlaceInQueue(
+            string username, 
+            string fullFileName, 
+            bool addIfNotAdded,
+            bool silent, 
+            TransferItem transferItemInQuestion = null, 
+            Func<TransferItem, object> actionOnComplete = null)
         {
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -3315,22 +3448,50 @@ namespace Seeker
                             {
                                 if (SeekerState.ActiveActivityRef != null)
                                 {
-                                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                    Toast.MakeText(
+                                        SeekerState.ActiveActivityRef, 
+                                        SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), 
+                                        ToastLength.Short
+                                    ).Show();
                                 }
                             });
+                            
                             return;
                         }
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
+                            GetDownloadPlaceInQueueLogic(
+                                username,
+                                fullFileName, 
+                                addIfNotAdded,
+                                silent, 
+                                transferItemInQuestion, 
+                                actionOnComplete
+                            );
+                        });
                     }));
                 }
             }
             else
             {
-                GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete);
+                GetDownloadPlaceInQueueLogic(
+                    username, 
+                    fullFileName, 
+                    addIfNotAdded, 
+                    silent, 
+                    transferItemInQuestion,
+                    actionOnComplete
+                );
             }
         }
 
-        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
+        private static void GetDownloadPlaceInQueueLogic(
+            string username, 
+            string fullFileName,
+            bool addIfNotAdded,
+            bool silent, 
+            TransferItem transferItemInQuestion = null, 
+            Func<TransferItem, object> actionOnComplete = null)
         {
 
             Action<Task<int>> updateTask = new Action<Task<int>>(
@@ -3342,42 +3503,72 @@ namespace Seeker
                         Soulseek.TransferStates state = TransferStates.Errored;
                         if (t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
                         {
-                            //Nicotine always immediately transitions from queued to user offline the second the user goes offline. We dont do it immediately but on next check.
-                            //for QT you always are in "Queued" no matter what.
+                            // Nicotine always immediately transitions from queued to user offline
+                            // the second the user goes offline. We dont do it immediately but on next check.
+                            // for QT you always are in "Queued" no matter what.
                             transitionToNextState = true;
-                            state = TransferStates.Errored | TransferStates.UserOffline | TransferStates.FallenFromQueue;
+                            
+                            state = TransferStates.Errored 
+                                    | TransferStates.UserOffline 
+                                    | TransferStates.FallenFromQueue;
+                            
                             if (!silent)
                             {
-                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
+                                var userIsOfflineString = SeekerApplication.GetString(Resource.String.UserXIsOffline);
+                                var formattedString = string.Format(userIsOfflineString, username);
+                                ToastUIWithDebouncer(formattedString, "_6_", username);
                             }
                         }
-                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (t.Exception?.InnerException?.Message != null 
+                                 && t.Exception.InnerException.Message.ToLower()
+                                     .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            //Nicotine transitions from Queued to Cannot Connect IF you pause and resume. Otherwise you stay in Queued. Here if someone explicitly retries (i.e. silent = false) then we will transition states.
+                            // Nicotine transitions from Queued to Cannot Connect
+                            // IF you pause and resume. Otherwise you stay in Queued.
+                            // Here if someone explicitly retries (i.e. silent = false) then we will transition states.
                             // otherwise, its okay, lets just stay in Queued.
-                            //for QT you always are in "Queued" no matter what.
+                            // for QT you always are in "Queued" no matter what.
+                            
                             transitionToNextState = !silent;
-                            state = TransferStates.Errored | TransferStates.CannotConnect | TransferStates.FallenFromQueue;
+                            
+                            state = TransferStates.Errored 
+                                    | TransferStates.CannotConnect 
+                                    | TransferStates.FallenFromQueue;
+                            
                             if (!silent)
                             {
-                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
+                                var cannotConnectString =
+                                    SeekerApplication.GetString(Resource.String.CannotConnectUserX);
+                                
+                                ToastUIWithDebouncer(string.Format(cannotConnectString, username), "_7_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException is System.TimeoutException)
                         {
-                            transitionToNextState = false; //they may just not be sending queue position messages.  that is okay, we can still connect to them just fine for download time.
+                            // they may just not be sending queue position messages.
+                            // that is okay, we can still connect to them just fine for download time.
+                            transitionToNextState = false;
+                            
                             if (!silent)
                             {
-                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
+                                var messageString = SeekerApplication.GetString(Resource.String.TimeoutQueueUserX);
+                                ToastUIWithDebouncer(string.Format(messageString, username), "_8_", username, 6);
                             }
                         }
-                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
+                        else if (t.Exception?.InnerException?.Message != null 
+                                 && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
                         {
-                            //can be server connection (get user endpoint) or peer connection.
+                            // can be server connection (get user endpoint) or peer connection.
                             transitionToNextState = false;
+                            
                             if (!silent)
                             {
-                                ToastUIWithDebouncer(string.Format("Failed to get queue position for {0}: Connection was unexpectedly closed.", username), "_9_", username, 6);
+                                var formattedString = string.Format(
+                                    "Failed to get queue position for {0}: Connection was unexpectedly closed.",
+                                    username
+                                );
+                                
+                                ToastUIWithDebouncer(formattedString, "_9_", username, 6);
                             }
                         }
                         else
@@ -3386,16 +3577,17 @@ namespace Seeker
                             {
                                 ToastUIWithDebouncer($"Error getting queue position from {username}", "_9_", username);
                             }
+                            
                             LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
-
-                        // 
+                        
                         if (transitionToNextState)
                         {
-                            //update the transferItem array
+                            // update the transferItem array
                             if (transferItemInQuestion == null)
                             {
-                                transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                                transferItemInQuestion = TransfersFragment.TransferItemManagerDL
+                                    .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                             }
 
                             if (transferItemInQuestion == null)
@@ -3410,19 +3602,19 @@ namespace Seeker
                             {
                                 MainActivity.LogFirebase("cancellation token src issue: " + err.Message);
                             }
+                            
                             transferItemInQuestion.State = state;
-                            //let the Cancel() update it.
-                            //TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
                         }
                     }
                     else
                     {
                         bool queuePositionChanged = false;
 
-                        //update the transferItem array
+                        // update the transferItem array
                         if (transferItemInQuestion == null)
                         {
-                            transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                            transferItemInQuestion = TransfersFragment.TransferItemManagerDL
+                                .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                         }
 
                         if (transferItemInQuestion == null)
@@ -3454,13 +3646,17 @@ namespace Seeker
 
                         if (actionOnComplete != null)
                         {
-                            SeekerState.ActiveActivityRef?.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
+                            SeekerState.ActiveActivityRef?.RunOnUiThread(() =>
+                            {
+                                actionOnComplete(transferItemInQuestion);
+                            });
                         }
                         else
                         {
                             if (queuePositionChanged)
                             {
-                                TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
+                                // if the transfer item fragment is bound then we update it..
+                                TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion);
                             }
                         }
 
@@ -3471,53 +3667,100 @@ namespace Seeker
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(
+                    username, 
+                    fullFileName, 
+                    null, 
+                    transferItemInQuestion.ShouldEncodeFileLatin1(), 
+                    transferItemInQuestion.ShouldEncodeFolderLatin1()
+                );
             }
             catch (TransferNotFoundException)
             {
                 if (addIfNotAdded)
                 {
-                    //it is not downloading... therefore retry the download...
+                    // it is not downloading... therefore retry the download...
                     if (transferItemInQuestion == null)
                     {
-                        transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                        transferItemInQuestion = TransfersFragment.TransferItemManagerDL
+                            .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                     }
-                    //TransferItem item1 = transferItems[info.Position];  
+                    
                     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                     try
                     {
                         transferItemInQuestion.QueueLength = int.MaxValue;
                         Android.Net.Uri incompleteUri = null;
-                        TransfersFragment.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                        Task task = TransfersUtil.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
-                        task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, task, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion })));
+                        
+                        // else when you go to cancel you are cancelling an already cancelled useless token!!
+                        TransfersFragment
+                            .SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _);
+                        
+                        Task task = TransfersUtil.DownloadFileAsync(
+                            transferItemInQuestion.Username,
+                            transferItemInQuestion.FullFilename, 
+                            transferItemInQuestion.GetSizeForDL(),
+                            cancellationTokenSource, 
+                            out _, 
+                            isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(),
+                            isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1()
+                        );
+
+                        task.ContinueWith(DownloadContinuationActionUI(
+                            new DownloadAddedEventArgs(
+                                new DownloadInfo(
+                                    transferItemInQuestion.Username, 
+                                    transferItemInQuestion.FullFilename, 
+                                    transferItemInQuestion.Size, task,
+                                    cancellationTokenSource, 
+                                    transferItemInQuestion.QueueLength, 
+                                    0, 
+                                    transferItemInQuestion.GetDirectoryLevel()
+                                ) { TransferItemReference = transferItemInQuestion }
+                            )
+                        ));
                     }
                     catch (DuplicateTransferException)
                     {
-                        //happens due to button mashing...
+                        // happens due to button mashing...
                         return;
                     }
                     catch (System.Exception error)
                     {
-                        Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
-                        if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
+                        Action a = new Action(() =>
                         {
-
-                        }
-                        else
+                            // TODO: Logging errors through toasts isn't a good practice
+                            Toast.MakeText(
+                                SeekerState.ActiveActivityRef, 
+                                SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, 
+                                ToastLength.Long
+                            );
+                        });
+                        
+                        if (error.Message == null || !error.Message.ToString().Contains("must be connected and logged"))
                         {
                             MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
                         }
+                        
                         if (!silent)
                         {
                             SeekerState.ActiveActivityRef.RunOnUiThread(a);
                         }
-                        return; //otherwise null ref with task!
+                        
+                        return; // otherwise null ref with task!
                     }
+                    
                     //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
                     try
                     {
-                        getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(
+                            username,
+                            fullFileName, 
+                            null,
+                            transferItemInQuestion.ShouldEncodeFileLatin1(), 
+                            transferItemInQuestion.ShouldEncodeFolderLatin1()
+                        );
+                        
                         getDownloadPlace.ContinueWith(updateTask);
                     }
                     catch (Exception e)
@@ -3528,7 +3771,8 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.LogDebug("Transfer Item we are trying to get queue position of is not currently being downloaded.");
+                    MainActivity.LogDebug("Transfer Item we are trying to get queue position " +
+                                          "of is not currently being downloaded.");
                     return;
                 }
 
@@ -3536,13 +3780,14 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                //LogFirebase("GetDownloadPlaceInQueue" + e.Message);
                 return;
             }
+            
             getDownloadPlace.ContinueWith(updateTask);
         }
 
-        public static EventHandler<TransferItem> TransferItemQueueUpdated; //for transferItemPage to update its recyclerView
+        // for transferItemPage to update its recyclerView
+        public static EventHandler<TransferItem> TransferItemQueueUpdated;
 
         private void OnCloseClick(object sender, DialogClickEventArgs e)
         {
@@ -3571,12 +3816,13 @@ namespace Seeker
                     return true;
                 case Resource.Id.shutdown_action:
                     Intent intent3 = new Intent(this, typeof(CloseActivity));
-                    //Clear all activities and start new task
-                    //ClearTask - causes any existing task that would be associated with the activity 
-                    // to be cleared before the activity is started. can only be used in conjunction with NewTask.
-                    // basically it clears all activities in the current task.
+                    // Clear all activities and start new task
+                    // ClearTask - causes any existing task that would be associated with the activity 
+                    //  to be cleared before the activity is started. can only be used in conjunction with NewTask.
+                    //  basically it clears all activities in the current task.
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
                     this.StartActivity(intent3);
+                    
                     if ((int)Android.OS.Build.VERSION.SdkInt < 21)
                     {
                         this.FinishAffinity();
@@ -3585,22 +3831,38 @@ namespace Seeker
                     {
                         this.FinishAndRemoveTask();
                     }
+                    
                     return true;
                 case Resource.Id.about_action:
-                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-                    //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-                    var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+                    var builder = 
+                        new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                    
+                    var diag = builder.SetMessage(Resource.String.about_body)
+                        .SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
-                    var origString = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), SeekerApplication.GetVersionString()); //this is a literal CDATA string.
+                    
+                    // this is a literal CDATA string.
+                    var origString = string.Format(
+                        SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), 
+                        SeekerApplication.GetVersionString()
+                    );
+                    
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
                     {
-                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
+                        // this can be slow so do NOT do it in loops...
+                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted =
+                            Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy);
                     }
                     else
                     {
-                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString); //this can be slow so do NOT do it in loops...
+                        // this can be slow so do NOT do it in loops...
+                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = 
+                            Android.Text.Html.FromHtml(origString);
                     }
-                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
+                    
+                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = 
+                        Android.Text.Method.LinkMovementMethod.Instance;
+                    
                     return true;
             }
 
@@ -3615,10 +3877,11 @@ namespace Seeker
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme);
-            //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-            var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
-            diag.Show();
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme)
+                .SetMessage(messageResourceString)
+                .SetPositiveButton(actionResourceString, OnCloseClick)
+                .Create()
+                .Show();
         }
 
 
@@ -3626,46 +3889,71 @@ namespace Seeker
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
         public const string UPLOADS_NOTIF_EXTRA = "From Upload";
 
-        public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
+        public static Notification CreateUploadNotification(
+            Context context,
+            String username, 
+            List<String> directories, 
+            int numFiles)
         {
-            string fileS = numFiles == 1 ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
-            string titleText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.upload_f_string), numFiles, fileS, username);
+            string fileS = numFiles == 1 
+                ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) 
+                : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
+            
+            string titleText = string.Format(
+                SeekerState.ActiveActivityRef.GetString(Resource.String.upload_f_string),
+                numFiles, 
+                fileS,
+                username
+            );
+            
             string directoryString = string.Empty;
+            
             if (directories.Count == 1)
             {
-                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directory) + ": " + directories[0];
+                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directory) 
+                                  + ": " + directories[0];
             }
             else
             {
-                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directories) + ": " + directories[0];
+                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directories) 
+                                  + ": " + directories[0];
+                
                 for (int i = 0; i < directories.Count; i++)
                 {
                     if (i == 0)
                     {
                         continue;
                     }
+                    
                     directoryString += ", " + directories[i];
                 }
             }
+            
             string contextText = directoryString;
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
-            PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
+            
+            PendingIntent pendingIntent = PendingIntent.GetActivity(
+                context, 
+                username.GetHashCode(),
+                notifIntent, 
+                CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)
+            );
+            
+            // no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
+            // a "channel" is a category in the UI to the end user.
             Notification notification = null;
+            
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
             {
-                notification =
-                      new Notification.Builder(context, UPLOADS_CHANNEL_ID)
-                      .SetContentTitle(titleText)
-                      .SetContentText(contextText)
-                      .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                      .SetContentIntent(pendingIntent)
-                      .SetOnlyAlertOnce(true) //maybe
-                      .SetTicker(titleText).Build();
+                notification = new Notification.Builder(context, UPLOADS_CHANNEL_ID)
+                    .SetContentTitle(titleText)
+                    .SetContentText(contextText)
+                    .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                    .SetContentIntent(pendingIntent)
+                    .SetOnlyAlertOnce(true) // maybe
+                    .SetTicker(titleText).Build();
             }
             else
             {
@@ -3684,24 +3972,6 @@ namespace Seeker
             return notification;
         }
 
-
-
-
-
-        ///// <summary>
-        ///// this is for global uploading event handling only.  the tabpageadapter is the one for downloading... and for upload tranferpage specific events
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //private void Upload_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
-        //{
-        //    if (e.Transfer.Direction == TransferDirection.Download)
-        //    {
-        //        return;
-        //    }
-        //    //the transfer has average speed already calcuated for us... it also has remainingtime for us too :)
-        //}
-
         public static bool UserListContainsUser(string username)
         {
             lock (SeekerState.UserList)
@@ -3710,7 +3980,11 @@ namespace Seeker
                 {
                     return false;
                 }
-                return SeekerState.UserList.FirstOrDefault((userlistinfo) => { return userlistinfo.Username == username; }) != null;
+                
+                return SeekerState.UserList.FirstOrDefault((userlistinfo) =>
+                {
+                    return userlistinfo.Username == username;
+                }) != null;
             }
         }
 
@@ -3763,11 +4037,11 @@ namespace Seeker
                 }
                 if (!found)
                 {
-                    //this is the normal case..
+                    // this is the normal case..
                     var item = new UserListItem(userData.Username);
                     item.UserData = userData;
 
-                    //if added an ignored user, then unignore the user.  the two are mutually exclusive.....
+                    // if added an ignored user, then unignore the user.  the two are mutually exclusive.....
                     if (SeekerApplication.IsUserInIgnoreList(userData.Username))
                     {
                         SeekerApplication.RemoveFromIgnoreList(userData.Username);
@@ -3801,10 +4075,12 @@ namespace Seeker
                         break;
                     }
                 }
+                
                 if (itemToRemove == null)
                 {
                     return false;
                 }
+                
                 SeekerState.UserList.Remove(itemToRemove);
                 return true;
             }
@@ -3815,7 +4091,8 @@ namespace Seeker
 
 
         /// <summary>
-        ///     Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/> in response to a remote request.
+        /// Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/>
+        /// in response to a remote request.
         /// </summary>
         /// <param name="username">The username of the requesting user.</param>
         /// <param name="endpoint">The IP endpoint of the requesting user.</param>
@@ -3826,6 +4103,7 @@ namespace Seeker
             {
                 return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
             }
+            
             return Task.FromResult(SeekerState.SharedFileCache.GetBrowseResponseForUser(username));
         }
 
@@ -3837,21 +4115,28 @@ namespace Seeker
         /// <param name="token">The unique token for the request, supplied by the requesting user.</param>
         /// <param name="directory">The requested directory.</param>
         /// <returns>A Task resolving an instance of Soulseek.Directory containing the contents of the requested directory.</returns>
-        private static Task<Soulseek.Directory> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
+        private static Task<Soulseek.Directory> DirectoryContentsResponseResolver(
+            string username, 
+            IPEndPoint endpoint,
+            int token, 
+            string directory)
         {
-            //the directory is the presentable name.
-            //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
-            Tuple<string, string> fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault(); //TODO DICTIONARY>>>>>
+            // the directory is the presentable name.
+            // the old EndsWith(dir) fails if the directory is not unique
+            // i.e. document structure of Soulseek Complete > some dirs and files,
+            // Soulseek Complete > more dirs and files..
+            Tuple<string, string> fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping
+                .Where((Tuple<string, string> t) => { return t.Item1 == directory; })
+                .FirstOrDefault(); // TODO: DICTIONARY>>>>>
 
             if (fullDirUri == null)
             {
-                //as fallback safety.  I dont think this will ever happen.....
-                fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
+                // as fallback safety.  I dont think this will ever happen.....
+                fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping
+                    .Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); })
+                    .FirstOrDefault();
             }
-            if (fullDirUri == null)
-            {
-                //could not find...
-            }
+            
             DocumentFile fullDir = null;
             if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(fullDirUri.Item2)) //todo
             {
@@ -3859,17 +4144,25 @@ namespace Seeker
             }
             else
             {
-                fullDir = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
+                fullDir = 
+                    DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
             }
-            //Android.Net.Uri.Parse(SeekerState.UploadDataDirectoryUri).Path
-            var slskDir = SlskDirFromDocumentFile(fullDir, true, GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
+            
+            var slskDir = 
+                SlskDirFromDocumentFile(fullDir, true, GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
+            
             slskDir = new Directory(directory, slskDir.Files);
             return Task.FromResult(slskDir);
         }
 
         public static void TurnOnSharing()
         {
-            SeekerState.SoulseekClient.Options.SetSharedHandlers(BrowseResponseResolver, SearchResponseResolver, DirectoryContentsResponseResolver, EnqueueDownloadAction);
+            SeekerState.SoulseekClient.Options.SetSharedHandlers(
+                BrowseResponseResolver, 
+                SearchResponseResolver,
+                DirectoryContentsResponseResolver, 
+                EnqueueDownloadAction
+            );
         }
 
         public static void TurnOffSharing()
@@ -3882,9 +4175,12 @@ namespace Seeker
         /// </summary>
         /// <param name="informServerOfChangeIfThereIsAChange"></param>
         /// <param name="force">force if we are chaning the upload directory...</param>
-        public static void SetUnsetSharingBasedOnConditions(bool informServerOfChangeIfThereIsAChange, bool force = false)
+        public static void SetUnsetSharingBasedOnConditions(
+            bool informServerOfChangeIfThereIsAChange, 
+            bool force = false)
         {
-            bool wasShared = SeekerState.SoulseekClient.Options.SearchResponseResolver != null; //when settings gets recreated can get nullref here.
+            // when settings gets recreated can get nullref here.
+            bool wasShared = SeekerState.SoulseekClient.Options.SearchResponseResolver != null;
             if (MeetsCurrentSharingConditions())
             {
                 TurnOnSharing();
@@ -3911,7 +4207,10 @@ namespace Seeker
         /// <returns></returns>
         public static bool MeetsSharingConditions()
         {
-            return SeekerState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SeekerState.IsParsing && !UploadDirectoryManager.AreAllFailed();
+            return SeekerState.SharingOn 
+                   && UploadDirectoryManager.UploadDirectories.Count != 0 
+                   && !SeekerState.IsParsing 
+                   && !UploadDirectoryManager.AreAllFailed();
         }
 
         /// <summary>
@@ -3925,14 +4224,7 @@ namespace Seeker
 
         public static bool IsSharingSetUpSuccessfully()
         {
-            if (SeekerState.SharedFileCache == null || !SeekerState.SharedFileCache.SuccessfullyInitialized)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized
         }
 
         public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
@@ -3940,14 +4232,21 @@ namespace Seeker
             isParsing = false;
             if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
             {
-                //try to parse this into a path: SeekerState.ShareDataDirectoryUri
+                // try to parse this into a path: SeekerState.ShareDataDirectoryUri
                 if (MeetsCurrentSharingConditions())
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.On, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+                    return new Tuple<SharingIcons, string>(
+                        SharingIcons.On, 
+                        SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing)
+                    );
                 }
                 else
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.OffDueToNetwork, "Sharing disabled on metered connection");
+                    // TODO: Use a string resource here
+                    return new Tuple<SharingIcons, string>(
+                        SharingIcons.OffDueToNetwork, 
+                        "Sharing disabled on metered connection"
+                    );
                 }
             }
             else if (MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
@@ -3958,33 +4257,55 @@ namespace Seeker
                 }
                 else
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                    return new Tuple<SharingIcons, string>(
+                        SharingIcons.Error,
+                        SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set)
+                    );
                 }
             }
             else if (!SeekerState.SharingOn)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Off, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off));
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.Off,
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off)
+                );
             }
             else if (SeekerState.IsParsing)
             {
                 isParsing = true;
-                return new Tuple<SharingIcons, string>(SharingIcons.CurrentlyParsing, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.CurrentlyParsing, 
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing)
+                );
             }
             else if (SeekerState.FailedShareParse)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing));
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.Error, 
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing)
+                );
             }
             else if (UploadDirectoryManager.UploadDirectories.Count == 0)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.Error,
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set)
+                );
             }
             else if (UploadDirectoryManager.AreAllFailed())
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)); //TODO get error
+                // TODO: get error
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.Error,
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)
+                );
             }
             else
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error));
+                return new Tuple<SharingIcons, string>(
+                    SharingIcons.Error, 
+                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)
+                );
             }
         }
 
@@ -3999,32 +4320,22 @@ namespace Seeker
 
                 Action<Task> getAndSetLoggedInInfoAction = new Action<Task>((Task t) =>
                 {
-                    //we want to 
-                    //UpdateStatus ??
-                    //inform server if we are sharing..
-                    //get our upload speed..
+                    // we want to 
+                    // UpdateStatus ??
+                    // inform server if we are sharing..
+                    // get our upload speed..
                     if (t.Status == TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
                     {
                         return;
                     }
-                    InformServerOfSharedFiles(); //dont need to get the result of this one.
-                    SeekerState.SoulseekClient.GetUserDataAsync(SeekerState.Username); //the result of this one if from an event handler..
-                    //.ContinueWith(
-                    //    (Task<UserData> userDataTask) =>
-                    //    {
-                    //        if(userDataTask.IsFaulted)
-                    //        {
-                    //            LogFirebase("userDataTask is faulted " + userDataTask.Exception);
-                    //            return;
-                    //        }
-                    //        else
-                    //        {
-                    //            //userDataTask.Result.AverageSpeed;
-                    //        }
-
-                    //    });
-
+                    
+                    // don't need to get the result of this one.
+                    InformServerOfSharedFiles();
+                    
+                    // the result of this one if from an event handler..
+                    SeekerState.SoulseekClient.GetUserDataAsync(SeekerState.Username);
                 });
+                
                 t.ContinueWith(getAndSetLoggedInInfoAction);
             }
         }
@@ -4042,23 +4353,18 @@ namespace Seeker
             }
             return false;
         }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
+        
         private void onBackPressedAction(OnBackPressedCallback callback)
         {
             bool relevant = false;
             try
             {
-                //TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs); returns -1
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
                     relevant = BrowseFragment.Instance.BackButton();
                 }
-                else if (pager.CurrentItem == 2) //transfer tab
+                else if (pager.CurrentItem == 2) // transfer tab
                 {
                     if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                     {
@@ -4070,10 +4376,9 @@ namespace Seeker
                         {
                             TransfersFragment.CurrentlySelectedDLFolder = null;
                         }
+                        
                         SetTransferSupportActionBarState();
                         this.InvalidateOptionsMenu();
-                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();  //if you go to transfers rotate phone and then OnBackPressed gets hit,. the fragment that getitem returns will be very old.
-                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).RestoreScrollPosition();
                         StaticHacks.TransfersFrag.SetRecyclerAdapter();
                         StaticHacks.TransfersFrag.RestoreScrollPosition();
                         relevant = true;
@@ -4082,9 +4387,11 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                //During Back Button: Attempt to invoke virtual method 'java.lang.Object android.content.Context.getSystemService(java.lang.String)' on a null object reference
+                // During Back Button:
+                // Attempt to invoke virtual method 'java.lang.Object android.content.Context.getSystemService(java.lang.String)' on a null object reference
                 MainActivity.LogFirebase("During Back Button: " + e.Message);
             }
+            
             if (!relevant)
             {
                 callback.Enabled = false;
@@ -4104,22 +4411,28 @@ namespace Seeker
             {
                 if (e.Message.Contains("Operation timed out"))
                 {
-                    //this happens to me all the time and it is literally fine
+                    // this happens to me all the time and it is literally fine
                     return;
                 }
             }
             MainActivity.LogFirebase(e.Message);
         }
 
-        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
+        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(
+            Action<Task> action, string msg = null, Context contextToUseForMessage = null)
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
-                //old: SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn). this is not good enough since you can still pass this if you are connected but not yet Logging In!
-                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) 
+                    || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
-                    //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: TRUE");
-                    SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+                    SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(
+                        action, 
+                        System.Threading.CancellationToken.None, 
+                        TaskContinuationOptions.None, 
+                        TaskScheduler.Default
+                    );
+                    
                     if (msg != null)
                     {
                         if (contextToUseForMessage == null)
@@ -4131,11 +4444,11 @@ namespace Seeker
                             Toast.MakeText(contextToUseForMessage, msg, ToastLength.Short).Show();
                         }
                     }
+                    
                     return true;
                 }
                 else
                 {
-                    //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: FALSE");
                     return false;
                 }
             }
@@ -4147,41 +4460,41 @@ namespace Seeker
             {
                 c = SeekerState.MainActivityRef;
             }
-            if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
+            if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) // tested..
             {
                 if (!silent)
                 {
-                    Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                    tst.Show();
+                    Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short).Show();
                 }
             }
             else
             {
                 if (!silent)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(
-                    () =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                        tst.Show();
+                        Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short)
+                            .Show();
                     });
                 }
             }
-            //if we are still not connected then creating the task will throw. 
-            //also if the async part of the task fails we will get task.faulted.
+            
+            // if we are still not connected then creating the task will throw. 
+            // also if the async part of the task fails we will get task.faulted.
             try
             {
-                connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                connectTask = 
+                    SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
                 return true;
             }
             catch
             {
                 if (!silent)
                 {
-                    Toast tst2 = Toast.MakeText(c, c.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                    tst2.Show();
+                    Toast.MakeText(c, c.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
                 }
             }
+            
             connectTask = null;
             return false;
         }
@@ -4189,7 +4502,9 @@ namespace Seeker
         public static bool CurrentlyLoggedInButDisconnectedState()
         {
             return (SeekerState.currentlyLoggedIn &&
-                (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
+                (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) 
+                 || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting))
+                );
         }
 
         public static void SetStatusApi(bool away)
@@ -4198,23 +4513,30 @@ namespace Seeker
             {
                 return;
             }
-            if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            
+            if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) 
+                || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
-                //dont log in just for this.
-                //but if we later connect while still in the background, it may be best to set a flag.
-                //do it when we log in... since we could not set it now...
-                SeekerState.PendingStatusChangeToAwayOnline = away ? SeekerState.PendingStatusChange.AwayPending : SeekerState.PendingStatusChange.OnlinePending;
+                // dont log in just for this.
+                // but if we later connect while still in the background, it may be best to set a flag.
+                // do it when we log in... since we could not set it now...
+                SeekerState.PendingStatusChangeToAwayOnline = away 
+                    ? SeekerState.PendingStatusChange.AwayPending 
+                    : SeekerState.PendingStatusChange.OnlinePending;
+                
                 return;
             }
             try
             {
-                SeekerState.SoulseekClient.SetStatusAsync(away ? UserPresence.Away : UserPresence.Online).ContinueWith((Task t) =>
+                SeekerState.SoulseekClient.SetStatusAsync(away 
+                    ? UserPresence.Away 
+                    : UserPresence.Online).ContinueWith((Task t) =>
                 {
                     if (t.IsCompletedSuccessfully)
                     {
                         SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
                         SeekerState.OurCurrentStatusIsAway = away;
-                        string statusString = away ? "away" : "online"; //not user facing
+                        string statusString = away ? "away" : "online"; // not user facing
                         MainActivity.LogDebug($"We successfully changed our status to {statusString}");
                     }
                     else
@@ -4231,12 +4553,17 @@ namespace Seeker
 
         private void UpdateForScreenSize()
         {
-            if (!SeekerState.IsLowDpi()) return;
+            if (!SeekerState.IsLowDpi())
+            {
+                return;
+            }
+            
             try
             {
                 TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
                 LinearLayout vg = (LinearLayout)tabs.GetChildAt(0);
                 int tabsCount = vg.ChildCount;
+                
                 for (int j = 0; j < tabsCount; j++)
                 {
                     ViewGroup vgTab = (ViewGroup)vg.GetChildAt(j);
@@ -4253,27 +4580,25 @@ namespace Seeker
             }
             catch
             {
-                //not worth throwing over..
+                // not worth throwing over..
             }
         }
 
         public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)//Build.VERSION_CODES.N)
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)
             {
-                SupportFragmentManager.BeginTransaction().Detach(f).CommitNowAllowingStateLoss();//hisbeginTransaction().detach(fragment).commitNow()
+                SupportFragmentManager.BeginTransaction().Detach(f).CommitNowAllowingStateLoss();
                 SupportFragmentManager.BeginTransaction().Attach(f).CommitNowAllowingStateLoss();
             }
             else
             {
-                //SupportFragmentManager
                 SupportFragmentManager.BeginTransaction().Detach(f).Attach(f).CommitNow();
-                //supportFragmentManager.beginTransaction().detach(fragment).attach(fragment).commitNow()
             }
         }
 
         /// <summary>
-        ///     Creates and returns a <see cref="SearchResponse"/> in response to the given <paramref name="query"/>.
+        /// Creates and returns a <see cref="SearchResponse"/> in response to the given <paramref name="query"/>.
         /// </summary>
         /// <param name="username">The username of the requesting user.</param>
         /// <param name="token">The search token.</param>
@@ -4293,27 +4618,31 @@ namespace Seeker
             {
                 return defaultResponse;
             }
-            // some bots and perhaps users search for very short terms.  only respond to queries >= 3 characters.  sorry, U2 fans.
+            // some bots and perhaps users search for very short terms.
+            // only respond to queries >= 3 characters.  sorry, U2 fans.
             if (query.Query.Length < 5)
             {
                 return defaultResponse;
             }
 
-            if (SeekerState.Username == null || SeekerState.Username == string.Empty || SeekerState.SharedFileCache == null)
+            if (SeekerState.Username == null 
+                || SeekerState.Username == string.Empty 
+                || SeekerState.SharedFileCache == null)
             {
                 return defaultResponse;
             }
 
-            var results = SeekerState.SharedFileCache.Search(query, username, out IEnumerable<Soulseek.File> lockedResults);
+            var results = 
+                SeekerState.SharedFileCache.Search(query, username, out IEnumerable<Soulseek.File> lockedResults);
 
             if (results.Any() || lockedResults.Any())
             {
-                //Console.WriteLine($"[SENDING SEARCH RESULTS]: {results.Count()} records to {username} for query {query.SearchText}");
                 int ourUploadSpeed = 1024 * 256;
                 if (SeekerState.UploadSpeed > 0)
                 {
                     ourUploadSpeed = SeekerState.UploadSpeed;
                 }
+                
                 return Task.FromResult(new SearchResponse(
                     SeekerState.Username,
                     token,
@@ -4328,21 +4657,19 @@ namespace Seeker
             // in either case, no response will be sent to the requestor.
             return Task.FromResult<SearchResponse>(null);
         }
-
-
+        
         public static string GetLastPathSegment(string uri)
         {
             return Android.Net.Uri.Parse(uri).LastPathSegment;
         }
-
-
+        
         /// <summary>
         ///     Invoked upon a remote request to download a file.    THE ORIGINAL BUT WITHOUT ITRANSFERTRACKER!!!!
         /// </summary>
         /// <param name="username">The username of the requesting user.</param>
         /// <param name="endpoint">The IP endpoint of the requesting user.</param>
         /// <param name="filename">The filename of the requested file.</param>
-      //  /// <param name="tracker">(for example purposes) the ITransferTracker used to track progress.</param>
+        /// <param name="tracker">(for example purposes) the ITransferTracker used to track progress.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
         /// <exception cref="DownloadEnqueueException">Thrown when the download is rejected.  The Exception message will be passed to the remote user.</exception>
         /// <exception cref="Exception">Thrown on any other Exception other than a rejection.  A generic message will be passed to the remote user for security reasons.</exception>
