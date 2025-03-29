@@ -571,42 +571,42 @@ namespace Seeker
                 }
             }
         }
-
-
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryLegacy(
-            UploadDirectoryInfo newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
+        
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> 
+            ParseSharedDirectoryLegacy(
+                UploadDirectoryInfo newlyAddedDirectoryIfApplicable,
+                Dictionary<string,Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
+                ref int directoryCount, 
+                out BrowseResponse br, 
+                out List<Tuple<string, string>> dirMappingFriendlyNameToUri, 
+                out Dictionary<int, string> index, 
+                out List<Soulseek.Directory> allHiddenDirs
+            )
         {
-            //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
-            //so the presentablename should be FolderSelected/path to rest
-            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
-            //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
+            // searchable name (just folder/song),
+            // uri.ToString (to actually get it),
+            // size (for ID purposes and to send),
+            // presentablename (to send - this is the name that is supposed to show
+            // up as the folder that the QT and nicotine clients send)
+            
+            // so the presentablename should be FolderSelected/path to rest
+            // there due to the way android separates the sdcard root (or primary:) and other OS.
+            // wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.
+            // If primary: is part of the presentable name then I will change 
+            // it to primary:\Foldername similar to C:\Foldername.
+            // I think this makes most sense of the things I have tried.
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new ();
+            
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             List<Soulseek.Directory> allLockedDirs = new List<Soulseek.Directory>();
             allHiddenDirs = new List<Soulseek.Directory>();
-
-
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if(UploadDirectoryManager.AreAllFailed())
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
 
             dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             index = new Dictionary<int, string>();
             int indexNum = 0;
 
-
-            //string lastPathSegment = dir.Uri.Path.Replace('/', '\\');
-            //string toStrip = string.Empty;
-            //if (lastPathSegment.Contains('\\'))
-            //{
-            //    int stripIndex = lastPathSegment.LastIndexOf('\\');
-            //    toStrip = lastPathSegment.Substring(0, stripIndex + 1);
-            //}
-
-            var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
+            // avoid race conditions and enumeration modified exceptions.
+            var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList();
             foreach (var uploadDirectoryInfo in tmpUploadDirs)
             {
                 if (uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
@@ -615,29 +615,46 @@ namespace Seeker
                 }
 
                 DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                
+                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, 
+                    out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs,
-                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index,
-                    previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
-                    ref directoryCount, ref indexNum);
+                traverseDirectoryEntriesLegacy(
+                    dir, 
+                    pairs, 
+                    true,
+                    allDirs,
+                    allLockedDirs,
+                    allHiddenDirs,
+                    dirMappingFriendlyNameToUri,
+                    toStrip,
+                    index,
+                    previousFileInfoToUse,
+                    overrideCase,
+                    overrideCase ? rootFolderDisplayName : null,
+                    ref directoryCount, 
+                    ref indexNum
+                );
             }
 
             br = new BrowseResponse(allDirs, allLockedDirs);
             return pairs;
         }
 
-
         public static string GetVolumeName(string lastPathSegment, bool alwaysReturn, out bool entireString)
         {
             entireString = false;
-            //if the first part of the path has a colon in it, then strip it.
+            
+            // if the first part of the path has a colon in it, then strip it.
             int endOfFirstPart = lastPathSegment.IndexOf('\\');
+            
             if (endOfFirstPart == -1)
             {
                 endOfFirstPart = lastPathSegment.Length;
             }
+            
             int volumeIndex = lastPathSegment.Substring(0, endOfFirstPart).IndexOf(':');
+            
             if (volumeIndex == -1)
             {
                 return null;
@@ -645,19 +662,17 @@ namespace Seeker
             else
             {
                 string volumeName = lastPathSegment.Substring(0, volumeIndex + 1);
-                if (volumeName.Length == lastPathSegment.Length)
-                {   //special case where root is primary:.  in this case we return null which gets treated as "dont strip out anything"
-                    entireString = true;
-                    if (alwaysReturn)
-                    {
-                        return volumeName;
-                    }
-                    return null;
-                }
-                else
+
+                if (volumeName.Length != lastPathSegment.Length)
                 {
                     return volumeName;
                 }
+                
+                // special case where root is primary:.
+                // in this case we return null which gets treated as "dont strip out anything"
+                entireString = true;
+
+                return alwaysReturn ? volumeName : null;
             }
         }
 
@@ -666,7 +681,7 @@ namespace Seeker
         {
             if (dir.IsDirectory)
             {
-                DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
+                DocumentFile[] files = dir.ListFiles(); // doesn't need to be sorted
                 for (int i = 0; i < files.Length; ++i)
                 {
                     DocumentFile file = files[i];
@@ -682,7 +697,8 @@ namespace Seeker
         private List<string> GetRootDirs(DocumentFile dir)
         {
             List<string> dirUris = new List<string>();
-            DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
+            DocumentFile[] files = dir.ListFiles(); // doesn't need to be sorted
+            
             for (int i = 0; i < files.Length; ++i)
             {
                 DocumentFile file = files[i];
@@ -691,34 +707,36 @@ namespace Seeker
                     dirUris.Add(file.Uri.ToString());
                 }
             }
+            
             return dirUris;
         }
 
-        private static Soulseek.Directory SlskDirFromUri(ContentResolver contentResolver, Android.Net.Uri rootUri, Android.Net.Uri dirUri, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
+        private static Soulseek.Directory SlskDirFromUri(
+            ContentResolver contentResolver, 
+            Android.Net.Uri rootUri, 
+            Android.Net.Uri dirUri, 
+            string dirToStrip,
+            bool diagFromDirectoryResolver,
+            string volumePath)
         {
-
-
-            string directoryPath = dirUri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            // on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            string directoryPath = dirUri.LastPathSegment;
             directoryPath = directoryPath.Replace("/", @"\");
-            //try
-            //{
-            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            //}
-            //catch(Exception e)
-            //{
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-            //    //its possible for dirToStrip to be null
-            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-            //    LogFirebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            //}
-            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
-            //strip out the shared root dir
-            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
-            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, DocumentsContract.GetDocumentId(dirUri));
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
+
+            var documentId = DocumentsContract.GetDocumentId(dirUri);
+            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, documentId);
+            
+            var cursorData = new String[]
+            {
+                Document.ColumnDocumentId, 
+                Document.ColumnDisplayName, 
+                Document.ColumnMimeType,
+                Document.ColumnSize
+            }
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, cursorData, null, null, null);
+            
             List<Soulseek.File> files = new List<Soulseek.File>();
+            
             try
             {
                 while (c.MoveToNext())
@@ -728,26 +746,23 @@ namespace Seeker
                     string mime = c.GetString(2);
                     long size = c.GetLong(3);
                     var childUri = DocumentsContract.BuildDocumentUri(rootUri.Authority, docId);
-                    //MainActivity.LogDebug("docId: " + docId + ", name: " + name + ", mime: " + mime);
-                    if (isDirectory(mime))
-                    {
-                    }
-                    else
+                    
+                    if (!isDirectory((mime)))
                     {
 
                         string fname = CommonHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
                         string folderName = Common.Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
-                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                               //bc we get a path that is:
-                                                                               //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                                                                               //not quite a full URI but it does add quite a bit..
+                        
+                        // for the brose response should only be the filename!!! 
+                        // when a user tries to download something from a browse resonse,
+                        // the soulseek client on their end must create a fully qualified path for us
+                        // bc we get a path that is:
+                        // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                        // not quite a full URI but it does add quite a bit..
+                        string searchableName = fname;
 
-                        //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
-                        //{
-                        //    searchableName = searchableName.Substring(8);
-                        //}
-                        var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), size, System.IO.Path.GetExtension(childUri.Path));
+                        var pathExtension = System.IO.Path.GetExtension(childUri.Path);
+                        var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), size, pathExtension);
                         files.Add(slskFile);
                     }
                 }
@@ -761,26 +776,21 @@ namespace Seeker
             {
                 closeQuietly(c);
             }
-            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            
+            CommonHelpers.SortSlskDirFiles(files); // otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
                 if (directoryPath.Substring(0, volumePath.Length) == volumePath)
                 {
-                    //if (directoryPath.Length != volumePath.Length)
-                    //{
                     directoryPath = directoryPath.Substring(volumePath.Length);
-                    //}
                 }
             }
 
             var slskDir = new Soulseek.Directory(directoryPath, files);
             return slskDir;
         }
-
-
-
-
+        
         /// <summary>
         /// We only use this in Contents Response Resolver.
         /// </summary>
@@ -789,26 +799,12 @@ namespace Seeker
         /// <param name="diagFromDirectoryResolver"></param>
         /// <param name="volumePath"></param>
         /// <returns></returns>
-        private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, bool diagFromDirectoryResolver, string volumePath)
+        private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, bool diagFromDirectoryResolver, 
+            string volumePath)
         {
-            string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            // on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            string directoryPath = dirFile.Uri.LastPathSegment;
             directoryPath = directoryPath.Replace("/", @"\");
-            //try
-            //{
-            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            //}
-            //catch(Exception e)
-            //{
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-            //    //its possible for dirToStrip to be null
-            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-            //    LogFirebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            //}
-            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
-            //strip out the shared root dir
-            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
 
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (DocumentFile f in dirFile.ListFiles())
@@ -817,31 +813,32 @@ namespace Seeker
                 {
                     continue;
                 }
+                
                 try
                 {
                     string fname = null;
                     string searchableName = null;
 
-                    if (dirFile.Uri.Authority == "com.android.providers.downloads.documents" && !f.Uri.Path.Contains(dirFile.Uri.Path))
+                    var isDocumentsAuthority = dirFile.Uri.Authority == "com.android.providers.downloads.documents"
+                    if (isDocumentsAuthority && !f.Uri.Path.Contains(dirFile.Uri.Path))
                     {
                         //msd, msf case
                         fname = f.Name;
-                        searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                        searchableName = fname; // for the brose response should only be the filename!!! 
                     }
                     else
                     {
                         fname = CommonHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
-                        searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                        searchableName = fname; // for the brose response should only be the filename!!! 
                     }
-                    //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                    //bc we get a path that is:
-                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                    //not quite a full URI but it does add quite a bit..
+                    // when a user tries to download something from a browse resonse,
+                    // the soulseek client on their end must create a fully qualified path for us
+                    // bc we get a path that is:
+                    // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                    // not quite a full URI but it does add quite a bit...
 
-                    //{
-                    //    searchableName = searchableName.Substring(8);
-                    //}
-                    var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), f.Length(), System.IO.Path.GetExtension(f.Uri.Path));
+                    var pathExtension = System.IO.Path.GetExtension(f.Uri.Path);
+                    var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), f.Length(), pathExtension);
                     files.Add(slskFile);
                 }
                 catch (Exception e)
@@ -851,17 +848,11 @@ namespace Seeker
                 }
 
             }
-            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            CommonHelpers.SortSlskDirFiles(files); // otherwise our browse response files will be way out of order
 
-            if (volumePath != null)
+            if (volumePath != null && directoryPath.Substring(0, volumePath.Length) == volumePath)
             {
-                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
-                {
-                    //if(directoryPath.Length != volumePath.Length)
-                    //{
-                    directoryPath = directoryPath.Substring(volumePath.Length);
-                    //}
-                }
+                directoryPath = directoryPath.Substring(volumePath.Length);
             }
 
             var slskDir = new Soulseek.Directory(directoryPath, files);
