@@ -202,7 +202,7 @@ namespace Common
                 string newRootDirName = GetLongestCommonParent(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name);
                 if (newRootDirName == string.Empty)
                 {
-                    //MainActivity.LogFirebase("Root is the empty string: " + username); //this is fine
+                    //Logger.FirebaseDebug("Root is the empty string: " + username); //this is fine
                     newRootDirName = "";
                     emptyRoot = true;
                 }

@@ -6,6 +6,7 @@ using Android.OS;
 using AndroidX.AppCompat.App;
 using AndroidX.Fragment.App;
 using Seeker.Helpers;
+using Seeker.Utils;
 
 namespace Seeker;
 
@@ -66,20 +67,20 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
                         bool? foreground = appCompatActivity.IsResumed();
                         if (foreground == null)
                         {
-                            MainActivity.LogFirebase("Unknown seeker keep alive cannot be started: " + message);
+                            Logger.FirebaseDebug("Unknown seeker keep alive cannot be started: " + message);
                         }
                         else if (foreground.Value)
                         {
-                            MainActivity.LogFirebase("FOREGROUND seeker keep alive cannot be started: " + message);
+                            Logger.FirebaseDebug("FOREGROUND seeker keep alive cannot be started: " + message);
                         }
                         else
                         {
-                            MainActivity.LogFirebase("BACKGROUND seeker keep alive cannot be started: " + message);
+                            Logger.FirebaseDebug("BACKGROUND seeker keep alive cannot be started: " + message);
                         }
                     }
                     else
                     {
-                        MainActivity.LogFirebase("seeker keep alive cannot be started: " + message);
+                        Logger.FirebaseDebug("seeker keep alive cannot be started: " + message);
                     }
                 }
                 catch
@@ -100,18 +101,18 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
         SeekerState.ActiveActivityRef = activity as FragmentActivity;
         if (SeekerState.ActiveActivityRef == null)
         {
-            MainActivity.LogFirebase("OnActivityStarted activity is null!");
+            Logger.FirebaseDebug("OnActivityStarted activity is null!");
         }
 
         DiagLastStarted = activity.GetType().Name;
-        MainActivity.LogDebug("OnActivityStarted " + DiagLastStarted);
+        Logger.Debug("OnActivityStarted " + DiagLastStarted);
 
         NumberOfActiveActivities++;
         
-        //we are just coming back alive.
+        // we are just coming back alive.
         if (NumberOfActiveActivities == 1)
         {
-            MainActivity.LogDebug("We are back!");
+            Logger.Debug("We are back!");
             if (AutoAwayTimer != null)
             {
                 AutoAwayTimer.Stop();
@@ -125,9 +126,9 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
 
         if (SeekerState.OurCurrentStatusIsAway)
         {
-            MainActivity.LogDebug("Our current status is away, lets set it back to online!");
+            Logger.Debug("Our current status is away, lets set it back to online!");
             
-            //set back to online
+            // set back to online
             MainActivity.SetStatusApi(false);
         }
     }
@@ -136,12 +137,12 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
     {
         try
         {
-            MainActivity.LogDebug("! TryToReconnect (on app resume) !");
+            Logger.Debug("! TryToReconnect (on app resume) !");
 
             if (SeekerApplication.ReconnectSteppedBackOffThreadIsRunning)
             {
-                //set and let it run.
-                MainActivity.LogDebug("In progress, so .Set to let the next one run.");
+                // set and let it run.
+                Logger.Debug("In progress, so .Set to let the next one run.");
                 SeekerApplication.ReconnectAutoResetEvent.Set();
             }
             else
@@ -159,11 +160,11 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
 
                         if (task.IsFaulted)
                         {
-                            MainActivity.LogDebug("TryToReconnect FAILED");
+                            Logger.Debug("TryToReconnect FAILED");
                         }
                         else
                         {
-                            MainActivity.LogDebug("TryToReconnect SUCCESSFUL");
+                            Logger.Debug("TryToReconnect SUCCESSFUL");
                         }
 
                     });
@@ -173,21 +174,22 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
         }
         catch (Exception e)
         {
-            MainActivity.LogFirebase("TryToReconnect Failed " + e.Message + e.StackTrace);
+            Logger.FirebaseDebug("TryToReconnect Failed " + e.Message + e.StackTrace);
         }
     }
 
     void Application.IActivityLifecycleCallbacks.OnActivityStopped(Activity activity)
     {
         DiagLastStopped = activity.GetType().Name.ToString();
-        MainActivity.LogDebug("OnActivityStopped " + DiagLastStopped);
+        Logger.Debug("OnActivityStopped " + DiagLastStopped);
 
         NumberOfActiveActivities--;
         
-        //if this is 0 then app is in background, or screen is locked, user at home screen, other app in front, etc.
+        // if this is 0 then app is in background,
+        // or screen is locked, user at home screen, other app in front, etc.
         if (NumberOfActiveActivities == 0 && SeekerState.AutoAwayOnInactivity)
         {
-            MainActivity.LogDebug("We are away!");
+            Logger.Debug("We are away!");
             if (AutoAwayTimer == null)
             {
                 AutoAwayTimer = new System.Timers.Timer(1000 * 60 * 5); // 5 minutes
@@ -200,7 +202,7 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
 
     private void AutoAwayTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
     {
-        MainActivity.LogDebug("We were away for the interval specified.  time to set status to away.");
+        Logger.Debug("We were away for the interval specified.  time to set status to away.");
         MainActivity.SetStatusApi(true);
     }
 

@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Net;
 using Android.Widget;
+using Seeker.Utils;
 
 namespace Seeker;
 
@@ -13,7 +14,7 @@ public class ConnectionReceiver : BroadcastReceiver
         NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; 
         bool isConnected = NetworkHandoffDetector.ProcessEvent(netInfo);
 
-        MainActivity.LogDebug("ConnectionReceiver.OnReceive");
+        Logger.Debug("ConnectionReceiver.OnReceive");
         // these are just toasts letting us know the status of the network...
 
         string action = intent?.Action;
@@ -22,7 +23,7 @@ public class ConnectionReceiver : BroadcastReceiver
             bool changed = SeekerApplication.SetNetworkState(context);
             if (changed)
             {
-                MainActivity.LogDebug("metered state changed.. lets set up our handlers and inform server..");
+                Logger.Debug("metered state changed.. lets set up our handlers and inform server..");
                 MainActivity.SetUnsetSharingBasedOnConditions(true);
                 SeekerState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
             }
@@ -31,7 +32,7 @@ public class ConnectionReceiver : BroadcastReceiver
 
             if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
             {
-                MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
+                Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
                 SeekerApplication.ShowToast("Is Connected", ToastLength.Long);
                 NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
                 if (info.IsConnected)
@@ -48,12 +49,12 @@ public class ConnectionReceiver : BroadcastReceiver
             {
                 if (cm.ActiveNetworkInfo != null)
                 {
-                    MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
+                    Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
                     SeekerApplication.ShowToast("Is Disconnected", ToastLength.Long);
                 }
                 else
                 {
-                    MainActivity.LogDebug("info: Is Disconnected(null)");
+                    Logger.Debug("info: Is Disconnected(null)");
                     SeekerApplication.ShowToast("Is Disconnected (null)", ToastLength.Long);
                 }
             }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -476,33 +477,32 @@ namespace Seeker
             return null;
         }
 
-        public bool IsFolderNowComplete(TransferItem ti, bool noSingleItemFolders = false) //!!!!! no single item logic will not work with AutoClearComplete
+        // !!!!! no single item logic will not work with AutoClearComplete
+        public bool IsFolderNowComplete(TransferItem ti, bool noSingleItemFolders = false)
         {
             if (ti == null)
             {
-                MainActivity.LogDebug("IsFolderNowComplete: transferitem is null");
+                Logger.Debug("IsFolderNowComplete: transferitem is null");
                 return false;
             }
-            else
+
+            FolderItem folder;
+            lock (AllFolderItems)
             {
-                FolderItem folder = null;
-                lock (AllFolderItems)
+                folder = GetMatchingFolder(ti).FirstOrDefault();
+            }
+            if (folder == null)
+            {
+                Logger.Debug("IsFolderNowComplete: folder is null");
+                return false;
+            }
+            lock (folder.TransferItems)
+            {
+                foreach (TransferItem item in folder.TransferItems)
                 {
-                    folder = GetMatchingFolder(ti).FirstOrDefault();
-                }
-                if (folder == null)
-                {
-                    MainActivity.LogDebug("IsFolderNowComplete: folder is null");
-                    return false;
-                }
-                lock (folder.TransferItems)
-                {
-                    foreach (TransferItem item in folder.TransferItems)
+                    if (!item.State.HasFlag(TransferStates.Succeeded))
                     {
-                        if (!item.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
             }

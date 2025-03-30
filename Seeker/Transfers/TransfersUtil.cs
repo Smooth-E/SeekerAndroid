@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Models;
+using Seeker.Utils;
 
 namespace Seeker.Transfers
 {
@@ -140,17 +141,22 @@ namespace Seeker.Transfers
                     }
                     catch (Exception errr)
                     {
-                        MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                        // I think this is fixed by changing to concurrent dict but just in case...
+                        Logger.FirebaseDebug("concurrency issue: " + errr);
                     }
                 }
-                transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
-                MainActivity.LogDebug($"Adding Transfer To Database: {transferItem.Filename}");
+                transferItem = TransfersFragment.TransferItemManagerDL
+                    .AddIfNotExistAndReturnTransfer(transferItem, out exists);
+                
+                Logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
                 downloadInfo.TransferItemReference = transferItem;
 
                 if (queuePaused)
                 {
                     transferItem.State = TransferStates.Cancelled;
-                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null)); //otherwise the ui will not refresh.
+                    
+                    // otherwise the ui will not refresh.
+                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null));
                 }
                 else
                 {
@@ -190,16 +196,18 @@ namespace Seeker.Transfers
         {
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            MainActivity.LogDebug($"DownloadFileAsync: {fullfilename}");
-            Task dlTask = null;
-            Action<TransferStateChangedEventArgs> updateForEnqueue = new Action<TransferStateChangedEventArgs>( (args) =>
+            Logger.Debug($"DownloadFileAsync: {fullfilename}");
+            Task dlTask;
+            Action<TransferStateChangedEventArgs> updateForEnqueue = args =>
             {
-                if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
+                if (args.Transfer.State.HasFlag(TransferStates.Queued) 
+                    || args.Transfer.State == TransferStates.Initializing)
                 {
-                    MainActivity.LogDebug($"Queued / Init: {fullfilename} We can proceed to download next file.");
+                    Logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
                     waitUntilEnqueue.TrySetResult(true);
                 }
-            });
+            };
+            
             if (SeekerState.MemoryBackedDownload)
             {
                 dlTask =

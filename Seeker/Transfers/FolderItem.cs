@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -96,18 +97,19 @@ namespace Seeker
                     folderBytesComplete += (long)((ti.Progress / 100.0) * ti.Size);
                     totalFolderBytes += ti.Size;
                 }
+                
                 totalBytes = totalFolderBytes;
                 bytesCompleted = folderBytesComplete;
-                //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
+                
+                // error "System.OverflowException: Value was either too large or too small for an Int32."
+                // can occur for example when totalFolderBytes is 0
                 if (totalFolderBytes == 0)
                 {
-                    MainActivity.LogInfoFirebase("total folder bytes == 0");
+                    Logger.FirebaseInfo("total folder bytes == 0");
                     return 100;
                 }
-                else
-                {
-                    return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
-                }
+                
+                return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
             }
         }
 

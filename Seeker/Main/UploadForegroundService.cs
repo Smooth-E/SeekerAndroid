@@ -2,12 +2,8 @@
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -95,7 +91,7 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("timer issue: " + e.Message + e.StackTrace);
             }
             //.setContentTitle(getText(R.string.notification_title))
             //.setContentText(getText(R.string.notification_message))

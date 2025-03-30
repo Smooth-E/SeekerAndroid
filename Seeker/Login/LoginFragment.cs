@@ -27,9 +27,12 @@ using Soulseek;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Utils;
+
 namespace Seeker
 {
-    public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
+    //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
+    public class LoginFragment : Fragment
     {
         public volatile View rootView;
         private Button cbttn;
@@ -60,9 +63,9 @@ namespace Seeker
             {
                 SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
-            catch (System.Exception err)
+            catch (Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.FirebaseDebug("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -86,24 +89,20 @@ namespace Seeker
             bool hasError = ValidateUsername();
             EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }
-
-
-        //private bool firstTime = true;
+        
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
 
             HasOptionsMenu = true;
-            MainActivity.LogDebug("LoginFragmentOnCreateView");
+            Logger.Debug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
+            if (MainActivity.IsNotLoggedIn()) // you are not logged in if username or password is null
             {
                 SeekerState.currentlyLoggedIn = false;
-                this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
+                rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
                 SetUpLogInLayout();
-
-                //StaticHacks.RootView = this.rootView;
-                //firstTime = false;
+                
                 return rootView;
             }
             else
@@ -114,18 +113,22 @@ namespace Seeker
                     Task login = null;
                     try
                     {
-                        //there is a bug where we reach here with an empty Username and Password...
+                        // there is a bug where we reach here with an empty Username and Password...
                         login = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
                     }
                     catch (InvalidOperationException)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
-                        MainActivity.LogFirebase("We are already logging in");
+                        Toast.MakeText(SeekerState.ActiveActivityRef, 
+                            Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
+                        
+                        Logger.FirebaseDebug("We are already logging in");
                     }
-                    //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SeekerState.Username, SeekerState.Password);
-                    login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
+
+                    login?.ContinueWith(UpdateLoginUI);
                     login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                    SeekerState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
+                    
+                    // sets up a continue with if sharing is enabled, else noop
+                    SeekerState.MainActivityRef.SetUpLoginContinueWith(login);
                 }
                 else if (!StaticHacks.LoggingIn || StaticHacks.UpdateUI)
                 {
@@ -226,7 +229,7 @@ namespace Seeker
 
         private void UpdateLoginUI(Task t)
         {
-            //all logins go to here...
+            // all logins go to here...
             if (SoulseekClient.DNS_LOOKUP_FAILED && (t != null && t.Status == TaskStatus.Faulted)) //task can be null and so if DNS lookup fails this will be a nullref...
             {
                 //this can happen if we do not have internet....
@@ -237,7 +240,7 @@ namespace Seeker
                 var action = new Action(() =>
                 {
                     Toast.MakeText(SeekerState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
-                    //MainActivity.LogFirebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+                    //Logger.FirebaseDebug("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SeekerState.MainActivityRef.RunOnUiThread(action);
                 SoulseekClient.DNS_LOOKUP_FAILED = false; // dont have to keep showing this... wait for next failure for it to be set...
@@ -324,18 +327,16 @@ namespace Seeker
 
                 if (msgToLog != string.Empty)
                 {
-                    MainActivity.LogDebug(msgToLog);
-                    MainActivity.LogFirebase(msgToLog);
+                    Logger.Debug(msgToLog);
+                    Logger.FirebaseDebug(msgToLog);
                 }
 
-                MainActivity.LogDebug("time to update layouts..");
+                Logger.Debug("time to update layouts..");
                 MainActivity.AddLoggedInLayout(this.rootView);
                 MainActivity.BackToLogInLayout(this.rootView, LogInClick, clearUserPass);
             }
-
-
-            MainActivity.LogDebug("Login Status: " + cannotLogin);
-            //SeekerState.ManualResetEvent.WaitOne();
+            
+            Logger.Debug("Login Status: " + cannotLogin);
 
             if (cannotLogin == false)
             {
@@ -394,37 +395,27 @@ namespace Seeker
             Task login = null;
             try
             {
-                //System.Net.IPAddress ipaddr = null;
-                //try
-                //{
-                //MUST DO THIS ON A SEPARATE THREAD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //ipaddr = System.Net.Dns.GetHostEntry("vps.slsknet.org").AddressList[0];
-                //Android.Net.DnsResolver.Instance.Query(null, "vps.slsknet.org",Android.Net.DnsResolverFlag.Empty,this.Context.MainExecutor,null,this);
                 if (string.IsNullOrEmpty(this.usernameTextEdit.Text) || string.IsNullOrEmpty(this.passwordTextEdit.Text))
                 {
                     Toast.MakeText(this.Activity, Resource.String.no_empty_user_pass, ToastLength.Long).Show();
                     return;
                 }
+                
                 login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
                 login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                //throw new InvalidOperationException("The client is already connected"); //bug catcher
 
-                //login.ContinueWith(t=>t.IsCompletedSuccessfully)
                 try
                 {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
+                    Android.Views.InputMethods.InputMethodManager imm = 
+                        (Android.Views.InputMethods.InputMethodManager)Activity
+                            .GetSystemService(Context.InputMethodService);
+                    
                     imm.HideSoftInputFromWindow(this.usernameTextEdit.WindowToken, 0);
                 }
-                catch (System.Exception)
+                catch (Exception)
                 {
-
+                    // Intentional no-op
                 }
-                //}
-                //catch(AddressException)
-                //{
-                //    Toast.MakeText(this.Activity, "Failed to resolve soulseek server ip address from name. Trying hardcoded ip.", ToastLength.Long).Show();
-                //    login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, user.Text, pass.Text);
-                //}
             }
             catch (AddressException)
             {
@@ -496,32 +487,6 @@ namespace Seeker
                 Toast.MakeText(this.Activity, message, ToastLength.Long).Show();
                 SeekerState.currentlyLoggedIn = false;
             }
-
-            //Activity.Recreate();
         }
-
-        //public void OnAnswer(Java.Lang.Object answer, int rcode)
-        //{
-        //    //NEVER GOT THIS WORKING. supposed to be a fallback if the dns resolve does not work.
-        //    //might be best to async try the System.Net.Dns resolve.  or to see if it has a timeout or error handling stuff.
-        //    //dont know why it happens...
-
-
-        //    //Java.Util.ArrayList ans = answer as Java.Util.ArrayList;
-        //    //IEnumerable<Java.Net.Inet4Address>  ans2 = answer as IEnumerable<Java.Net.Inet4Address>;
-        //    //Java.Net.Inet4Address ans3 = ans2.ToArray()[0] as Java.Net.Inet4Address;
-        //    //Java.Net.Inet4Address ans1 = ans.ToArray()[0] as Java.Net.Inet4Address;
-        //    //string a = ans1.HostAddress;
-
-        //    ////Java.Util.ArrayList<Java.Net.InetAddress> ans = answer as Java.Util.LinkedList<Java.Net.InetAddress>;
-        //    ////string a = ans[0].HostAddress;
-        //    ////System.Console.WriteLine(a);
-        //    //throw new NotImplementedException();
-        //}
-
-        //public void OnError(DnsResolver.DnsException error)
-        //{
-        //    //throw new NotImplementedException();
-        //}
     }
 }

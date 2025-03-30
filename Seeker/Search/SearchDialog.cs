@@ -6,6 +6,8 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using System;
+using Seeker.Utils;
+
 namespace Seeker
 {
     public class SearchDialog : AndroidX.Fragment.App.DialogFragment
@@ -67,13 +69,13 @@ namespace Seeker
 
         public override void OnResume()
         {
-            if (SearchDialog.Instance != null && SearchDialog.Instance != this)
+            if (Instance != null && Instance != this)
             {
-                //we only support 1 dialog, the most recent one..
-                MainActivity.LogDebug("cancelling old search dialog");
-                this.Dismiss();
+                // we only support 1 dialog, the most recent one..
+                Logger.Debug("cancelling old search dialog");
+                Dismiss();
             }
-            MainActivity.LogDebug("resuming instance: " + guid.ToString());
+            Logger.Debug("resuming instance: " + guid);
 
             SetControlState();
             base.OnResume();
@@ -84,8 +86,9 @@ namespace Seeker
 
         public override void OnDestroy()
         {
-            MainActivity.LogDebug("OnDestroy SearchDialog");
-            SearchDialog.Instance = null;
+            Logger.Debug("OnDestroy SearchDialog");
+            Instance = null;
+            
             base.OnDestroy();
         }
 
@@ -190,17 +193,20 @@ namespace Seeker
                 intent.PutExtra(SearchSendIntentHelper.FromSearchDialogDummyActivity, SearchSendIntentHelper.FromSearchDialogDummyActivity);
                 string mainText = Intent.GetStringExtra(Intent.ExtraText);
                 string subject = Intent.GetStringExtra(Intent.ExtraSubject);
+                
                 if (mainText != null)
                 {
                     intent.PutExtra(Intent.ExtraText, mainText);
                 }
+                
                 if (subject != null)
                 {
                     intent.PutExtra(Intent.ExtraSubject, subject);
                 }
-                MainActivity.LogDebug("SearchDialogDummyActivity launch intent");
-                this.StartActivity(intent);
-                this.Finish();
+                
+                Logger.Debug("SearchDialogDummyActivity launch intent");
+                StartActivity(intent);
+                Finish();
             }
             base.OnCreate(savedInstanceState);
         }

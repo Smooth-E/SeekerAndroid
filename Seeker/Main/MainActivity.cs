@@ -81,61 +81,7 @@ namespace Seeker
     {
         public static object SHARED_PREF_LOCK = new object();
         public const string logCatTag = "seeker";
-        public static bool crashlyticsEnabled = true;
-
-        public static void LogDebug(string msg)
-        {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                //write to file
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
-        }
-
-        public static void LogFirebaseError(string msg, Exception e)
-        {
-            LogFirebase($"{msg} msg: {e.Message} stack: {e.StackTrace}");
-        }
-
-        public static void LogFirebase(string msg)
-        {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                //write to file
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
-#if !IzzySoft
-            if (crashlyticsEnabled)
-            {
-                Firebase.Crashlytics.FirebaseCrashlytics.Instance.RecordException(new Java.Lang.Throwable(msg));
-            }
-#endif
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
-        }
-
-        public static void LogInfoFirebase(string msg)
-        {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                //write to file
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
-#if !IzzySoft
-            if (crashlyticsEnabled)
-            {
-                Firebase.Crashlytics.FirebaseCrashlytics.Instance.Log(msg);
-            }
-#endif
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
-        }
-
+        
         public static void createNotificationChannel(Context c, string id, string name)
         {
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
@@ -188,7 +134,7 @@ namespace Seeker
 
                 if (isShown == alreadyOpen)
                 {
-                    LogDebug("Keyboard state - Ignoring global layout change...");
+                    Logger.Debug("Keyboard state - Ignoring global layout change...");
                     return;
                 }
 
@@ -378,7 +324,7 @@ namespace Seeker
         {
             if (uri.LastPathSegment == null)
             {
-                MainActivity.LogFirebase($"{uri} has null last path segment");
+                Logger.FirebaseDebug($"{uri} has null last path segment");
                 // next line throws
             }
 
@@ -413,7 +359,7 @@ namespace Seeker
         {
             DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
             Android.Net.Uri uri = dir.Uri;
-            MainActivity.LogInfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
+            Logger.FirebaseInfo("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
 
             string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
 
@@ -440,7 +386,7 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.LogFirebase("contains neither: " + lastPathSegment); // Download (on Android 9 emu)
+                    Logger.FirebaseDebug("contains neither: " + lastPathSegment); // Download (on Android 9 emu)
                 }
             }
 
@@ -564,7 +510,7 @@ namespace Seeker
                     }
                     catch (Exception e)
                     {
-                        MainActivity.LogFirebase("pre get all mediaStoreInfo: " + e.Message + e.StackTrace);
+                        Logger.FirebaseDebug("pre get all mediaStoreInfo: " + e.Message + e.StackTrace);
                     }
                     finally
                     {
@@ -774,8 +720,8 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                LogDebug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
-                LogFirebase("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
+                Logger.Debug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
             }
             finally
             {
@@ -848,8 +794,8 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    LogDebug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
-                    LogFirebase("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
+                    Logger.Debug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
+                    Logger.FirebaseDebug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
                 }
 
             }
@@ -889,8 +835,8 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                LogDebug("ClearParsedCacheResults " + e.Message + e.StackTrace);
-                LogFirebase("ClearParsedCacheResults " + e.Message + e.StackTrace);
+                Logger.Debug("ClearParsedCacheResults " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("ClearParsedCacheResults " + e.Message + e.StackTrace);
             }
         }
 
@@ -962,7 +908,7 @@ namespace Seeker
                     CachedParseResults cachedParseResults = new CachedParseResults();
                     if (convertFrom2to3)
                     {
-                        MainActivity.LogDebug("convert from v2 to v3");
+                        Logger.Debug("convert from v2 to v3");
 
                         var oldKeys = binaryFormatter.Deserialize(m_stringUriPairs) 
                                 as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
@@ -1006,7 +952,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogDebug("v3");
+                        Logger.Debug("v3");
                         cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) 
                             as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>;
                     }
@@ -1057,7 +1003,7 @@ namespace Seeker
                     }
 
                     sw.Stop();
-                    MainActivity.LogDebug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
+                    Logger.Debug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
 
                     return cachedParseResults;
                 }
@@ -1065,8 +1011,8 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                LogDebug("error deserializing" + e.Message + e.StackTrace);
-                LogFirebase("error deserializing" + e.Message + e.StackTrace);
+                Logger.Debug("error deserializing" + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("error deserializing" + e.Message + e.StackTrace);
                 return null;
             }
 #endif
@@ -1303,7 +1249,7 @@ namespace Seeker
                         // if still not fixed
                         if (sampleRate == -1 || duration == -1 || bitDepth == -1)
                         {
-                            MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull"
+                            Logger.FirebaseDebug("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull"
                                                      + (SeekerState.ActiveActivityRef == null) + childUri?.ToString());
                         }
                     }
@@ -1378,7 +1324,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("get audio attr failed: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("get audio attr failed: " + e.Message + e.StackTrace);
                 return null;
             }
         }
@@ -1504,7 +1450,7 @@ namespace Seeker
                 //would list files work?
                 bool docFileLegacyWork = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentUri).Exists();
 
-                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: "
+                Logger.FirebaseDebug("cursor is null: parentDoc" + parentDoc + " list children uri: "
                                          + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks
                                          + " activeContext: " + wouldActiveWork + " legacyWork: " + docFileLegacyWork);
             }
@@ -1637,7 +1583,7 @@ namespace Seeker
                         {
                             if (volName.Length > directoryPath.Length)
                             {
-                                MainActivity.LogFirebase("volName > directoryPath" + volName + " -- "
+                                Logger.FirebaseDebug("volName > directoryPath" + volName + " -- "
                                                          + directoryPath + " -- " + isRootCase);
                             }
 
@@ -1902,12 +1848,12 @@ namespace Seeker
                     }
 
                     int nonHiddenCountForServer = keys.Count(pair1 => !pair1.Value.Item5);
-                    MainActivity.LogDebug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
+                    Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
                     SeekerState.NumberParsed = int.MaxValue; // our signal that we are finishing up...
                     s.Stop();
 
-                    MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds",
+                    Logger.Debug(string.Format("{0} Files parsed in {1} milliseconds",
                         keys.Keys.Count, s.ElapsedMilliseconds));
 
                     s.Reset();
@@ -1949,8 +1895,7 @@ namespace Seeker
 
                     s.Stop();
 
-                    MainActivity
-                        .LogDebug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
+                    Logger.Debug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
 
                     var newCachedResults = new CachedParseResults(
                         keys,
@@ -2025,7 +1970,7 @@ namespace Seeker
                 }
                 else
                 {
-                    LogDebug("Using cached results");
+                    Logger.Debug("Using cached results");
                     UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
 
                     if (UploadDirectoryManager.AreAllFailed())
@@ -2072,7 +2017,7 @@ namespace Seeker
                 }
 
                 success = false;
-                LogDebug("Error parsing files: " + e.Message + e.StackTrace);
+                Logger.Debug("Error parsing files: " + e.Message + e.StackTrace);
 
                 if (e is DirectoryAccessFailure)
                 {
@@ -2080,7 +2025,7 @@ namespace Seeker
                 }
                 else
                 {
-                    LogFirebase("Error parsing files: " + e.Message + e.StackTrace);
+                    Logger.FirebaseDebug("Error parsing files: " + e.Message + e.StackTrace);
                 }
 
                 if (e.Message.Contains("An item with the same key"))
@@ -2088,7 +2033,7 @@ namespace Seeker
                     try
                     {
                         var codePoints = ShowCodePoints(e.Message.Substring(e.Message.Length - 7));
-                        LogFirebase("Possible encoding issue: " + codePoints);
+                        Logger.FirebaseDebug("Possible encoding issue: " + codePoints);
                         errorMsg = "Path Conflict. Same Name?";
                     }
                     catch
@@ -2099,7 +2044,7 @@ namespace Seeker
 
                 if (errorMsg == defaultUnspecified)
                 {
-                    MainActivity.LogFirebase("Error Parsing Files Unspecified Error" + e.Message + e.StackTrace);
+                    Logger.FirebaseDebug("Error Parsing Files Unspecified Error" + e.Message + e.StackTrace);
                 }
             }
             finally
@@ -2199,7 +2144,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("FAILED to restore sharing parse results: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("FAILED to restore sharing parse results: " + e.Message + e.StackTrace);
                 return null;
             }
         }
@@ -2313,11 +2258,11 @@ namespace Seeker
                     {
                         if (SeekerState.SharedFileCache != null)
                         {
-                            MainActivity.LogDebug("Tell server we are sharing "
-                                                  + SeekerState.SharedFileCache.DirectoryCount
-                                                  + " dirs and "
-                                                  + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer()
-                                                  + " files");
+                            Logger.Debug("Tell server we are sharing "
+                                         + SeekerState.SharedFileCache.DirectoryCount
+                                         + " dirs and "
+                                         + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer()
+                                         + " files");
 
                             SeekerState.SoulseekClient.SetSharedCountsAsync(
                                 SeekerState.SharedFileCache.DirectoryCount,
@@ -2328,12 +2273,12 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.LogDebug("We would tell server but we are not successfully set up yet.");
+                            Logger.Debug("We would tell server but we are not successfully set up yet.");
                         }
                     }
                     else
                     {
-                        MainActivity.LogDebug("Tell server we are sharing 0 dirs and 0 files");
+                        Logger.Debug("Tell server we are sharing 0 dirs and 0 files");
                         SeekerState.SoulseekClient.SetSharedCountsAsync(0, 0);
                     }
 
@@ -2345,22 +2290,22 @@ namespace Seeker
                     {
                         if (SeekerState.SharedFileCache != null)
                         {
-                            MainActivity.LogDebug("We need to Tell server we are sharing "
-                                                  + SeekerState.SharedFileCache.DirectoryCount
-                                                  + " dirs and "
-                                                  + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer()
-                                                  + " files on next log in");
+                            Logger.Debug("We need to Tell server we are sharing "
+                                         + SeekerState.SharedFileCache.DirectoryCount
+                                         + " dirs and "
+                                         + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer()
+                                         + " files on next log in");
                         }
                         else
                         {
-                            MainActivity.LogDebug("we meet sharing conditions " +
-                                                  "but our shared file cache is not successfully set up");
+                            Logger.Debug("we meet sharing conditions " + 
+                                         "but our shared file cache is not successfully set up");
                         }
                     }
                     else
                     {
-                        MainActivity.LogDebug("We need to Tell server we are sharing 0 dirs" +
-                                              " and 0 files on next log in");
+                        Logger.Debug("We need to Tell server we are sharing 0 dirs" +
+                                     " and 0 files on next log in");
                     }
 
                     SeekerState.NumberOfSharedDirectoriesIsStale = true;
@@ -2368,8 +2313,8 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogDebug("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
-                MainActivity.LogFirebase("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
+                Logger.Debug("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
             }
         }
 
@@ -2443,9 +2388,9 @@ namespace Seeker
                     else
                     {
                         // do something here with the file
-                        LogDebug(file.Path);
-                        LogDebug(file.AbsolutePath);
-                        LogDebug(file.CanonicalPath);
+                        Logger.Debug(file.Path);
+                        Logger.Debug(file.AbsolutePath);
+                        Logger.Debug(file.CanonicalPath);
                     }
                 }
             }
@@ -2492,7 +2437,8 @@ namespace Seeker
             {
                 string errorMessage = string.Empty;
                 bool success = false;
-                LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
+                Logger.Debug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
+                
                 try
                 {
                     // we check the cache which has ALL of the parsed results in it. much different from rescanning.
@@ -2500,12 +2446,12 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
+                    Logger.Debug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
                     SetUnsetSharingBasedOnConditions(false, true);
 
                     if (!(e is DirectoryAccessFailure))
                     {
-                        MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
+                        Logger.FirebaseDebug("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
                     }
 
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
@@ -2522,7 +2468,7 @@ namespace Seeker
                     && SeekerState.SharedFileCache != null
                     && SeekerState.SharedFileCache.SuccessfullyInitialized)
                 {
-                    LogDebug("database full initialized.");
+                    Logger.Debug("database full initialized.");
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                     {
                         Toast.MakeText(
@@ -2539,7 +2485,7 @@ namespace Seeker
                     }
                     catch (Exception e)
                     {
-                        MainActivity.LogFirebase("MainActivity error setting handlers: "
+                        Logger.FirebaseDebug("MainActivity error setting handlers: "
                                                  + e.Message + "  " + e.StackTrace);
                     }
                 }
@@ -2587,12 +2533,12 @@ namespace Seeker
 
             if (savedInstanceState == null)
             {
-                LogDebug("Main Activity On Create NEW");
+                Logger.Debug("Main Activity On Create NEW");
             }
             else
             {
                 reborn = true;
-                LogDebug("Main Activity On Create REBORN");
+                Logger.Debug("Main Activity On Create REBORN");
             }
 
             try
@@ -2615,7 +2561,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                LogFirebase("error init keepalives: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("error init keepalives: " + e.Message + e.StackTrace);
             }
 
             if (KeepAliveInactivityKillTimer == null)
@@ -2695,10 +2641,10 @@ namespace Seeker
                     SeekerState.MainActivityRef = this; // set these early. they are needed
                     SeekerState.ActiveActivityRef = this;
 
-                    MainActivity.LogInfoFirebase("is resumed: "
+                    Logger.FirebaseInfo("is resumed: "
                                                  + (SearchFragment.Instance?.IsResumed ?? false).ToString());
 
-                    MainActivity.LogInfoFirebase("from wishlist clicked");
+                    Logger.FirebaseInfo("from wishlist clicked");
 
                     int currentPage = pager.CurrentItem;
                     int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
@@ -2706,14 +2652,14 @@ namespace Seeker
                     // this is the case even if process previously got am state killed.
                     if (currentPage == 1)
                     {
-                        MainActivity.LogInfoFirebase("from wishlist clicked - current page");
+                        Logger.FirebaseInfo("from wishlist clicked - current page");
                         if (tabID == int.MaxValue)
                         {
-                            LogFirebase("tabID == int.MaxValue");
+                            Logger.FirebaseDebug("tabID == int.MaxValue");
                         }
                         else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                         {
-                            LogFirebase("doesnt contain key");
+                            Logger.FirebaseDebug("doesnt contain key");
 
                             Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
                                 .Show();
@@ -2722,8 +2668,8 @@ namespace Seeker
                         {
                             if (SearchFragment.Instance?.IsResumed ?? false) // !??! this logic is backwards...
                             {
-                                MainActivity.LogDebug("we are on the search page " +
-                                                      "but we need to wait for OnResume search frag");
+                                Logger.Debug("we are on the search page " +
+                                             "but we need to wait for OnResume search frag");
 
                                 goToSearchTab = tabID; // we read this we resume
                             }
@@ -2735,7 +2681,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogInfoFirebase("from wishlist clicked - different page");
+                        Logger.FirebaseInfo("from wishlist clicked - different page");
 
                         // when we move to the page, lets move to our tab, if its not the current one..
                         goToSearchTab = tabID; //we read this when we move tab...
@@ -2750,7 +2696,7 @@ namespace Seeker
                 }
                 else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
                 {
-                    MainActivity.LogInfoFirebase("from browse self");
+                    Logger.FirebaseInfo("from browse self");
                     pager.SetCurrentItem(3, false);
                 }
                 // this will always create a new instance,
@@ -2759,15 +2705,15 @@ namespace Seeker
                 {
                     SeekerState.MainActivityRef = this;
                     SeekerState.ActiveActivityRef = this;
-                    MainActivity.LogDebug("MainActivity action send intent");
+                    Logger.Debug("MainActivity action send intent");
 
                     // give us a new fresh tab if the current one has a search in it...
                     if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
                     {
-                        MainActivity.LogDebug("lets go to a new fresh tab");
+                        Logger.Debug("lets go to a new fresh tab");
                         int newTabToGoTo = SearchTabHelper.AddSearchTab();
 
-                        MainActivity.LogDebug("search fragment null? " + (SearchFragment.Instance == null).ToString());
+                        Logger.Debug("search fragment null? " + (SearchFragment.Instance == null).ToString());
 
                         if (SearchFragment.Instance?.IsResumed ?? false)
                         {
@@ -2776,15 +2722,15 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.LogDebug("we are on the search page but we need to wait " +
-                                                  "for OnResume search frag");
+                            Logger.Debug("we are on the search page but we need to wait " +
+                                         "for OnResume search frag");
 
                             goToSearchTab = newTabToGoTo; // we read this we resume
                         }
                     }
 
                     // go to search tab
-                    MainActivity.LogDebug("prev search term: " + SearchDialog.SearchTerm);
+                    Logger.Debug("prev search term: " + SearchDialog.SearchTerm);
                     SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
                     SearchDialog.IsFollowingLink = false;
                     pager.SetCurrentItem(1, false);
@@ -2802,7 +2748,7 @@ namespace Seeker
                     // close previous instance
                     if (SearchDialog.Instance != null)
                     {
-                        MainActivity.LogDebug("previous instance exists");
+                        Logger.Debug("previous instance exists");
                     }
 
                     var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
@@ -2872,12 +2818,12 @@ namespace Seeker
                         {
                             //legacy DocumentFile.FromTreeUri failed with URI: /tree/2A6B-256B:Seeker/Soulseek Complete Invalid URI: /tree/2A6B-256B:Seeker/Soulseek Complete
                             //legacy DocumentFile.FromTreeUri failed with URI: /tree/raw:/storage/emulated/0/Download/Soulseek Downloads Invalid URI: /tree/raw:/storage/emulated/0/Download/Soulseek Downloads
-                            LogFirebase("legacy DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() +
+                            Logger.FirebaseDebug("legacy DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() +
                                         " " + e.Message + " scheme " + chosenUri.Scheme);
                         }
                         else
                         {
-                            LogFirebase("legacy DocumentFile.FromTreeUri failed with null URI");
+                            Logger.FirebaseDebug("legacy DocumentFile.FromTreeUri failed with null URI");
                         }
                     }
 
@@ -2894,7 +2840,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase("cannot write" + chosenUri?.ToString() ?? "null");
+                        Logger.FirebaseDebug("cannot write" + chosenUri?.ToString() ?? "null");
                     }
                 }
 
@@ -2932,12 +2878,12 @@ namespace Seeker
                     {
                         if (chosenIncompleteUri != null)
                         {
-                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with URI: "
+                            Logger.FirebaseDebug("legacy Incomplete DocumentFile.FromTreeUri failed with URI: "
                                         + chosenIncompleteUri.ToString() + " " + e.Message);
                         }
                         else
                         {
-                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with null URI");
+                            Logger.FirebaseDebug("legacy Incomplete DocumentFile.FromTreeUri failed with null URI");
                         }
                     }
 
@@ -2956,7 +2902,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase("cannot write incomplete" + chosenIncompleteUri?.ToString() ?? "null");
+                        Logger.FirebaseDebug("cannot write incomplete" + chosenIncompleteUri?.ToString() ?? "null");
                     }
                 }
 
@@ -3002,11 +2948,11 @@ namespace Seeker
                 {
                     if (res != null)
                     {
-                        LogFirebase("DocumentFile.FromTreeUri failed with URI: " + res.ToString() + " " + e.Message);
+                        Logger.FirebaseDebug("DocumentFile.FromTreeUri failed with URI: " + res.ToString() + " " + e.Message);
                     }
                     else
                     {
-                        LogFirebase("DocumentFile.FromTreeUri failed with null URI");
+                        Logger.FirebaseDebug("DocumentFile.FromTreeUri failed with null URI");
                     }
                 }
 
@@ -3107,12 +3053,12 @@ namespace Seeker
                     {
                         if (incompleteRes != null)
                         {
-                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: "
+                            Logger.FirebaseDebug("DocumentFile.FromTreeUri failed with incomplete URI: "
                                         + incompleteRes.ToString() + " " + e.Message);
                         }
                         else
                         {
-                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
+                            Logger.FirebaseDebug("DocumentFile.FromTreeUri failed with incomplete null URI");
                         }
                     }
 
@@ -3221,7 +3167,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: "
+                Logger.FirebaseDebug("RequestPostNotificationPermissionsIfApplicable error: "
                                          + e.Message + e.StackTrace);
             }
         }
@@ -3253,7 +3199,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: "
+                Logger.FirebaseDebug("RequestPostNotificationPermissionsIfApplicable error: "
                                          + e.Message + e.StackTrace);
             }
         }
@@ -3276,16 +3222,16 @@ namespace Seeker
 
         protected override void OnNewIntent(Intent intent)
         {
-            MainActivity.LogDebug("OnNewIntent");
+            Logger.Debug("OnNewIntent");
             base.OnNewIntent(intent);
             Intent = intent.PutExtra("ALREADY_HANDLED", true);
             if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
             {
-                MainActivity.LogInfoFirebase("is null: "
+                Logger.FirebaseInfo("is null: "
                                              + (SearchFragment.Instance?.Activity == null
                                                 || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
 
-                MainActivity.LogInfoFirebase("from wishlist clicked");
+                Logger.FirebaseInfo("from wishlist clicked");
 
                 int currentPage = pager.CurrentItem;
                 int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
@@ -3294,7 +3240,7 @@ namespace Seeker
                 {
                     if (tabID == int.MaxValue)
                     {
-                        LogFirebase("tabID == int.MaxValue");
+                        Logger.FirebaseDebug("tabID == int.MaxValue");
                     }
                     else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                     {
@@ -3305,8 +3251,8 @@ namespace Seeker
                     {
                         if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
                         {
-                            MainActivity.LogDebug("we are on the search page but we need to wait " +
-                                                  "for OnResume search frag");
+                            Logger.Debug("we are on the search page but we need to wait " + 
+                                         "for OnResume search frag");
 
                             goToSearchTab = tabID; // we read this we resume
                         }
@@ -3331,7 +3277,7 @@ namespace Seeker
             }
             else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
             {
-                MainActivity.LogInfoFirebase("from browse self");
+                Logger.FirebaseInfo("from browse self");
                 pager.SetCurrentItem(3, false);
             }
             else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
@@ -3355,20 +3301,20 @@ namespace Seeker
         private void HandleFromNotificationUploadIntent()
         {
             // either we change to uploads mode now (if resumed), or we wait for on resume to do it.
-            MainActivity.LogInfoFirebase("from uploads clicked");
+            Logger.FirebaseInfo("from uploads clicked");
             int currentPage = pager.CurrentItem;
 
             if (currentPage == 2)
             {
                 if (StaticHacks.TransfersFrag?.Activity == null || (StaticHacks.TransfersFrag?.IsResumed ?? false))
                 {
-                    MainActivity.LogInfoFirebase("we need to wait for on resume");
+                    Logger.FirebaseInfo("we need to wait for on resume");
                     fromNotificationMoveToUploads = true; // we read this in onresume
                 }
                 else
                 {
                     // we can change to uploads mode now
-                    MainActivity.LogDebug("go to upload now");
+                    Logger.Debug("go to upload now");
                     StaticHacks.TransfersFrag.MoveToUploadForNotif();
                 }
             }
@@ -3599,7 +3545,7 @@ namespace Seeker
                                 ToastUIWithDebouncer($"Error getting queue position from {username}", "_9_", username);
                             }
 
-                            LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
+                            Logger.FirebaseDebug("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
 
                         if (transitionToNextState)
@@ -3622,7 +3568,7 @@ namespace Seeker
                             }
                             catch (Exception err)
                             {
-                                MainActivity.LogFirebase("cancellation token src issue: " + err.Message);
+                                Logger.FirebaseDebug("cancellation token src issue: " + err.Message);
                             }
 
                             transferItemInQuestion.State = state;
@@ -3658,11 +3604,11 @@ namespace Seeker
 
                             if (queuePositionChanged)
                             {
-                                MainActivity.LogDebug($"Queue Position of {fullFileName} has changed to {t.Result}");
+                                Logger.Debug($"Queue Position of {fullFileName} has changed to {t.Result}");
                             }
                             else
                             {
-                                MainActivity.LogDebug($"Queue Position of {fullFileName} is still {t.Result}");
+                                Logger.Debug($"Queue Position of {fullFileName} is still {t.Result}");
                             }
                         }
 
@@ -3761,7 +3707,7 @@ namespace Seeker
 
                         if (error.Message == null || !error.Message.ToString().Contains("must be connected and logged"))
                         {
-                            MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
+                            Logger.FirebaseDebug(error.Message + " OnContextItemSelected");
                         }
 
                         if (!silent)
@@ -3787,15 +3733,15 @@ namespace Seeker
                     }
                     catch (Exception e)
                     {
-                        LogFirebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
+                        Logger.FirebaseDebug("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
                     }
 
                     return;
                 }
                 else
                 {
-                    MainActivity.LogDebug("Transfer Item we are trying to get queue position " +
-                                          "of is not currently being downloaded.");
+                    Logger.Debug("Transfer Item we are trying to get queue position " +
+                                 "of is not currently being downloaded.");
                     return;
                 }
 
@@ -4198,7 +4144,7 @@ namespace Seeker
                 TurnOnSharing();
                 if (!wasShared || force)
                 {
-                    MainActivity.LogDebug("sharing state changed to ON");
+                    Logger.Debug("sharing state changed to ON");
                     InformServerOfSharedFiles();
                 }
             }
@@ -4207,7 +4153,7 @@ namespace Seeker
                 TurnOffSharing();
                 if (wasShared)
                 {
-                    MainActivity.LogDebug("sharing state changed to OFF");
+                    Logger.Debug("sharing state changed to OFF");
                     InformServerOfSharedFiles();
                 }
             }
@@ -4362,7 +4308,7 @@ namespace Seeker
             }
             catch
             {
-                MainActivity.LogFirebase("OnBrowseTab failed");
+                Logger.FirebaseDebug("OnBrowseTab failed");
             }
 
             return false;
@@ -4403,7 +4349,7 @@ namespace Seeker
             {
                 // During Back Button:
                 // Attempt to invoke virtual method 'java.lang.Object android.content.Context.getSystemService(java.lang.String)' on a null object reference
-                MainActivity.LogFirebase("During Back Button: " + e.Message);
+                Logger.FirebaseDebug("During Back Button: " + e.Message);
             }
 
             if (!relevant)
@@ -4416,7 +4362,7 @@ namespace Seeker
 
         public static void DebugLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
         {
-            MainActivity.LogDebug(e.Message);
+            Logger.Debug(e.Message);
         }
 
         public static void SoulseekClient_ErrorLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
@@ -4430,7 +4376,7 @@ namespace Seeker
                 }
             }
 
-            MainActivity.LogFirebase(e.Message);
+            Logger.FirebaseDebug(e.Message);
         }
 
         public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(
@@ -4554,17 +4500,17 @@ namespace Seeker
                         SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
                         SeekerState.OurCurrentStatusIsAway = away;
                         string statusString = away ? "away" : "online"; // not user facing
-                        MainActivity.LogDebug($"We successfully changed our status to {statusString}");
+                        Logger.Debug($"We successfully changed our status to {statusString}");
                     }
                     else
                     {
-                        MainActivity.LogDebug("SetStatusApi FAILED " + t.Exception?.Message);
+                        Logger.Debug("SetStatusApi FAILED " + t.Exception?.Message);
                     }
                 });
             }
             catch (Exception e)
             {
-                MainActivity.LogDebug("SetStatusApi FAILED " + e.Message + e.StackTrace);
+                Logger.Debug("SetStatusApi FAILED " + e.Message + e.StackTrace);
             }
         }
 
@@ -4709,7 +4655,7 @@ namespace Seeker
 
             if (ourFileInfo == null)
             {
-                LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
+                Logger.FirebaseDebug("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
                 throw new DownloadEnqueueException($"File not found.");
             }
 
@@ -4784,7 +4730,7 @@ namespace Seeker
                 }
                 catch (DuplicateTransferException dup) //not tested
                 {
-                    LogDebug("UPLOAD DUPL - " + dup.Message);
+                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
 
                     // if there is a duplicate you do not want to overwrite the good cancellation token
                     // with a meaningless one. so restore the old one.
@@ -4792,7 +4738,7 @@ namespace Seeker
                 }
                 catch (DuplicateTokenException dup)
                 {
-                    LogDebug("UPLOAD DUPL - " + dup.Message);
+                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
 
                     // if there is a duplicate you do not want to overwrite the good cancellation token
                     // with a meaningless one. so restore the old one.
@@ -4832,7 +4778,7 @@ namespace Seeker
                         var toastMessage =
                             SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings);
                         ToastUi.Long(toastMessage);
-                        LogFirebase("StaticHacks.LoginFragment.View is null");
+                        Logger.FirebaseDebug("StaticHacks.LoginFragment.View is null");
                         return;
                     }
 
@@ -5105,7 +5051,7 @@ namespace Seeker
             {
                 // stop dl service..
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                MainActivity.LogDebug("Stop Service");
+                Logger.Debug("Stop Service");
                 this.StopService(downloadServiceIntent);
             }
             catch
@@ -5128,8 +5074,8 @@ namespace Seeker
                     Action action = null;
                     if (task.IsCanceled)
                     {
-                        MainActivity.LogDebug((DateTimeOffset.Now.ToUnixTimeMilliseconds()
-                                               - SeekerState.TaskWasCancelledToastDebouncer).ToString());
+                        Logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds()
+                                      - SeekerState.TaskWasCancelledToastDebouncer).ToString());
 
                         if ((DateTimeOffset.Now.ToUnixTimeMilliseconds()
                              - SeekerState.TaskWasCancelledToastDebouncer) > 1000)
@@ -5195,7 +5141,7 @@ namespace Seeker
                                 }
                                 else
                                 {
-                                    MainActivity.LogFirebase("cancel and retry creation failed: "
+                                    Logger.FirebaseDebug("cancel and retry creation failed: "
                                                              + e.Message + e.StackTrace);
                                 }
 
@@ -5208,7 +5154,7 @@ namespace Seeker
 
                         if (e.dlInfo.TransferItemReference.CancelAndClearFlag)
                         {
-                            MainActivity.LogDebug("continue with cleanup activity: " + e.dlInfo.fullFilename);
+                            Logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
                             e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                             e.dlInfo.TransferItemReference.InProcessing = false;
 
@@ -5245,7 +5191,7 @@ namespace Seeker
                             // update the size and rerequest.
                             // if we have partially downloaded the file already
                             // we need to delete it to prevent corruption.
-                            MainActivity.LogDebug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
+                            Logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
                             transferItem.Size = sizeException.RemoteSize;
                             e.dlInfo.Size = sizeException.RemoteSize;
                             retriable = true;
@@ -5264,8 +5210,8 @@ namespace Seeker
                                         "Failed to delete incomplete file on TransferSizeMismatchException: "
                                         + ex.ToString();
 
-                                    MainActivity.LogDebug(exceptionString);
-                                    MainActivity.LogFirebase(exceptionString);
+                                    Logger.Debug(exceptionString);
+                                    Logger.FirebaseDebug(exceptionString);
                                 }
                             }
                         }
@@ -5329,7 +5275,7 @@ namespace Seeker
                                 }; // needed
                             }
 
-                            MainActivity.LogDebug("rejected. is not shared: " + isFileNotShared);
+                            Logger.Debug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
@@ -5360,7 +5306,7 @@ namespace Seeker
                                  && task.Exception.InnerException.Message.ToLower()
                                      .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            LogDebug("Task Exception: " + task.Exception.InnerException.Message);
+                            Logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
                                 ToastUIWithDebouncer(
@@ -5375,7 +5321,7 @@ namespace Seeker
                                      .Contains("read error: remote connection closed"))
                         {
                             retriable = true;
-                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
                                 ToastUi.Long(
@@ -5395,7 +5341,7 @@ namespace Seeker
                             // this is often due to handoff. handoff either causes this or "remote connection closed"
                             if (ConnectionReceiver.DoWeHaveInternet())
                             {
-                                LogDebug("we do have internet");
+                                Logger.Debug("we do have internet");
                                 action = () =>
                                 {
                                     ToastUi.Long(SeekerState.ActiveActivityRef
@@ -5417,7 +5363,7 @@ namespace Seeker
                                 };
                             }
 
-                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message
@@ -5432,8 +5378,7 @@ namespace Seeker
                             // do not try it again.
 
                             retriable = true;
-                            //MainActivity.LogFirebase("Reported as failed by uploader");
-                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
                                 ToastUi.Long(
@@ -5444,7 +5389,7 @@ namespace Seeker
                                  && task.Exception.InnerException.Message.ToLower()
                                      .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () =>
                             {
                                 ToastUIWithDebouncer(
@@ -5467,7 +5412,7 @@ namespace Seeker
                             if (task.Exception != null && task.Exception.InnerException != null)
                             {
                                 // I get a lot of null refs from task.Exception.InnerException.Message
-                                LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                                Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
                                 // is thrown by Stream.Close()
                                 if (task.Exception.InnerException.Message.StartsWith("Disk full."))
@@ -5504,7 +5449,7 @@ namespace Seeker
 
                                     if (unknownException)
                                     {
-                                        MainActivity.LogFirebase("InnerInnerException: "
+                                        Logger.FirebaseDebug("InnerInnerException: "
                                                                  + task.Exception.InnerException.InnerException.Message
                                                                  + task.Exception.InnerException
                                                                      .InnerException.StackTrace);
@@ -5514,7 +5459,7 @@ namespace Seeker
                                     if (task.Exception.InnerException.InnerException.InnerException != null
                                         && unknownException)
                                     {
-                                        MainActivity.LogInfoFirebase("InnerInnerException: "
+                                        Logger.FirebaseInfo("InnerInnerException: "
                                                                      + task.Exception.InnerException
                                                                          .InnerException.Message
                                                                      + task.Exception.InnerException
@@ -5523,7 +5468,7 @@ namespace Seeker
                                         var innerInner = task.Exception.InnerException.InnerException.InnerException;
 
                                         //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                        MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message
+                                        Logger.FirebaseDebug("Innerx3_Exception: " + innerInner.Message
                                             + innerInner.StackTrace);
                                     }
                                 }
@@ -5535,18 +5480,18 @@ namespace Seeker
                                     {
                                         if (task.Exception.InnerException.StackTrace.Length > 1201)
                                         {
-                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: "
+                                            Logger.FirebaseDebug("xml Unhandled task exception 2nd part: "
                                                                      + task.Exception.InnerException.StackTrace
                                                                          .Skip(1000).ToString());
                                         }
 
-                                        MainActivity.LogFirebase("xml Unhandled task exception: "
+                                        Logger.FirebaseDebug("xml Unhandled task exception: "
                                                                  + task.Exception.InnerException.Message
                                                                  + task.Exception.InnerException.StackTrace);
                                     }
                                     else
                                     {
-                                        MainActivity.LogFirebase("dlcontaction Unhandled task exception: "
+                                        Logger.FirebaseDebug("dlcontaction Unhandled task exception: "
                                                                  + task.Exception.InnerException.Message
                                                                  + task.Exception.InnerException.StackTrace);
                                     }
@@ -5554,10 +5499,10 @@ namespace Seeker
                             }
                             else if (task.Exception != null && unknownException)
                             {
-                                MainActivity.LogFirebase("Unhandled task exception (little info): "
+                                Logger.FirebaseDebug("Unhandled task exception (little info): "
                                                          + task.Exception.Message);
 
-                                LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
+                                Logger.Debug("Unhandled task exception (little info):" + task.Exception.Message);
                             }
                         }
 
@@ -5567,7 +5512,7 @@ namespace Seeker
                                 && (SeekerState.AutoRetryDownload)
                                 && retriable))
                         {
-                            MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
+                            Logger.Debug("!! retry the download " + e.dlInfo.fullFilename);
                             try
                             {
                                 // retry download.
@@ -5610,14 +5555,14 @@ namespace Seeker
                             catch (System.Exception e)
                             {
                                 // if this happens at least log the normal message....
-                                MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
+                                Logger.FirebaseDebug("retry creation failed: " + e.Message + e.StackTrace);
                             }
 
                         }
 
                         if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                         {
-                            LogFirebase("auto retry failed: prev exception: "
+                            Logger.FirebaseDebug("auto retry failed: prev exception: "
                                         + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString()
                                         + "new exception: "
                                         + task.Exception?.InnerException?.Message?.ToString());
@@ -5640,7 +5585,7 @@ namespace Seeker
 
                     if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                     {
-                        LogFirebase("auto retry succeeded: prev exception: "
+                        Logger.FirebaseDebug("auto retry succeeded: prev exception: "
                                     + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
                     }
 
@@ -5695,7 +5640,7 @@ namespace Seeker
                     }
                     else
                     {
-                        LogFirebase("Very bad. Task is not the right type.....");
+                        Logger.FirebaseDebug("Very bad. Task is not the right type.....");
                     }
 
                     e.dlInfo.TransferItemReference.FinalUri = finalUri;
@@ -5728,24 +5673,27 @@ namespace Seeker
             int seconds = 1)
         {
             long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            //if it does not exist then updatedTime will be curTime.  If it does exist but is older than a second then updated time will also be curTime.  In those two cases, show the toast.
-            MainActivity.LogDebug("curtime " + curTime);
+            
+            // if it does not exist then updatedTime will be curTime.
+            // If it does exist but is older than a second then updated time will also be curTime.
+            // In those two cases, show the toast.
+            Logger.Debug("curtime " + curTime);
+            
             bool stale = false;
             long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime,
                 (key, oldValue) =>
                 {
-
-                    MainActivity.LogDebug("key exists: " + (curTime - oldValue).ToString());
-
+                    Logger.Debug("key exists: " + (curTime - oldValue).ToString());
                     stale = (curTime - oldValue) < (seconds * 1000);
                     if (stale)
                     {
-                        MainActivity.LogDebug("stale");
+                        Logger.Debug("stale");
                     }
 
                     return stale ? oldValue : curTime;
                 });
-            MainActivity.LogDebug("updatedTime " + updatedTime);
+            
+            Logger.Debug("updatedTime " + updatedTime);
             if (!stale)
             {
 
@@ -5921,24 +5869,21 @@ namespace Seeker
         {
             var action = new Action(() =>
             {
-                //this is the case where it already has the loggedin fragment loaded.
+                // this is the case where it already has the loggedin fragment loaded.
                 Button bttn = null;
                 TextView welcome = null;
                 TextView loading = null;
-                //EditText editText = null;
-                //EditText editText2 = null;
-                //TextView textView = null;
                 ViewGroup loggingInLayout = null;
                 ViewGroup logInLayout = null;
                 Button buttonLogin = null;
-                //View noAccountHelp = null;
                 Button settings = null;
-                MainActivity.LogDebug("BackToLogInLayout");
+                
+                Logger.Debug("BackToLogInLayout");
                 try
                 {
                     if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
                     {
-                        MainActivity.LogDebug("StaticHacks.RootView != null");
+                        Logger.Debug("StaticHacks.RootView != null");
                         bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
@@ -5975,17 +5920,16 @@ namespace Seeker
                             buttonLogin.Click -= LogInClick;
                             (StaticHacks.LoginFragment as Seeker.LoginFragment).rootView = StaticHacks.RootView;
                             (StaticHacks.LoginFragment as Seeker.LoginFragment).SetUpLogInLayout();
-                            //buttonLogin.Click += LogInClick;
                         }
                         catch (Exception ex)
                         {
-                            MainActivity.LogDebug("BackToLogInLayout" + ex.Message);
+                            Logger.Debug("BackToLogInLayout" + ex.Message);
                         }
 
                     }
                     else
                     {
-                        MainActivity.LogDebug("StaticHacks.RootView == null");
+                        Logger.Debug("StaticHacks.RootView == null");
                         bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
@@ -5996,10 +5940,10 @@ namespace Seeker
                 }
                 catch
                 {
-
+                    // Intentional no-op
                 }
 
-                MainActivity.LogDebug("logInLayout is here? " + (logInLayout != null).ToString());
+                Logger.Debug("logInLayout is here? " + (logInLayout != null).ToString());
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Visible;
@@ -6051,17 +5995,13 @@ namespace Seeker
                 SeekerState.MainActivityRef.RunOnUiThread(action);
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
+        
         public static void UpdateUIForLoggingInLoading(View rootView = null)
         {
-            MainActivity.LogDebug("UpdateUIForLoggingInLoading");
+            Logger.Debug("UpdateUIForLoggingInLoading");
             var action = new Action(() =>
             {
-                //this is the case where it already has the loggedin fragment loaded.
+                // this is the case where it already has the loggedin fragment loaded.
                 Button logoutButton = null;
                 TextView welcome = null;
                 ViewGroup loggingInView = null;
@@ -6239,7 +6179,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    LogFirebase("Legacy Filesystem Issue: " + e.Message + e.StackTrace + System.Environment.NewLine +
+                    Logger.FirebaseDebug("Legacy Filesystem Issue: " + e.Message + e.StackTrace + System.Environment.NewLine +
                                 incompleteDir.Exists() + musicDir.Exists() + fileExists);
                     throw;
                 }
@@ -6261,33 +6201,32 @@ namespace Seeker
                     throw new DownloadDirectoryNotSetException();
                 }
 
-                //MainActivity.LogDebug("rootDocumentFileIsNull: " + rootDocumentFileIsNull);
                 try
                 {
                     if (useDownloadDir)
                     {
                         rootdir = SeekerState.RootDocumentFile;
-                        MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
+                        Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
                     }
                     else if (useTempDir)
                     {
                         Java.IO.File appPrivateExternal = SeekerState.ActiveActivityRef.GetExternalFilesDir(null);
                         rootdir = DocumentFile.FromFile(appPrivateExternal);
-                        MainActivity.LogDebug("using temp incomplete dir");
+                        Logger.Debug("using temp incomplete dir");
                     }
                     else if (useCustomDir)
                     {
                         rootdir = SeekerState.RootIncompleteDocumentFile;
-                        MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                        Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
                     }
                     else
                     {
-                        MainActivity.LogFirebase("!! should not get here, no dirs");
+                        Logger.FirebaseDebug("!! should not get here, no dirs");
                     }
 
                     if (!rootdir.Exists())
                     {
-                        LogFirebase("rootdir (nonnull) does not exist: " + rootdir.Uri);
+                        Logger.FirebaseDebug("rootdir (nonnull) does not exist: " + rootdir.Uri);
                         diagRootDirExistsAndCanWrite = false;
                         //dont know how to create self
                         //rootdir.CreateDirectory();
@@ -6295,7 +6234,7 @@ namespace Seeker
                     else if (!rootdir.CanWrite())
                     {
                         diagRootDirExistsAndCanWrite = false;
-                        LogFirebase("rootdir (nonnull) exists but cant write: " + rootdir.Uri);
+                        Logger.FirebaseDebug("rootdir (nonnull) exists but cant write: " + rootdir.Uri);
                     }
                     else
                     {
@@ -6317,16 +6256,16 @@ namespace Seeker
                             if (slskDir1 == null)
                             {
                                 string diagMessage = CheckPermissions(rootdir.Uri);
-                                LogFirebase("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
-                                LogInfoFirebase("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
+                                Logger.FirebaseDebug("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
+                                Logger.FirebaseInfo("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
                             }
                             else if (!slskDir1.Exists())
                             {
-                                LogFirebase("slskDir1 does not exist" + rootdir.Uri);
+                                Logger.FirebaseDebug("slskDir1 does not exist" + rootdir.Uri);
                             }
                             else if (!slskDir1.CanWrite())
                             {
-                                LogFirebase("slskDir1 cannot write" + rootdir.Uri);
+                                Logger.FirebaseDebug("slskDir1 cannot write" + rootdir.Uri);
                             }
 
                             CreateNoMediaFile(slskDir1);
@@ -6338,8 +6277,8 @@ namespace Seeker
                     if (slskDir1 == null)
                     {
                         diagSlskDirExistsAfterCreation = false;
-                        LogFirebase("slskDir1 is null");
-                        LogInfoFirebase("slskDir1 is null");
+                        Logger.FirebaseDebug("slskDir1 is null");
+                        Logger.FirebaseInfo("slskDir1 is null");
                     }
                     else
                     {
@@ -6371,20 +6310,22 @@ namespace Seeker
                                 }
 
                                 string diagMessage = CheckPermissions(slskDir1.Uri);
-                                LogInfoFirebase("folderDir1 is null:" + album_folder_name + "root: " + rootUri +
-                                                "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " +
-                                                diagMessage);
-                                LogFirebase("folderDir1 is null:" + album_folder_name + "root: " + rootUri +
+                                
+                                Logger.FirebaseInfo("folderDir1 is null:" + album_folder_name + "root: " + rootUri +
+                                                    "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " +
+                                                    diagMessage);
+                                
+                                Logger.FirebaseDebug("folderDir1 is null:" + album_folder_name + "root: " + rootUri +
                                             "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " +
                                             diagMessage);
                             }
                             else if (!folderDir1.Exists())
                             {
-                                LogFirebase("folderDir1 does not exist:" + album_folder_name);
+                                Logger.FirebaseDebug("folderDir1 does not exist:" + album_folder_name);
                             }
                             else if (!folderDir1.CanWrite())
                             {
-                                LogFirebase("folderDir1 cannot write:" + album_folder_name);
+                                Logger.FirebaseDebug("folderDir1 cannot write:" + album_folder_name);
                             }
 
                             CreateNoMediaFile(folderDir1);
@@ -6403,7 +6344,7 @@ namespace Seeker
                     string rootDirUri = SeekerState.RootDocumentFile?.Uri == null
                         ? "null"
                         : SeekerState.RootDocumentFile.Uri.ToString();
-                    MainActivity.LogFirebase("Filesystem Issue: " + rootDirUri + " " + e.Message +
+                    Logger.FirebaseDebug("Filesystem Issue: " + rootDirUri + " " + e.Message +
                                              diagSlskDirExistsAfterCreation + diagRootDirExistsAndCanWrite +
                                              diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + e.StackTrace);
                 }
@@ -6520,12 +6461,12 @@ namespace Seeker
 
             if (memoryMode && (bytes == null || bytes.Length == 0))
             {
-                LogFirebase("EMPTY or NULL BYTE ARRAY in mem mode");
+                Logger.FirebaseDebug("EMPTY or NULL BYTE ARRAY in mem mode");
             }
 
             if (!memoryMode && uriOfIncomplete == null)
             {
-                LogFirebase("no URI in file mode");
+                Logger.FirebaseDebug("no URI in file mode");
             }
 
             finalUri = string.Empty;
@@ -6647,7 +6588,7 @@ namespace Seeker
                         if (slskDir1 == null || !slskDir1.Exists())
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
-                            LogDebug("Creating Soulseek Complete");
+                            Logger.Debug("Creating Soulseek Complete");
                             diagDidWeCreateSoulSeekDir = true;
                         }
 
@@ -6676,7 +6617,7 @@ namespace Seeker
                             if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
                             {
                                 tempUsernameDir1 = slskDir1.CreateDirectory(username);
-                                LogDebug(string.Format("Creating {0} dir", username));
+                                Logger.Debug(string.Format("Creating {0} dir", username));
                                 diagDidWeCreateUsernameDir = true;
                             }
                         }
@@ -6710,13 +6651,13 @@ namespace Seeker
                                 folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
                                 if (folderDir1 == null || !folderDir1.Exists())
                                 {
-                                    LogDebug("Creating " + dir);
+                                    Logger.Debug("Creating " + dir);
                                     folderDir1 = slskDir1.CreateDirectory(dir);
                                 }
 
                                 if (folderDir1 == null || !folderDir1.Exists())
                                 {
-                                    LogFirebase("folderDir is null or does not exists");
+                                    Logger.FirebaseDebug("folderDir is null or does not exists");
                                 }
                             }
                         }
@@ -6736,13 +6677,13 @@ namespace Seeker
                                     folderDir1.FindFile(singleDir); //does the folder we want to save to exist
                                 if (folderDirNext == null || !folderDirNext.Exists())
                                 {
-                                    LogDebug("Creating " + dir);
+                                    Logger.Debug("Creating " + dir);
                                     folderDirNext = folderDir1.CreateDirectory(singleDir);
                                 }
 
                                 if (folderDirNext == null || !folderDirNext.Exists())
                                 {
-                                    LogFirebase("folderDir is null or does not exists, depth" + _depth);
+                                    Logger.FirebaseDebug("folderDir is null or does not exists, depth" + _depth);
                                 }
                             }
 
@@ -6754,7 +6695,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    MainActivity.LogFirebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation +
+                    Logger.FirebaseDebug("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation +
                                              diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull +
                                              SeekerState.CreateUsernameSubfolders);
                 }
@@ -6813,9 +6754,9 @@ namespace Seeker
                         }
                         catch (Exception e)
                         {
-                            MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR pre" + e.Message);
+                            Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR pre" + e.Message);
                             SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path);
+                            Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
                         }
                     }
                     else
@@ -6867,7 +6808,7 @@ namespace Seeker
                                         //couldnt be created.  This error is misleading though so do a more generic error.
                                         SeekerApplication.ShowToast($"Filesystem Error for file {realName}.",
                                             ToastLength.Long);
-                                        LogDebug("complete and incomplete locations are the same");
+                                        Logger.Debug("complete and incomplete locations are the same");
                                     }
                                     else
                                     {
@@ -6879,7 +6820,7 @@ namespace Seeker
                                 }
                                 catch (Exception e2)
                                 {
-                                    MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
+                                    Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
                                 }
 
                             }
@@ -6887,7 +6828,7 @@ namespace Seeker
                             {
                                 if (uri == null) //this means doc file failed (else it would be after)
                                 {
-                                    MainActivity.LogInfoFirebase("uri==null");
+                                    Logger.FirebaseInfo("uri==null");
                                     //lets try with the non MoveDocument way.
                                     //this case can happen (for a legitimate reason) if:
                                     //  the user is on api <29.  they start downloading an album.  then while its downloading they set the download directory.  the manual one will be file:\\ but the end location will be content:\\
@@ -6897,10 +6838,10 @@ namespace Seeker
                                         DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
-                                        MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete +
+                                        Logger.FirebaseInfo("retrying: incomplete: " + uriOfIncomplete +
                                                                      " complete: " + finalUri + " parent: " +
                                                                      parentUriOfIncomplete);
-                                        //                                        MainActivity.LogInfoFirebase("using temp: " + 
+                                        //                                        Logger.FirebaseInfo("using temp: " + 
                                         System.IO.Stream stream =
                                             SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                                         MoveFile(
@@ -6909,17 +6850,17 @@ namespace Seeker
                                     }
                                     catch (Exception secondTryErr)
                                     {
-                                        MainActivity.LogFirebase(
+                                        Logger.FirebaseDebug(
                                             "Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" +
                                             secondTryErr.Message);
                                         SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                        MainActivity.LogDebug(secondTryErr.Message + " " + uriOfIncomplete.Path);
+                                        Logger.Debug(secondTryErr.Message + " " + uriOfIncomplete.Path);
                                     }
                                 }
                                 else
                                 {
-                                    MainActivity.LogInfoFirebase("uri!=null");
-                                    MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message +
+                                    Logger.FirebaseInfo("uri!=null");
+                                    Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR " + e.Message +
                                                              " path child: " +
                                                              Android.Net.Uri.Decode(uriOfIncomplete.ToString()) +
                                                              " path parent: " +
@@ -6927,9 +6868,7 @@ namespace Seeker
                                                              " path dest: " +
                                                              Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
                                     SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                    MainActivity.LogDebug(e.Message + " " +
-                                                          uriOfIncomplete
-                                                              .Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                    Logger.Debug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
                                 }
                             }
                         }
@@ -6938,21 +6877,11 @@ namespace Seeker
 
                     if (uri == null)
                     {
-                        LogFirebase("DocumentsContract MoveDocument FAILED, override incomplete: " +
+                        Logger.FirebaseDebug("DocumentsContract MoveDocument FAILED, override incomplete: " +
                                     SeekerState.OverrideDefaultIncompleteLocations);
                     }
 
                     finalUri = uri.ToString();
-
-                    //1220ms for 35mb so 10x slower
-                    //DocumentFile mFile = folderDir1.CreateFile(@"audio/mp3", name);
-                    //System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                    //MoveFile(SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
-
-
-                    //stopwatch.Stop();
-                    //LogDebug("DocumentsContract.MoveDocument took: " + stopwatch.ElapsedMilliseconds);
-
                 }
             }
 
@@ -6979,12 +6908,12 @@ namespace Seeker
                 {
                     if (!(new Java.IO.File(toDelete.Path)).Delete())
                     {
-                        LogFirebase("Java.IO.File.Delete() failed to delete");
+                        Logger.FirebaseDebug("Java.IO.File.Delete() failed to delete");
                     }
                 }
                 catch (Exception e)
                 {
-                    LogFirebase("Java.IO.File.Delete() threw" + e.Message + e.StackTrace);
+                    Logger.FirebaseDebug("Java.IO.File.Delete() threw" + e.Message + e.StackTrace);
                 }
             }
             else
@@ -6995,7 +6924,7 @@ namespace Seeker
 
                 if (!df.Delete()) //on API 19 this seems to always fail..
                 {
-                    LogFirebase("df.Delete() failed to delete");
+                    Logger.FirebaseDebug("df.Delete() failed to delete");
                 }
             }
 
@@ -7018,7 +6947,7 @@ namespace Seeker
         {
             if (parent == null)
             {
-                MainActivity.LogFirebase("null parent");
+                Logger.FirebaseDebug("null parent");
                 return;
             }
 
@@ -7035,12 +6964,12 @@ namespace Seeker
                 {
                     if (!parent.ListFiles()[0].Delete())
                     {
-                        LogFirebase("parent.Delete() failed to delete .nomedia child...");
+                        Logger.FirebaseDebug("parent.Delete() failed to delete .nomedia child...");
                     }
 
                     if (!parent.Delete())
                     {
-                        LogFirebase("parent.Delete() failed to delete parent");
+                        Logger.FirebaseDebug("parent.Delete() failed to delete parent");
                     }
                 }
             }
@@ -7064,12 +6993,12 @@ namespace Seeker
             {
                 if (!parent.ListFiles()[0].Delete())
                 {
-                    LogFirebase("LEGACY parent.Delete() failed to delete .nomedia child...");
+                    Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete .nomedia child...");
                 }
 
                 if (!parent.Delete()) //this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
                 {
-                    LogFirebase("LEGACY parent.Delete() failed to delete parent");
+                    Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete parent");
                 }
             }
         }
@@ -7090,7 +7019,7 @@ namespace Seeker
             to.Close();
             if (!toDelete.Delete())
             {
-                LogFirebase("LEGACY df.Delete() failed to delete ()");
+                Logger.FirebaseDebug("LEGACY df.Delete() failed to delete ()");
             }
 
             DeleteParentIfEmpty(parent);
@@ -7293,7 +7222,7 @@ namespace Seeker
                 {
                     //if(SearchFragment.Instance == null)
                     //{
-                    //    MainActivity.LogDebug("Search Frag Instance is Null");
+                    //    Logger.Debug("Search Frag Instance is Null");
                     //}
                     if (SearchFragment.Instance?.Activity == null ||
                         !(SearchFragment.Instance.Activity.Lifecycle.CurrentState
@@ -7301,12 +7230,12 @@ namespace Seeker
                                 .Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
                     {
                         //let onresume go to the search tab..
-                        MainActivity.LogDebug("Delay Go To Wishlist Search Fragment for OnResume");
+                        Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
                     }
                     else
                     {
                         //can we do this now??? or should we pass this down to the search fragment for when it gets created...  maybe we should put this in a like "OnResume"
-                        MainActivity.LogDebug("Do Go To Wishlist in page selected");
+                        Logger.Debug("Do Go To Wishlist in page selected");
                         SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
                         goToSearchTab = int.MaxValue;
                     }
@@ -7499,7 +7428,7 @@ namespace Seeker
         }
         public override void OnClick(View widget)
         {
-            MainActivity.LogDebug("magnet link click");
+            Logger.Debug("magnet link click");
             try
             {
                 Intent followLink = new Intent(Intent.ActionView);
@@ -7522,7 +7451,7 @@ namespace Seeker
         }
         public override void OnClick(View widget)
         {
-            MainActivity.LogDebug("slsk link click");
+            Logger.Debug("slsk link click");
             CommonHelpers.SlskLinkClickedData = textClicked;
             CommonHelpers.ShowSlskLinkContextMenu = true;
             SeekerState.ActiveActivityRef.RegisterForContextMenu(widget);
@@ -7547,7 +7476,7 @@ namespace Seeker
             //    return;
             //}
             //init = true;
-            MainActivity.LogDebug("MaterialProgressBarPassThrough disposed" + disposed);
+            Logger.Debug("MaterialProgressBarPassThrough disposed" + disposed);
             var c = new ContextThemeWrapper(context, Resource.Style.MaterialThemeForChip);
             LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through, this, true);
         }
@@ -7607,7 +7536,7 @@ public static class TestClient
                 maxSleep = 200; //trickling in case
                 break;
         }
-        Seeker.MainActivity.LogDebug("max sleep: " + maxSleep);
+        Logger.Debug("max sleep: " + maxSleep);
         for (int i = 0; i < 1000; i++)
         {
             List<Soulseek.File> fs = new List<Soulseek.File>();

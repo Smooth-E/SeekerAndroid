@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -57,8 +58,6 @@ namespace Seeker
             System.IO.Stream fileStream = null;
             try
             {
-                //int max_estimation_frames = 30 * 44100 / 1152;
-
                 double bitrate_accumulator = 0;
                 int frame_size_accu = 0;
                 List<double> last_bitrates = new List<double>();
@@ -67,15 +66,18 @@ namespace Seeker
                 byte[] header = new byte[4];
                 fileStream.Read(header, 0, 4);
                 bool startsWithID3 = header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3"));
-                //{
-                //its technically incorrect, but flac files can have ID3 tags.
-                //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
+                
+                // it's technically incorrect, but flac files can have ID3 tags.
+                // I found the sample file to test in tinytag repo.  otherwise I think this is rare.
                 byte[] id3Header = new byte[10];
-                if ((fileStream.Read(id3Header, 0, 10) == 10))
+                
+                if (fileStream.Read(id3Header, 0, 10) == 10)
                 {
                     if (startsWithID3)
                     {
-                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
+                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 
+                                   + id3Header[5];
+                        
                         fileStream.Seek(size, System.IO.SeekOrigin.Begin);
                     }
                     else
@@ -231,7 +233,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("getMp3Metadata: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("getMp3Metadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -329,7 +331,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("GetAiffMetadata: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("GetAiffMetadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -415,7 +417,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("GetApeMetadata: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("GetApeMetadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -490,7 +492,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
+                Logger.FirebaseDebug("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
             }
             finally
             {

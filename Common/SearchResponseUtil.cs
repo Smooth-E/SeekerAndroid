@@ -15,7 +15,6 @@ namespace Common
                 string folderName = Common.Helpers.GetFullPathFromFile(file.Filename);
                 if (folderFilePairs.ContainsKey(folderName))
                 {
-                    //MainActivity.LogDebug("Split Foldername: " + folderName);
                     folderFilePairs[folderName].Add(file);
                 }
                 else
@@ -67,7 +66,6 @@ namespace Common
                     {
                         splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, null, pair.Value));
                     }
-                    //MainActivity.LogDebug("User: " + origResponse.Username + " got split into " + folderFilePairs.Keys.Count);
                     return new Tuple<bool, List<SearchResponse>>(true, splitSearchResponses);
                 }
                 else

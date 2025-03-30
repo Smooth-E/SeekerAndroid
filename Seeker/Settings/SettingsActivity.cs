@@ -412,7 +412,7 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("Settings Created");
+            Logger.Debug("Settings Created");
 
 
             base.OnCreate(savedInstanceState);
@@ -879,7 +879,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("Unable to tweak layout " + ex);
+                Logger.FirebaseDebug("Unable to tweak layout " + ex);
             }
         }
 
@@ -1089,7 +1089,7 @@ namespace Seeker
         //private static AndroidX.AppCompat.App.AlertDialog configSmartFilters = null;
         private void ConfigSmartFilters_Click(object sender, EventArgs e)
         {
-            MainActivity.LogInfoFirebase("ConfigSmartFilters_Click");
+            Logger.FirebaseInfo("ConfigSmartFilters_Click");
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(Resource.String.ConfigureSmartFilters);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
@@ -1436,7 +1436,7 @@ namespace Seeker
             }
 
             // show dialog
-            MainActivity.LogInfoFirebase("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
+            Logger.FirebaseInfo("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
 
             void OkayAction(object sender, string textInput)
             {
@@ -1579,18 +1579,18 @@ namespace Seeker
                         return;
                     }
                     rootdir = SeekerState.RootDocumentFile;
-                    MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
+                    Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
                 }
                 else if (useTempDir)
                 {
                     Java.IO.File appPrivateExternal = SeekerState.ActiveActivityRef.GetExternalFilesDir(null);
                     rootdir = DocumentFile.FromFile(appPrivateExternal);
-                    MainActivity.LogDebug("using temp incomplete dir");
+                    Logger.Debug("using temp incomplete dir");
                 }
                 else if (useCustomDir)
                 {
                     rootdir = SeekerState.RootIncompleteDocumentFile;
-                    MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                    Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
                 }
 
                 folderExists = CleanIncompleteFolder(rootdir.FindFile("Soulseek Incomplete"), doNotDelete, out folderCount);
@@ -1699,7 +1699,7 @@ namespace Seeker
 
         private void ShowChangeDialog(ChangeDialogType changeDialogType)
         {
-            MainActivity.LogInfoFirebase("ShowChangePortDialog");
+            Logger.FirebaseInfo("ShowChangePortDialog");
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             if (changeDialogType == ChangeDialogType.ChangePort)
             {
@@ -1829,7 +1829,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1840,7 +1840,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -1865,7 +1865,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.FirebaseDebug("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -2115,7 +2115,7 @@ namespace Seeker
         {
             if (e.IsChecked == SeekerState.AllowPrivateRoomInvitations)
             {
-                MainActivity.LogDebug("allow private: nothing to do");
+                Logger.Debug("allow private: nothing to do");
             }
             else
             {
@@ -2171,8 +2171,8 @@ namespace Seeker
             }
             catch (Exception e)
             {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                MainActivity.LogFirebase("reconfigure options: " + e.Message + e.StackTrace);
-                MainActivity.LogDebug("reconfigure options FAILED" + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("reconfigure options: " + e.Message + e.StackTrace);
+                Logger.Debug("reconfigure options FAILED" + e.Message + e.StackTrace);
                 return;
             }
             Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) =>
@@ -2181,7 +2181,7 @@ namespace Seeker
                 {
                     if (reconfigTask.IsFaulted)
                     {
-                        MainActivity.LogDebug("reconfigure options FAILED");
+                        Logger.Debug("reconfigure options FAILED");
                         if (allowPrivateInvites.HasValue)
                         {
                             string enabledDisabled = allowPrivateInvites.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
@@ -2211,7 +2211,7 @@ namespace Seeker
                     {
                         if (allowPrivateInvites.HasValue)
                         {
-                            MainActivity.LogDebug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
+                            Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
                             SeekerState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
                             //set shared prefs...
                             lock (MainActivity.SHARED_PREF_LOCK)
@@ -2554,7 +2554,7 @@ namespace Seeker
         private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
 
-            MainActivity.LogDebug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + SeekerState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
+            Logger.Debug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + SeekerState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
 
             if (e.Position == 0)
             {
@@ -2570,8 +2570,8 @@ namespace Seeker
                 editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
                 bool success = editor.Commit();
                 int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(KeyConsts.M_DayNightMode, -1);
-                MainActivity.LogDebug("was commit successful: " + success);
-                MainActivity.LogDebug("after writing and immediately reading: " + x);
+                Logger.Debug("was commit successful: " + success);
+                Logger.Debug("after writing and immediately reading: " + x);
             }
             //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
             switch (e.Position)
@@ -2852,19 +2852,19 @@ namespace Seeker
                         DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result)); //from tree uri not added til 21 also.  from single uri returns a f.Exists=false file.
                         if (f == null)
                         {
-                            MainActivity.LogFirebase("api<21 f is null");
+                            Logger.FirebaseDebug("api<21 f is null");
                             SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
                             return;
                         }
                         else if (!f.Exists())
                         {
-                            MainActivity.LogFirebase("api<21 f does not exist");
+                            Logger.FirebaseDebug("api<21 f does not exist");
                             SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
                             return;
                         }
                         else if (!f.IsDirectory)
                         {
-                            MainActivity.LogFirebase("api<21 NOT A DIRECTORY");
+                            Logger.FirebaseDebug("api<21 NOT A DIRECTORY");
                             SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_not_a_dir, ToastLength.Long).Show(); });
                             return;
                         }
@@ -2932,7 +2932,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        Logger.FirebaseDebug("showDirSettings: " + e.Message + e.StackTrace);
                         throw e;
                     }
                 }
@@ -2978,7 +2978,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        Logger.FirebaseDebug("showDirSettings: " + e.Message + e.StackTrace);
                         throw e;
                     }
                 }
@@ -3229,7 +3229,7 @@ namespace Seeker
                 this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
                 if (hiddenChanged || lockedChanged || overrideNameChanged)
                 {
-                    MainActivity.LogDebug("things changed re: folder options..");
+                    Logger.Debug("things changed re: folder options..");
                     Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
                 }
 
@@ -3328,7 +3328,7 @@ namespace Seeker
                 bool isUnqiue = UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(newlyAddedDirectory, true);
                 if (!isUnqiue)
                 {
-                    MainActivity.LogDebug("Root name was not unique. Updated it to be unique.");
+                    Logger.Debug("Root name was not unique. Updated it to be unique.");
                 }
                 UploadDirectoryChanged?.Invoke(null, new EventArgs());
             }
@@ -3336,14 +3336,14 @@ namespace Seeker
 
             if (SeekerState.IsParsing)
             {
-                MainActivity.LogDebug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
+                Logger.Debug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
                 MoreChangesHaveBeenMadeSoRescanWhenDone = true;
                 return;
             }
 
             try
             {
-                MainActivity.LogDebug("Parsing now......");
+                Logger.Debug("Parsing now......");
 
                 SeekerState.IsParsing = true;
                 int prevFiles = -1;
@@ -3377,7 +3377,7 @@ namespace Seeker
                     MainActivity.SetUnsetSharingBasedOnConditions(true);
                     if (!(e is DirectoryAccessFailure))
                     {
-                        MainActivity.LogFirebase("error parsing: " + e.Message + "  " + e.StackTrace);
+                        Logger.FirebaseDebug("error parsing: " + e.Message + "  " + e.StackTrace);
                     }
                     this.RunOnUiThread(new Action(() =>
                     {
@@ -3434,7 +3434,7 @@ namespace Seeker
                 SeekerState.IsParsing = false;
                 if (MoreChangesHaveBeenMadeSoRescanWhenDone)
                 {
-                    MainActivity.LogDebug("okay now lets pick up our new changes");
+                    Logger.Debug("okay now lets pick up our new changes");
                     MoreChangesHaveBeenMadeSoRescanWhenDone = false;
                     ParseDatabaseAndUpdateUI(null, requestCode, fromLegacyPicker, false);
                 }

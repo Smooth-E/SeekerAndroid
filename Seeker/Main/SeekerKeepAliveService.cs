@@ -2,15 +2,10 @@
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
-using AndroidX.Lifecycle;
 using Seeker.Helpers;
+using Seeker.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Seeker
 {
@@ -53,7 +48,7 @@ namespace Seeker
                 this.StopSelf();
                 return StartCommandResult.NotSticky;
             }
-            MainActivity.LogInfoFirebase("keep alive service started...");
+            Logger.FirebaseInfo("keep alive service started...");
             SeekerState.IsStartUpServiceCurrentlyRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
@@ -74,7 +69,7 @@ namespace Seeker
                 //   in my case it did not.
                 SeekerState.IsStartUpServiceCurrentlyRunning = false;
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
-                MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
+                Logger.FirebaseDebug($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
                 SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
 #endif
@@ -85,18 +80,18 @@ namespace Seeker
                 if (CpuKeepAlive_FullService != null && !CpuKeepAlive_FullService.IsHeld)
                 {
                     CpuKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("CpuKeepAlive acquire");
+                    Logger.FirebaseInfo("CpuKeepAlive acquire");
                 }
                 if (WifiKeepAlive_FullService != null && !WifiKeepAlive_FullService.IsHeld)
                 {
                     WifiKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("WifiKeepAlive acquire");
+                    Logger.FirebaseInfo("WifiKeepAlive acquire");
                 }
             }
             catch (System.Exception e)
             {
-                MainActivity.LogInfoFirebase("keepalive issue: " + e.Message + e.StackTrace);
-                MainActivity.LogFirebase("keepalive issue: " + e.Message + e.StackTrace);
+                Logger.FirebaseInfo("keepalive issue: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("keepalive issue: " + e.Message + e.StackTrace);
             }
             //}
             //runs indefinitely until stop.
@@ -110,28 +105,28 @@ namespace Seeker
             if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
                 CpuKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("CpuKeepAlive release");
+                Logger.FirebaseInfo("CpuKeepAlive release");
             }
             else if (CpuKeepAlive_FullService == null)
             {
-                MainActivity.LogFirebase("CpuKeepAlive is null");
+                Logger.FirebaseDebug("CpuKeepAlive is null");
             }
             else if (!CpuKeepAlive_FullService.IsHeld)
             {
-                MainActivity.LogFirebase("CpuKeepAlive not held");
+                Logger.FirebaseDebug("CpuKeepAlive not held");
             }
             if (WifiKeepAlive_FullService != null && WifiKeepAlive_FullService.IsHeld)
             {
                 WifiKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("WifiKeepAlive release");
+                Logger.FirebaseInfo("WifiKeepAlive release");
             }
             else if (WifiKeepAlive_FullService == null)
             {
-                MainActivity.LogFirebase("WifiKeepAlive is null");
+                Logger.FirebaseDebug("WifiKeepAlive is null");
             }
             else if (!WifiKeepAlive_FullService.IsHeld)
             {
-                MainActivity.LogFirebase("WifiKeepAlive not held");
+                Logger.FirebaseDebug("WifiKeepAlive not held");
             }
 
             base.OnDestroy();

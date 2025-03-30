@@ -6,6 +6,7 @@ using Android.Content;
 using Android.Views;
 using Android.Widget;
 using Google.Android.Material.Snackbar;
+using Seeker.Utils;
 using Soulseek;
 
 namespace Seeker.Helpers;
@@ -117,7 +118,7 @@ public static class RequestedUserInfoHelper
             {
                 if (!AddIfRequestedUser(uname, null, null, userInfoTask.Result))
                 {
-                    MainActivity.LogFirebase("requested user info logic yet could not find in list!!");
+                    Logger.FirebaseDebug("requested user info logic yet could not find in list!!");
                     // TODO: HANDLE ERROR
                 }
                 else
@@ -181,7 +182,7 @@ public static class RequestedUserInfoHelper
                     string msg = e.Message;
                     string innerMsg = e.InnerException.Message;
                     Type t = e.InnerException.GetType();
-                    MainActivity.LogFirebase("unexpected exception: " + msg + t.Name);
+                    Logger.FirebaseDebug("unexpected exception: " + msg + t.Name);
                 }
                 //toast timed out for user x, etc... user X is offline etc.
             }
@@ -213,29 +214,31 @@ public static class RequestedUserInfoHelper
                     found = true;
                     if (userData != null)
                     {
-                        MainActivity.LogDebug("Requested server UserData received");
+                        Logger.Debug("Requested server UserData received");
                         item.UserData = userData;
                         UserDataReceivedUI?.Invoke(null, userData);
                     }
 
                     if (userStatus != null)
                     {
-                        MainActivity.LogDebug("Requested server UserStatus received");
+                        Logger.Debug("Requested server UserStatus received");
                         item.UserStatus = userStatus;
                     }
 
                     if (userInfo != null)
                     {
-                        MainActivity.LogDebug("Requested peer UserInfo received");
+                        Logger.Debug("Requested peer UserInfo received");
                         item.UserInfo = userInfo;
+                        
                         if (userInfo.HasPicture)
                         {
-                            MainActivity.LogDebug("peer has pic");
+                            Logger.Debug("peer has pic");
                             lock (picturesStoredUsersLock)
                             {
                                 picturesStoredUsers.Add(uname);
                                 picturesStoredUsers = picturesStoredUsers.Distinct().ToList();
-                                if (picturesStoredUsers.Count > int.MaxValue) //disabled for now
+                                
+                                if (picturesStoredUsers.Count > int.MaxValue) // disabled for now
                                 {
                                     removeOldestPic = true;
                                 }
@@ -254,7 +257,7 @@ public static class RequestedUserInfoHelper
 
             if (removeOldestPic)
             {
-                MainActivity.LogInfoFirebase("Remove oldest picture");
+                Logger.FirebaseInfo("Remove oldest picture");
                 lock (picturesStoredUsersLock)
                 {
                     string userToRemovePic = picturesStoredUsers[0];

@@ -1,14 +1,5 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using Soulseek;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Soulseek;
+using Seeker.Utils;
 
 namespace Seeker.Transfers
 {
@@ -20,7 +11,6 @@ namespace Seeker.Transfers
         private const int transfersInterval = 2 * 60 * 1000; //2 mins, faster for testing..
 #else
         private const int transfersInterval = 5 * 60 * 1000;
-
 #endif
 
         public static void InitializeService()
@@ -37,12 +27,12 @@ namespace Seeker.Transfers
                 var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)
                 {
-                    MainActivity.LogDebug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
+                    Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
                     MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
                 }
             }
 
-            MainActivity.LogDebug("TransfersController InitializeService");
+            Logger.Debug("TransfersController InitializeService");
             TransfersTimer = new System.Timers.Timer(transfersInterval);
             TransfersTimer.AutoReset = true;
             TransfersTimer.Elapsed += TransfersTimer_Elapsed;
@@ -52,7 +42,7 @@ namespace Seeker.Transfers
 
         private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            MainActivity.LogDebug("TransfersTimerElapsed");
+            Logger.Debug("TransfersTimerElapsed");
             if (MainActivity.IsNotLoggedIn())
             {
                 return;
@@ -60,7 +50,7 @@ namespace Seeker.Transfers
             var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
             if (queuedTransfers.Count > 0)
             {
-                MainActivity.LogDebug("TransfersTimerElapsed - Lets get position of queued transfers...");
+                Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");
                 MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
             }
 

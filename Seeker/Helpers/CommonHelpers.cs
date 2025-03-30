@@ -55,7 +55,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SeekerState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SeekerState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
+                    Logger.FirebaseDebug("CompleteIncompleteDifferentVolume failed: " + e.Message + SeekerState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SeekerState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
                     return false;
                 }
                 //}
@@ -113,7 +113,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
             if (dt.Date == CommonHelpers.GetDateTimeNowSafe().Date)
             {
@@ -584,10 +584,10 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
+                    
+                    // TODO: Below is probably some duplicate code. Check the comment
+                    // overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
@@ -595,7 +595,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
 
                     if (string.IsNullOrEmpty(input.Text) && textRequired)
@@ -621,7 +621,7 @@ namespace Seeker
                 }
                 catch (System.Exception err)
                 {
-                    MainActivity.LogFirebase("simpleDialog_FocusChange" + err.Message);
+                    Logger.FirebaseDebug("simpleDialog_FocusChange" + err.Message);
                 }
             }
 
@@ -643,26 +643,26 @@ namespace Seeker
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException null activities");
+                    Logger.FirebaseDebug("commonDialog WindowManagerBadTokenException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = owner.IsFinishing;
-                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.FirebaseDebug("commonDialog WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("commonDialogException null activities");
+                    Logger.FirebaseDebug("commonDialogException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = owner.IsFinishing;
-                    MainActivity.LogFirebase("commonDialogException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.FirebaseDebug("commonDialogException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
         }
@@ -809,7 +809,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
             if (dt.Date == CommonHelpers.GetDateTimeNowSafe().Date)
             {
@@ -929,7 +929,7 @@ namespace Seeker
             {
                 if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                 {
-                    MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
+                    Logger.FirebaseDebug("viewUri: " + e.Message + httpUri.ToString());
                     SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
                 }
             }
@@ -960,7 +960,7 @@ namespace Seeker
                     {
                         if (lastPathSegmentChild.StartsWith("raw:")) //scheme says "content" even though it starts with "raw:"
                         {
-                            MainActivity.LogInfoFirebase("soft msdcase (raw:) : " + lastPathSegmentChild); //should be raw: provider
+                            Logger.FirebaseInfo("soft msdcase (raw:) : " + lastPathSegmentChild); //should be raw: provider
                             msdCase = true;
                             return String.Empty;
                         }
@@ -971,14 +971,14 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogInfoFirebase("msdcase: " + lastPathSegmentChild); //should be msd:int
+                        Logger.FirebaseInfo("msdcase: " + lastPathSegmentChild); //should be msd:int
                         msdCase = true;
                         return String.Empty;
                     }
                 }
                 else
                 {
-                    MainActivity.LogInfoFirebase("downloads without any files");
+                    Logger.FirebaseInfo("downloads without any files");
                     return dir.Uri.LastPathSegment.Replace('/', '\\');
                 }
             }
@@ -1041,7 +1041,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("failure to parse: " + linkStringToParse);
+                Logger.FirebaseDebug("failure to parse: " + linkStringToParse);
                 username = dirPath = fullFilePath = null;
                 isFile = false;
                 return false;
@@ -1434,7 +1434,7 @@ namespace Seeker
                             }
                             else
                             {
-                                MainActivity.LogFirebase("Failed to change password" + t.Exception.InnerException.Message);
+                                Logger.FirebaseDebug("Failed to change password" + t.Exception.InnerException.Message);
                                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
                             }
                             return;
@@ -1533,7 +1533,7 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.LogFirebase(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
+                            Logger.FirebaseDebug(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
                             SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
                         }
                         return;
@@ -1711,7 +1711,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search)
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId);
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1722,7 +1722,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);

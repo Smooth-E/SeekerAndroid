@@ -9,10 +9,10 @@ using Google.Android.Material.Chip;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Utils;
 
 namespace Seeker
 {
-
     public static class ChipsHelper
     {
         /// <summary>
@@ -242,7 +242,7 @@ namespace Seeker
 #if DEBUG
                     foreach (string ftype in sortedListPass1str)
                     {
-                        MainActivity.LogDebug(ftype + " : " + fileTypeCounts[ftype]);
+                        Logger.Debug(ftype + " : " + fileTypeCounts[ftype]);
                     }
 #endif
 
@@ -580,7 +580,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("keywords failed " + ex.Message + ex.StackTrace);
+                Logger.FirebaseDebug("keywords failed " + ex.Message + ex.StackTrace);
                 return new List<Tuple<string, HashSet<string>>>();
             }
         }

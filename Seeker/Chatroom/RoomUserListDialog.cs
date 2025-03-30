@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Utils;
 
 namespace Seeker.Chatroom
 {
@@ -108,16 +109,20 @@ namespace Seeker.Chatroom
                         }
 
                         roomUserListAdapter.NotifyItemMoved(previousPosition, newPosition);
-                        roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
+                        roomUserListAdapter.NotifyItemChanged(newPosition); // this is always necessary..
 
                         if (wasAtTop)
                         {
-                            MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                            Logger.Debug("case where that person would otherwise be hidden, " +
+                                         "so we fix it by moving up seamlessly.");
+                            
                             recycleLayoutManager.ScrollToPosition(0);
                         }
                         else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                         {
-                            MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                            Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person," +
+                                         " so we fix it by not doing that..");
+                            
                             recycleLayoutManager.OnRestoreInstanceState(p);
                         }
 
@@ -175,11 +180,13 @@ namespace Seeker.Chatroom
                                 break;
                             }
                         }
+                        
                         if (indexToRemove == -1)
                         {
-                            MainActivity.LogDebug("not there" + uname);
+                            Logger.Debug("not there" + uname);
                             return;
                         }
+                        
                         UI_userDataList.RemoveAt(indexToRemove);
                         roomUserListAdapter.NotifyItemRemoved(indexToRemove);
                     }
@@ -188,7 +195,7 @@ namespace Seeker.Chatroom
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("EXCEPTION UpdateData " + e.Message + e.StackTrace);
             }
         }
 
@@ -420,7 +427,7 @@ namespace Seeker.Chatroom
             Action a = null;
             if (ChatroomController.PutFriendsOnTop)
             {
-                a = new Action(() =>
+                a = () =>
                 {
                     bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
                     int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
@@ -456,38 +463,38 @@ namespace Seeker.Chatroom
                     }
 
                     roomUserListAdapter.NotifyItemMoved(previousPosition, newPosition);
-                    roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
+                    roomUserListAdapter.NotifyItemChanged(newPosition); // this is always necessary..
 
                     if (wasAtTop)
                     {
-                        MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                        Logger.Debug("case where that person would otherwise be hidden," +
+                                     " so we fix it by moving up seamlessly.");
                         recycleLayoutManager.ScrollToPosition(0);
                     }
                     else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                     {
-                        MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                        Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person," +
+                                     " so we fix it by not doing that..");
                         recycleLayoutManager.OnRestoreInstanceState(p);
                     }
-                });
+                };
             }
             else
             {
-                a = new Action(() =>
-                {
-                    NotifyItemChanged(longClickedUserData);
-                });
+                a = () => { NotifyItemChanged(longClickedUserData); };
             }
+            
             return a;
         }
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
             var userdata = longClickedUserData;
-            if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
+            if (item.ItemId != 0) // this is "Remove User" as in Remove User from Room!
             {
                 if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
-                    MainActivity.LogDebug("Handled by commons");
+                    Logger.Debug("Handled by commons");
                     return base.OnContextItemSelected(item);
                 }
             }

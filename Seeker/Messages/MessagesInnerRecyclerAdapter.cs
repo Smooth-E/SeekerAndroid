@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Utils;
 
 namespace Seeker.Messages
 {
@@ -104,22 +105,24 @@ namespace Seeker.Messages
 
         public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
 
-            //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
-            //in that case we still dont want to show anything.
+            // if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link,
+            // then there will be no browse at location.
+            // in that case we still dont want to show anything.
             if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
             {
                 return;
             }
-            else if (CommonHelpers.ShowSlskLinkContextMenu)
+            
+            if (CommonHelpers.ShowSlskLinkContextMenu)
             {
-                //closing wont turn this off since its invalid parse, so turn it off here...
+                // closing wont turn this off since its invalid parse, so turn it off here...
                 CommonHelpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 
-            //this class is shared by both chatroom and messages......
+            // this class is shared by both chatroom and messages......
             if (v is MessageInnerViewSent msgSent)
             {
                 ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewSent).DataItem;
@@ -156,9 +159,7 @@ namespace Seeker.Messages
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewSentHolder");
-
+            Logger.Debug("OnCreateContextMenu MessageInnerViewSentHolder");
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
     }
@@ -185,9 +186,7 @@ namespace Seeker.Messages
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewReceivedHolder");
-
+            Logger.Debug("OnCreateContextMenu MessageInnerViewReceivedHolder");
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
     }

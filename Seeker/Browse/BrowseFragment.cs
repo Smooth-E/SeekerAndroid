@@ -37,6 +37,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 using Seeker.Models;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -107,7 +108,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.FirebaseDebug(e.Message + e.StackTrace);
             }
         }
 
@@ -125,7 +126,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.FirebaseDebug(e.Message + e.StackTrace);
             }
         }
 
@@ -141,7 +142,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.FirebaseDebug(e.Message + e.StackTrace);
             }
 
         }
@@ -310,7 +311,7 @@ namespace Seeker
             Instance = this;
             this.HasOptionsMenu = true;
             SeekerState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
-            MainActivity.LogDebug("BrowseFragmentOnCreateView");
+            Logger.Debug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
             UpdateForScreenSize();
             //this.rootView.FindViewById<Button>(Resource.Id.button2).Click += UpDirectory;
@@ -435,7 +436,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.FirebaseDebug("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -457,33 +458,13 @@ namespace Seeker
             }
             else
             {
-                //if the keyboard is up and the edittext is in focus then maybe just put the keyboard down
-                //else put the bottom sheet down.  
-                //so make it two tiered.
-                //or maybe just unset the focus...
+                // if the keyboard is up and the edittext is in focus then maybe just put the keyboard down
+                // else put the bottom sheet down.  
+                // so make it two tiered.
+                // or maybe just unset the focus...
                 EditText test = rootView.FindViewById<EditText>(Resource.Id.filterText);
-                //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
-                //Rect outRect = new Rect();
-                //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //MainActivity.LogDebug("Window Visible Display Frame " + outRect.Height());
-                //MainActivity.LogDebug("Actual Height " + this.rootView.Height);
-                //Type immType = IMM.GetType();
 
-                //MainActivity.LogDebug("Y Position " + rel.GetY());
-                //int[] location = new int[2];
-                //rel.GetLocationOnScreen(location);
-                //MainActivity.LogDebug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
-                //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", prop.Name));
-                //}
-                //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", meth.Name));
-                //}
-
-                MainActivity.LogDebug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
+                Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
                 {
@@ -525,7 +506,7 @@ namespace Seeker
                 e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
-                MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
                 //overriding this, the keyboard fails to go down by default for some reason.....
@@ -536,7 +517,7 @@ namespace Seeker
                 }
                 catch (System.Exception ex)
                 {
-                    MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                 }
             }
         }
@@ -703,14 +684,15 @@ namespace Seeker
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
             string oldFilterString = FilteredResults ? FilterString : string.Empty;
-            MainActivity.LogDebug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
+            Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
             {
                 return;//this is the case where going from search fragment to browse fragment this event gets fired
                 //with an old e.text value and so its impossible to autoclear the value.
             }
-            MainActivity.LogDebug("Text Changed: " + e.Text);
+            
+            Logger.Debug("Text Changed: " + e.Text);
             if (e.Text != null && e.Text.ToString() != string.Empty)
             {
                 FilteredResults = true;
@@ -994,7 +976,7 @@ namespace Seeker
                 }
             }
             s.Stop();
-            MainActivity.LogDebug("total dir in tree: " + diagnostics_count + " total time: " + s.ElapsedMilliseconds);
+            Logger.Debug("total dir in tree: " + diagnostics_count + " total time: " + s.ElapsedMilliseconds);
             return filtered;
         }
 
@@ -1051,18 +1033,13 @@ namespace Seeker
             lock (filteredDataItemsForListView)
             {
                 filteredDataItemsForListView.Clear();
-                //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
-                //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
-                //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
                 if (cachedFilteredDataItemsForListView != null && IsCurrentSearchMoreRestrictive(FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
                 {
-                    //MainActivity.LogDebug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
                     var test = FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
-                    filteredDataItemsForListView.AddRange(test);//FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
+                    filteredDataItemsForListView.AddRange(test);
                 }
                 else
                 {
-                    //MainActivity.LogDebug("current filter is less restrictive: " + FilterString);
                     var test = FilterBrowseList(dataItemsForListView);
                     filteredDataItemsForListView.AddRange(test);
                 }
@@ -1563,7 +1540,7 @@ namespace Seeker
                 catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
-                    MainActivity.LogFirebase(logMsg);
+                    Logger.FirebaseDebug(logMsg);
                     return null;
                 }
             }
@@ -1578,7 +1555,7 @@ namespace Seeker
                 catch (IndexOutOfRangeException)
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
-                    MainActivity.LogFirebase(logMsg);
+                    Logger.FirebaseDebug(logMsg);
                     return null;
                 }
             }
@@ -1600,7 +1577,7 @@ namespace Seeker
                 //SeekerState.ActiveActivityRef.Open
                 //this.RegisterForContextMenu(e.View);
                 ItemPositionLongClicked = e.Position;
-                MainActivity.LogInfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
+                Logger.FirebaseInfo($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
                 this.listViewDirectories.ShowContextMenu();
                 //BrowseFragment.Instance.Context
 
@@ -2021,7 +1998,7 @@ namespace Seeker
 
                     if (staringPoint == null)
                     {
-                        MainActivity.LogFirebase("SeekerState_BrowseResponseReceived: startingPoint is null");
+                        Logger.FirebaseDebug("SeekerState_BrowseResponseReceived: startingPoint is null");
                         SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
                         return; //we might be in a bad state just returning like this... idk...
                     }
@@ -2081,7 +2058,7 @@ namespace Seeker
             //tempHackItemClick =true; 
             //}
 
-            MainActivity.LogInfoFirebase("RefreshOnRecieved " + CurrentUsername);
+            Logger.FirebaseInfo("RefreshOnRecieved " + CurrentUsername);
             //!!!collection was modified exception!!!
             //guessing from modifying dataItemsForListView which can happen in this method and in others...
             currentUsernameUI = CurrentUsername;
@@ -2098,7 +2075,7 @@ namespace Seeker
         {
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
-            MainActivity.LogInfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
+            Logger.FirebaseInfo("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
 
@@ -2161,10 +2138,9 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    Logger.Debug("IME ACTION: " + e.ActionId);
+                    
+                    // overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
@@ -2172,7 +2148,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -2183,10 +2159,9 @@ namespace Seeker
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    Logger.Debug("keypress: " + e.Event.KeyCode);
+                    
+                    // overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
@@ -2194,7 +2169,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -2224,26 +2199,26 @@ namespace Seeker
             {
                 if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
-                    MainActivity.LogFirebase("WindowManagerBadTokenException null activities");
+                    Logger.FirebaseDebug("WindowManagerBadTokenException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
-                    MainActivity.LogFirebase("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.FirebaseDebug("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
                 if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
-                    MainActivity.LogFirebase("Exception null activities");
+                    Logger.FirebaseDebug("Exception null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
-                    MainActivity.LogFirebase("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.FirebaseDebug("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
 
@@ -2259,7 +2234,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.FirebaseDebug("MainActivity_FocusChange" + err.Message);
             }
         }
 

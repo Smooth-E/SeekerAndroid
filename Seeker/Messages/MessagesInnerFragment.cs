@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
+using Seeker.Utils;
 
 namespace Seeker.Messages
 {
@@ -161,8 +163,8 @@ namespace Seeker.Messages
 
             Android.Content.Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
 
-            MainActivity.LogDebug("is soulseekclient null: " + (SeekerState.SoulseekClient == null).ToString());
-            MainActivity.LogDebug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null).ToString());
+            Logger.Debug("is soulseekclient null: " + (SeekerState.SoulseekClient == null));
+            Logger.Debug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null));
 
 
             if (string.IsNullOrEmpty(msg.MessageText))
@@ -176,7 +178,7 @@ namespace Seeker.Messages
             }
             if (!SeekerState.currentlyLoggedIn)
             {
-                MainActivity.LogDebug("not currently logged in");
+                Logger.Debug("not currently logged in");
                 Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 if (fromDirectReplyAction)
                 {
@@ -185,34 +187,39 @@ namespace Seeker.Messages
                 return;
             }
 
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            Action<Task> actualActionToPerform = t =>
             {
 
-                MainActivity.LogDebug("our continue with action is occuring!...");
+                Logger.Debug("our continue with action is occuring!...");
                 if (t.IsFaulted)
                 {
-                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    if (t.Exception.InnerException is not FaultPropagationException)
                     {
-                        BroadcastFriendlyRunOnUiThread(() => { Toast.MakeText(contextToUse, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        BroadcastFriendlyRunOnUiThread(() =>
+                        {
+                            Toast.MakeText(contextToUse, ResourceConstant.String.failed_to_connect, 
+                                ToastLength.Short)?.Show();
+                        });
                     }
                     if (fromDirectReplyAction)
                     {
-                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Log In.");
+                        MessageController.ShowNotification(msg, true, true, 
+                            "Failure - Cannot Log In.");
                     }
                     throw new FaultPropagationException();
                 }
-                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                BroadcastFriendlyRunOnUiThread(() =>
                 {
                     SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
-                }));
-            });
+                });
+            };
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
-                MainActivity.LogDebug("currently logged in but disconnected...");
+                Logger.Debug("currently logged in but disconnected...");
 
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
+                // we disconnected. login then do the rest.
+                // this is due to temp lost connection
                 Task t;
                 if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
                 {
@@ -222,22 +229,22 @@ namespace Seeker.Messages
             }
             else
             {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, 
+                        "Message will send on connection re-establishment", contextToUse))
                 {
-                    MainActivity.LogDebug("on finish log in we will do it");
+                    Logger.Debug("on finish log in we will do it");
                     return;
                 }
-                else
-                {
-                    SendMessageLogic(msg, fromDirectReplyAction);
-                }
+
+                SendMessageLogic(msg, fromDirectReplyAction);
             }
 
         }
 
-        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null) //you can start out with a message...
+        // you can start out with a message...
+        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Context broadcastContext = null)
         {
-            MainActivity.LogDebug("SendMessageLogic");
+            Logger.Debug("SendMessageLogic");
 
             string usernameToMessage = msg.Username;
             if (MessageController.Messages.Keys.Contains(usernameToMessage))
@@ -246,7 +253,7 @@ namespace Seeker.Messages
             }
             else
             {
-                MessageController.Messages[usernameToMessage] = new List<Message>(); //our first message to them..
+                MessageController.Messages[usernameToMessage] = new List<Message>(); // our first message to them..
                 MessageController.Messages[usernameToMessage].Add(msg);
             }
             MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
@@ -255,8 +262,8 @@ namespace Seeker.Messages
             {
                 if (t.IsFaulted)
                 {
-                    MainActivity.LogDebug("faulted " + t.Exception.ToString());
-                    MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
+                    Logger.Debug("faulted " + t.Exception.ToString());
+                    Logger.Debug("faulted " + t.Exception.InnerException.Message.ToString());
                     msg.SentMsgStatus = SentStatus.Failed;
                     Toast.MakeText(broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
 
@@ -267,7 +274,7 @@ namespace Seeker.Messages
                 }
                 else
                 {
-                    MainActivity.LogDebug("did not fault");
+                    Logger.Debug("did not fault");
                     msg.SentMsgStatus = SentStatus.Success;
 
                     if (fromDirectReplyAction)
@@ -278,7 +285,8 @@ namespace Seeker.Messages
                 MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                 MessageController.RaiseMessageReceived(msg);
             });
-            MainActivity.LogDebug("useranme to mesasge " + usernameToMessage);
+            
+            Logger.Debug("useranme to mesasge " + usernameToMessage);
             SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
 
@@ -322,11 +330,11 @@ namespace Seeker.Messages
 
         public override void OnResume()
         {
-            MainActivity.LogDebug("inner frag resume");
+            Logger.Debug("inner frag resume");
 
             if (MessagesActivity.DirectReplyMessages.TryRemove(Username, out _))
             {
-                MainActivity.LogDebug("remove the notification history");
+                Logger.Debug("remove the notification history");
                 //remove the now possibly void notification
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                 // notificationId is a unique int for each notification that you must define
@@ -340,7 +348,7 @@ namespace Seeker.Messages
 
         public override void OnPause()
         {
-            MainActivity.LogDebug("inner frag pause");
+            Logger.Debug("inner frag pause");
             currentlyResumed = false;
             base.OnPause();
         }

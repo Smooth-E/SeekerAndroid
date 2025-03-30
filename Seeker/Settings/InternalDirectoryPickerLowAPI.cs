@@ -1,5 +1,4 @@
 ﻿using Android.App;
-//using AndroidX.AppCompat.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Runtime;
@@ -13,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Environment = Android.OS.Environment;
-//using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -41,8 +40,7 @@ namespace Seeker
         //////////////////////////////////////////////////////
         // Callback interface for selected directory
         //////////////////////////////////////////////////////
-
-
+        
         public SimpleFileDialog(Activity context, FileSelectionMode mode)
         {
             switch (mode)
@@ -102,7 +100,7 @@ namespace Seeker
                 }
                 if (rootFolder != "storage")
                 {
-                    MainActivity.LogFirebase("sdcard root is: " + rootFolder);
+                    Logger.FirebaseDebug("sdcard root is: " + rootFolder);
                 }
                 _mSdcardDirectory = @"/" + rootFolder + @"/";
                 //this allows one to press '..' to go above the typical emulated root.

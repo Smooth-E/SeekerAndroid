@@ -24,8 +24,8 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Activity;
-using Java.Lang;
 using Seeker.Helpers;
+using Seeker.Utils;
 using System;
 using System.Linq;
 
@@ -229,7 +229,7 @@ namespace Seeker
 
                     if (chosenFile == null || (!SeekerState.PreOpenDocumentTree() && !chosenFile.Exists())) //i.e. its not an error if <21 and does not exist.
                     {
-                        MainActivity.LogFirebase("selected image does not exist !!!!");
+                        Logger.FirebaseDebug("selected image does not exist !!!!");
                         Toast.MakeText(this, this.GetString(Resource.String.error_image_doesnt_exist), ToastLength.Long).Show();
                         return;
                     }
@@ -288,11 +288,11 @@ namespace Seeker
                     var files = user_info_dir.ListFiles();
                     if (files.Count() != 1)
                     {
-                        MainActivity.LogFirebase("files.Count!=1");
+                        Logger.FirebaseDebug("files.Count!=1");
                     }
                     else if (files[0].Name != SeekerState.UserInfoPictureName)
                     {
-                        MainActivity.LogFirebase("files[0].Name != SeekerState.UserInfoPictureName");
+                        Logger.FirebaseDebug("files[0].Name != SeekerState.UserInfoPictureName");
                     }
                     pictureText.Text = SeekerState.UserInfoPictureName;
                     pictureText.Invalidate();

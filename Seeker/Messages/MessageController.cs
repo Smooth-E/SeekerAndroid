@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Utils;
 
 namespace Seeker.Messages
 {
@@ -55,7 +56,7 @@ namespace Seeker.Messages
             {
                 if (SeekerApplication.IsUserInIgnoreList(e.Username))
                 {
-                    MainActivity.LogDebug("IGNORED PM received: " + e.Username);
+                    Logger.Debug("IGNORED PM received: " + e.Username);
                     return;
                 }
 
@@ -65,7 +66,7 @@ namespace Seeker.Messages
                 {
                     if (SeekerState.Username == null || SeekerState.Username == string.Empty)
                     {
-                        MainActivity.LogFirebase("we received a message while our username is still null");
+                        Logger.FirebaseDebug("we received a message while our username is still null");
                     }
                     else if (!RootMessages.ContainsKey(SeekerState.Username))
                     {
@@ -104,7 +105,7 @@ namespace Seeker.Messages
                 }
                 catch (Exception error)
                 {
-                    MainActivity.LogFirebase("MessageReceived raise event failed: " + error.Message);
+                    Logger.FirebaseDebug("MessageReceived raise event failed: " + error.Message);
                 }
 
                 try
@@ -113,12 +114,12 @@ namespace Seeker.Messages
                 }
                 catch (Exception err)
                 {
-                    MainActivity.LogFirebase("AcknowledgePrivateMessageAsync: " + err.Message);
+                    Logger.FirebaseDebug("AcknowledgePrivateMessageAsync: " + err.Message);
                 }
             }
             catch (Exception exc)
             {
-                MainActivity.LogFirebase("msg received:" + exc.Message + exc.StackTrace);
+                Logger.FirebaseDebug("msg received:" + exc.Message + exc.StackTrace);
             }
         }
 
@@ -131,7 +132,7 @@ namespace Seeker.Messages
         {
             if (t.IsFaulted)
             {
-                MainActivity.LogFirebase("AcknowledgePrivateMessageAsync faulted: " + t.Exception.Message + t.Exception.StackTrace);
+                Logger.FirebaseDebug("AcknowledgePrivateMessageAsync faulted: " + t.Exception.Message + t.Exception.StackTrace);
             }
         }
 
@@ -502,7 +503,7 @@ namespace Seeker.Messages
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("ShowNotification failed: " + e.Message + e.StackTrace);
             }
 
         }
@@ -605,10 +606,11 @@ namespace Seeker.Messages
             {
                 if (MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
                 {
-                    //if we are already at this user then dont set as unread.
+                    // if we are already at this user then dont set as unread.
                     return;
                 }
-                MainActivity.LogDebug("set");
+                
+                Logger.Debug("set");
                 UnreadUsernames.TryAdd(username, 0);
                 SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
@@ -618,14 +620,12 @@ namespace Seeker.Messages
         {
             if (!UnreadUsernames.ContainsKey(username))
             {
-                return; //nothing to do.
+                return; // nothing to do.
             }
-            else
-            {
-                MainActivity.LogDebug("unset");
-                UnreadUsernames.TryRemove(username, out _);
-                SaveUnreadStateDict(SeekerState.SharedPreferences);
-            }
+   
+            Logger.Debug("unset");
+            UnreadUsernames.TryRemove(username, out _);
+            SaveUnreadStateDict(SeekerState.SharedPreferences);
         }
     }
 }

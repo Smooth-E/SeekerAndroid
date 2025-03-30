@@ -1,5 +1,6 @@
 ﻿using System;
 using Android.Net;
+using Seeker.Utils;
 
 namespace Seeker;
 
@@ -32,14 +33,16 @@ public static class NetworkHandoffDetector
         {
             if (netInfo.IsConnected)
             {
-                if ((DateTime.UtcNow - DisconnectedTime).TotalSeconds < 2.0) //in practice .2s or less...
+                if ((DateTime.UtcNow - DisconnectedTime).TotalSeconds < 2.0) // in practice .2s or less...
                 {
-                    MainActivity.LogDebug("total seconds..." + (DateTime.UtcNow - DisconnectedTime).TotalSeconds);
+                    Logger.Debug("total seconds..." + (DateTime.UtcNow - DisconnectedTime).TotalSeconds);
                     NetworkHandOffTime = DateTime.UtcNow;
                     NetworkSuccessfullyHandedOff = true;
                 }
+                
                 return true;
             }
+            
             NetworkSuccessfullyHandedOff = false;
             DisconnectedTime = DateTime.UtcNow;
         }
@@ -54,9 +57,9 @@ public static class NetworkHandoffDetector
             return false;
         }
     
-        MainActivity.LogDebug("total seconds..." + (DateTime.UtcNow - NetworkHandOffTime).TotalSeconds);
+        Logger.Debug("total seconds..." + (DateTime.UtcNow - NetworkHandOffTime).TotalSeconds);
         
-        //in practice, we can keep reading from the stream for a while so 30s is reasonable.
+        // in practice, we can keep reading from the stream for a while so 30s is reasonable.
         return (DateTime.UtcNow - NetworkHandOffTime).TotalSeconds < 30.0;
     }
 }

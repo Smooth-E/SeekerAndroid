@@ -35,9 +35,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using log = Android.Util.Log;
 using Seeker.Helpers;
 using Seeker.Transfers;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -53,7 +55,7 @@ namespace Seeker
         //private List<int> selectedPositions = new List<int>();
         public DownloadDialog(int pos, SearchResponse resp)
         {
-            MainActivity.LogDebug("DownloadDialog create");
+            Logger.Debug("DownloadDialog create");
             searchResponse = resp;
             searchPosition = pos;
             SearchResponseTemp = resp;
@@ -62,7 +64,7 @@ namespace Seeker
 
         public DownloadDialog()
         {
-            MainActivity.LogDebug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
+            Logger.Debug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
             searchResponse = SearchResponseTemp;
             searchPosition = SearchPositionTemp;
         }
@@ -100,16 +102,16 @@ namespace Seeker
         public override void OnResume()
         {
             base.OnResume();
-            MainActivity.LogDebug("OnResume Start");
+            Logger.Debug("OnResume Start");
 
             Dialog?.SetSizeProportional(.9, .9);
 
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         public override void OnAttach(Context context)
         {
-            MainActivity.LogDebug("DownloadDialog OnAttach");
+            Logger.Debug("DownloadDialog OnAttach");
             base.OnAttach(context);
             if (context is Activity)
             {
@@ -123,10 +125,10 @@ namespace Seeker
 
         public override void OnDetach()
         {
-            MainActivity.LogDebug("DownloadDialog OnDetach");
+            Logger.Debug("DownloadDialog OnDetach");
             SearchFragment.dlDialogShown = false;
             base.OnDetach();
-            this.activity = null;
+            activity = null;
         }
 
         public override void OnDestroy()
@@ -150,8 +152,8 @@ namespace Seeker
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("DownloadDialog OnCreateView");
-            return inflater.Inflate(Resource.Layout.downloaddialog, container); //container is parent
+            Logger.Debug("DownloadDialog OnCreateView");
+            return inflater.Inflate(ResourceConstant.Layout.downloaddialog, container); // container is parent
         }
 
         private class OnRefreshListenerGetFolder : Java.Lang.Object, AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout.IOnRefreshListener
@@ -209,7 +211,7 @@ namespace Seeker
             if (searchResponse == null)
             {
                 log.Debug(MainActivity.logCatTag, "Is searchResponse null");
-                MainActivity.LogFirebase("DownloadDialog search response is null");
+                Logger.FirebaseDebug("DownloadDialog search response is null");
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
@@ -269,7 +271,7 @@ namespace Seeker
                 //in response to a crash android.view.WindowManager.BadTokenException
                 //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
                 //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+                Logger.FirebaseDebug(error.Message + " POPUP BAD ERROR");
             }
         }
 
@@ -281,7 +283,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestFilesLogic: " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("RequestFilesLogic: " + e.Message + e.StackTrace);
             }
             Task<BrowseResponse> browseResponseTask = null;
             try
@@ -295,18 +297,7 @@ namespace Seeker
             }
             Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) =>
             {
-                //var arrayOfDir = br.Result.Directories.ToArray();
-                //for(int i=0;i<arrayOfDir.Length;i++)
-                //{
-                //    Console.WriteLine(arrayOfDir[i].DirectoryName);
-                //    Console.WriteLine(arrayOfDir[i].FileCount);
-                //    if(i>100)
-                //    {
-                //        break;
-                //    }
-                //}
-                //Console.WriteLine(arrayOfDir.ToString());
-                MainActivity.LogDebug($"RequestFilesLogic {username} completed");
+                Logger.Debug($"RequestFilesLogic {username} completed");
 
                 if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
                 {
@@ -339,7 +330,7 @@ namespace Seeker
                 {
                     //shouldnt get here
                     SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
-                    MainActivity.LogFirebase("browse response faulted: " + username + br.Exception?.Message);
+                    Logger.FirebaseDebug("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
                 //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
@@ -472,16 +463,14 @@ namespace Seeker
             }
             else
             {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform))
                 {
-                    MainActivity.LogDebug("on finish log in we will do it");
+                    Logger.Debug("on finish log in we will do it");
                     return;
                 }
-                else
-                {
-                    Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
-                    t.ContinueWith(continueWithAction);
-                }
+                
+                Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
+                t.ContinueWith(continueWithAction);
             }
         }
 
@@ -611,7 +600,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
+                Logger.FirebaseDebug("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
                 throw e;
             }
 
@@ -752,32 +741,36 @@ namespace Seeker
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) =>
+                t.ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
                         SeekerState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    MainActivity.LogDebug("DownloadDialog Dl_Click");
+                    
+                    Logger.Debug("DownloadDialog Dl_Click");
                     DownloadFiles(filesToDownload, username, false);
 
-                }));
+                });
                 try
                 {
-                    t.Wait(); //errors will propagate on WAIT.  They will not propagate on ContinueWith.  So you can get an exception thrown here if there is no network.
-                    //we dont need to do anything if there is an exception thrown here.  Since the ContinueWith actually takes care of it by checking if task faulted..
+                    // errors will propagate on WAIT.  They will not propagate on ContinueWith.
+                    // So you can get an exception thrown here if there is no network.
+                    // we don't need to do anything if there is an exception thrown here.
+                    // Since the ContinueWith actually takes care of it by checking if task faulted...
+                    t.Wait(); 
                 }
                 catch (Exception exx)
                 {
-                    MainActivity.LogDebug("DownloadDialog DownloadWithContinuation: " + exx.Message);
-                    return; //dont dismiss dialog.  that only happens on success..
+                    Logger.Debug("DownloadDialog DownloadWithContinuation: " + exx.Message);
+                    return; // don't dismiss dialog.  that only happens on success..
                 }
                 Dismiss();
             }
             else
             {
-                MainActivity.LogDebug("DownloadDialog Dl_Click");
+                Logger.Debug("DownloadDialog Dl_Click");
                 DownloadFiles(filesToDownload, username, false);
                 Dismiss();
             }
@@ -849,7 +842,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + " InNightMode");
+                Logger.FirebaseDebug(e.Message + " InNightMode");
                 return false;
             }
         }
@@ -887,15 +880,16 @@ namespace Seeker
                         {
                             Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_timed_out), ToastLength.Short).Show();
                         }
-                        MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                        
+                        Logger.Debug(dirTask.Exception.InnerException.Message);
                     }
                     Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_failed), ToastLength.Short).Show();
-                    MainActivity.LogDebug("DirectoryReceivedContAction faulted");
+                    Logger.Debug("DirectoryReceivedContAction faulted");
                 }
                 else
                 {
-                    MainActivity.LogDebug("DirectoryReceivedContAction successful!");
-                    ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
+                    Logger.Debug("DirectoryReceivedContAction successful!");
+                    ListView listView = View.FindViewById<ListView>(ResourceConstant.Id.listView1);
                     if (listView.Count == dirTask.Result.Files.Count)
                     {
                         Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_already_have), ToastLength.Short).Show();
@@ -922,7 +916,7 @@ namespace Seeker
                 string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
-                    MainActivity.LogFirebase("The dirname is empty!!");
+                    Logger.FirebaseDebug("The dirname is empty!!");
                     stopRefreshing();
                     return;
                 }
@@ -937,7 +931,8 @@ namespace Seeker
             catch (Exception ex)
             {
                 CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                MainActivity.LogFirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                Logger.FirebaseError($"{SeekerState.HideLockedResultsInSearch} " +
+                                     $"{searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
         }
 

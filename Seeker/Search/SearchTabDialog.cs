@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -90,16 +91,11 @@ namespace Seeker
 
         }
 
-        //private void NewWishlist_Click(object sender, EventArgs e)
-        //{
-        //    SearchTabHelper.AddWishlistSearchTab();
-        //}
-
         private void NewSearch_Click(object sender, EventArgs e)
         {
             int tabID = SearchTabHelper.AddSearchTab();
             SearchFragment.Instance.GoToTab(tabID, false);
-            SearchTabDialog.Instance.Dismiss();
+            Instance.Dismiss();
             SearchFragment.Instance.SetCustomViewTabNumberImageViewState();
         }
 
@@ -107,19 +103,9 @@ namespace Seeker
         {
             base.OnResume();
 
-            MainActivity.LogDebug("OnResume ran");
-            //this.View.ViewTreeObserver.AddOnGlobalLayoutListener(this);
-            //Window window = Dialog.Window;//  getDialog().getWindow();
-
-            //int currentWindowHeight = window.DecorView.Height;
-            //int currentWindowWidth = window.DecorView.Width;
-
-            //int xxx = this.View.RootView.Width;
-            //int xxxxx = this.View.Width;
-
+            Logger.Debug("OnResume ran");
             Dialog?.SetSizeProportional(.9, -1);
-
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         private List<int> GetSearchTabIds()

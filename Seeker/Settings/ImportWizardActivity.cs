@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using AndroidX.Activity;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -171,7 +172,7 @@ namespace Seeker
                                         {
                                             Toast.MakeText(this, Resource.String.FailedToParseContactDev, ToastLength.Long).Show();
                                         }
-                                        MainActivity.LogFirebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
+                                        Logger.FirebaseDebug("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
 
                                 });
@@ -1743,27 +1744,28 @@ namespace Seeker
 
                 }
             }
+            
             return new ImportedData(userList, bannedIgnoredList.Distinct().ToList(), wishlists, notes);
         }
 
         private static ImportType DetermineImportTypeByFirstLine(Stream stream)
         {
-            System.IO.StreamReader fStream = new System.IO.StreamReader(stream);
+            StreamReader fStream = new(stream);
             string firstLine = fStream.ReadLine();
             stream.Seek(0, SeekOrigin.Begin);
+            
             if (firstLine.StartsWith("<?xml"))
             {
                 return ImportType.Seeker;
             }
-            else if (firstLine.StartsWith("["))
+            
+            if (firstLine.StartsWith("["))
             {
                 return ImportType.Nicotine;
             }
-            else
-            {
-                MainActivity.LogDebug("Unsure of filetype.  Firstline = " + firstLine);
-                return ImportType.Nicotine;
-            }
+
+            Logger.Debug("Unsure of filetype.  Firstline = " + firstLine);
+            return ImportType.Nicotine;
         }
 
         /// <summary>

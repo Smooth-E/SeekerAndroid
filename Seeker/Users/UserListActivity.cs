@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Utils;
 
 namespace Seeker
@@ -85,7 +86,7 @@ namespace Seeker
             {
                 if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
-                    MainActivity.LogDebug("handled by commons");
+                    Logger.Debug("handled by commons");
                     return true;
                 }
             }
@@ -487,12 +488,21 @@ namespace Seeker
             {
                 if (t.IsFaulted)
                 {
-                    //only show once for the original fault.
-                    MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
-                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    // only show once for the original fault.
+                    // t.Exception is always Aggregate Exception...
+                    Logger.Debug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException));
+                    
+                    if (t.Exception.InnerException is not FaultPropagationException)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
+                            Toast.MakeText(SeekerState.ActiveActivityRef, 
+                                SeekerState.ActiveActivityRef.Resources
+                                    ?.GetString(ResourceConstant.String.failed_to_connect),
+                                ToastLength.Short)?.Show();
+                        });
                     }
+                    
                     throw new FaultPropagationException();
                 }
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
@@ -500,17 +510,19 @@ namespace Seeker
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
-                MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState");
+                Logger.Debug("CurrentlyLoggedInButDisconnectedState");
+                
                 Task t;
                 if (!MainActivity.ShowMessageAndCreateReconnectTask(c, false, out t))
                 {
                     return;
                 }
+                
                 SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "User will be added once login is complete."))
             {
-                MainActivity.LogDebug("IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction");
+                Logger.Debug("IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction");
                 return;
             }
             else
@@ -663,10 +675,9 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search)
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    Logger.Debug("IME ACTION: " + e.ActionId);
+          
+                    // overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
@@ -674,30 +685,31 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
                 }
             };
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
+                    
+                    // overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
                     }
-                    catch (System.Exception ex)
+                    catch (Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.FirebaseDebug(ex.Message + " error closing keyboard");
                     }
+                    
+                    //
                     //Do the Browse Logic...
                     eventHandler(sender, null);
                 }
@@ -736,7 +748,7 @@ namespace Seeker
         //        //in response to a crash android.view.WindowManager.BadTokenException
         //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
         //        //in this case not showing it is probably best... as opposed to a crash...
-        //        MainActivity.LogFirebase(error.Message + " IGNORE POPUP BAD ERROR");
+        //        Logger.FirebaseDebug(error.Message + " IGNORE POPUP BAD ERROR");
         //    }
         //}
 
@@ -757,7 +769,7 @@ namespace Seeker
         //        //in response to a crash android.view.WindowManager.BadTokenException
         //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
         //        //in this case not showing it is probably best... as opposed to a crash...
-        //        MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+        //        Logger.FirebaseDebug(error.Message + " POPUP BAD ERROR");
         //    }
         //}
     }

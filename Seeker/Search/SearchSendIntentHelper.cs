@@ -1,5 +1,6 @@
 ﻿using Android.Content;
 using System;
+using Seeker.Utils;
 
 namespace Seeker.Helpers
 {
@@ -120,7 +121,7 @@ namespace Seeker.Helpers
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("tryparseintent step1: " + ex.Message + " " + ex.StackTrace);
+                Logger.FirebaseDebug("tryparseintent step1: " + ex.Message + " " + ex.StackTrace);
                 searchTerm = null;
                 return false;
             }
@@ -143,12 +144,12 @@ namespace Seeker.Helpers
             {
                 if (searchIntent.Extras == null || searchIntent.Extras.KeySet() == null)
                 {
-                    MainActivity.LogFirebase("extras is null");
+                    Logger.FirebaseDebug("extras is null");
                 }
                 else
                 {
                     string keyset = String.Join(' ', searchIntent.Extras.KeySet());
-                    MainActivity.LogFirebase("extras keyset is " + keyset);
+                    Logger.FirebaseDebug("extras keyset is " + keyset);
                 }
                 return false; //bc empty.
             }
@@ -210,7 +211,7 @@ namespace Seeker.Helpers
                     }
                     catch (Exception ex)
                     {
-                        MainActivity.LogFirebase("error following link: " + urlstring + ex.Message + " " + ex.StackTrace);
+                        Logger.FirebaseDebug("error following link: " + urlstring + ex.Message + " " + ex.StackTrace);
                         failed = true;
                     }
 
