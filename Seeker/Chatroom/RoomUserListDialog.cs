@@ -279,7 +279,7 @@ namespace Seeker.Chatroom
             ChatroomController.PutFriendsOnTop = e.IsChecked;
             if (putFriendsAtTop != ChatroomController.PutFriendsOnTop)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, ChatroomController.PutFriendsOnTop);
@@ -304,7 +304,7 @@ namespace Seeker.Chatroom
 
             if (prev != ChatroomController.SortChatroomUsersBy)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutInt(KeyConsts.M_RoomUserListSortOrder, (int)ChatroomController.SortChatroomUsersBy);

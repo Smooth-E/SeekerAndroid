@@ -1009,7 +1009,7 @@ namespace Seeker
                     serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
                     listOfUploadItems = writer.ToString();
                 }
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                     lock (TransferStateSaveLock)
                     {
                         var editor = sharedPreferences.Edit();

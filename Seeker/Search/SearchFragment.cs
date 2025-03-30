@@ -1345,7 +1345,7 @@ namespace Seeker
                     SeekerState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
                     if (old != SeekerState.DefaultSearchResultSortAlgorithm)
                     {
-                        lock (MainActivity.SHARED_PREF_LOCK)
+                        lock (SeekerApplication.SHARED_PREF_LOCK)
                         {
                             var editor = SeekerState.SharedPreferences.Edit();
                             editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)SeekerState.DefaultSearchResultSortAlgorithm);
@@ -2198,7 +2198,7 @@ namespace Seeker
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
             searchHistory = new List<string>();
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
@@ -2237,7 +2237,7 @@ namespace Seeker
                 serializer.Serialize(writer, searchHistory);
                 listOfSearchItems = writer.ToString();
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchHistory, listOfSearchItems);

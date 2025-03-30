@@ -225,7 +225,7 @@ namespace Seeker.Helpers
                 stringToSave = SerializationHelper.SerializeToString(savedStates);
             }
 
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchTabsState_Headers, stringToSave);

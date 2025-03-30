@@ -48,10 +48,12 @@ using SlskHelp;
 
 namespace Seeker
 {
-    [Application()]
+    [Application]
     public class SeekerApplication : Application
     {
-        public static Context ApplicationContext = null;
+        public static object SHARED_PREF_LOCK = new();
+        public static Context ApplicationContext;
+        
         public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
         {
         }
@@ -92,7 +94,7 @@ namespace Seeker
                 if (!SeekerState.LegacyLanguageMigrated)
                 {
                     SeekerState.LegacyLanguageMigrated = true;
-                    lock (MainActivity.SHARED_PREF_LOCK)
+                    lock (SHARED_PREF_LOCK)
                     {
                         var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                         editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
@@ -1721,7 +1723,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
@@ -1760,7 +1762,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
@@ -2102,7 +2104,7 @@ namespace Seeker
 
         public static void RestoreListeningState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 SeekerState.ListenerEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerEnabled, true);
                 SeekerState.ListenerPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
@@ -2112,7 +2114,7 @@ namespace Seeker
 
         public static void SaveListeningState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ListenerEnabled, SeekerState.ListenerEnabled);
@@ -2124,7 +2126,7 @@ namespace Seeker
 
         public static void SaveSpeedLimitState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, SeekerState.SpeedLimitDownloadOn);
@@ -2178,7 +2180,7 @@ namespace Seeker
 
         public static void SaveSmartFilterState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
@@ -2228,7 +2230,7 @@ namespace Seeker
                 serializer.Serialize(writer, recentUsers);
                 recentUsersStr = writer.ToString();
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);

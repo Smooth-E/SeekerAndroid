@@ -1444,7 +1444,7 @@ namespace Seeker
                         {
                             SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
                             SeekerState.Password = newPassword;
-                            lock (MainActivity.SHARED_PREF_LOCK)
+                            lock (SeekerApplication.SHARED_PREF_LOCK)
                             {
                                 var editor = SeekerState.SharedPreferences.Edit();
                                 editor.PutString(KeyConsts.M_Password, SeekerState.Password);
@@ -1663,7 +1663,7 @@ namespace Seeker
 
         public static void SaveUserNotes()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserNotes, SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
@@ -1674,7 +1674,7 @@ namespace Seeker
 
         public static void SaveOnlineAlerts()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));

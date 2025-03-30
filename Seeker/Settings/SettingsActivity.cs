@@ -851,7 +851,7 @@ namespace Seeker
             }
 
             SeekerState.Language = selection;
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutString(KeyConsts.M_Lanuage, SeekerState.Language);
@@ -894,7 +894,7 @@ namespace Seeker
                 MainActivity.SetUnsetSharingBasedOnConditions(true);
                 UpdateShareImageView();
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, SeekerState.AllowUploadsOnMetered);
@@ -930,7 +930,7 @@ namespace Seeker
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
             SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
-            MainActivity.SharedFileCache_Refreshed(null, (0, 0));
+            CacheManager.SharedFileCache_Refreshed(null, (0, 0));
             this.UpdateShareImageView();
         }
 
@@ -940,7 +940,7 @@ namespace Seeker
             SeekerState.NotifyOnFolderCompleted = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, SeekerState.NotifyOnFolderCompleted);
@@ -955,7 +955,7 @@ namespace Seeker
             SeekerState.AutoRetryBackOnline = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, SeekerState.AutoRetryBackOnline);
@@ -970,7 +970,7 @@ namespace Seeker
             SeekerState.AutoAwayOnInactivity = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, SeekerState.AutoAwayOnInactivity);
@@ -1160,7 +1160,7 @@ namespace Seeker
         private void ShowSmartFilters_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SeekerState.ShowSmartFilters = e.IsChecked;
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutBoolean(KeyConsts.M_ShowSmartFilters, SeekerState.ShowSmartFilters);
@@ -1204,7 +1204,7 @@ namespace Seeker
                 SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
                 SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                     editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, SeekerApplication.LOG_DIAGNOSTICS);
@@ -2097,7 +2097,7 @@ namespace Seeker
         private void StartServiceOnStartupCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SeekerState.StartServiceOnStartup = e.IsChecked;
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutBoolean(KeyConsts.M_ServiceOnStartup, SeekerState.StartServiceOnStartup);
@@ -2215,7 +2215,7 @@ namespace Seeker
                             Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
                             SeekerState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
                             //set shared prefs...
-                            lock (MainActivity.SHARED_PREF_LOCK)
+                            lock (SeekerApplication.SHARED_PREF_LOCK)
                             {
                                 var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                                 editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, allowPrivateInvites.Value);
@@ -2503,7 +2503,7 @@ namespace Seeker
             SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
             if (oldVarient != SeekerState.DayModeVarient)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                     editor.PutInt(KeyConsts.M_DayVarient, (int)(SeekerState.DayModeVarient));
@@ -2535,7 +2535,7 @@ namespace Seeker
             }
             if (oldVarient != SeekerState.NightModeVarient)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                     editor.PutInt(KeyConsts.M_NightVarient, (int)(SeekerState.NightModeVarient));
@@ -2565,7 +2565,7 @@ namespace Seeker
             {
                 SeekerState.DayNightMode = e.Position;
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
@@ -3361,7 +3361,7 @@ namespace Seeker
                 try
                 {
 
-                    success = MainActivity.InitializeDatabase(null, false, out string errorMessage);
+                    success = CacheManager.InitializeDatabase(null, false, out string errorMessage);
                     if (!success)
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
@@ -3371,10 +3371,9 @@ namespace Seeker
                 catch (Exception e)
                 {
                     SeekerState.IsParsing = false;
-                    //SeekerState.UploadDataDirectoryUri = null;
-                    //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    MainActivity.ClearLegacyParsedCacheResults();
-                    MainActivity.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
+                    
+                    CacheManager.ClearLegacyParsedCacheResults();
+                    CacheManager.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
                     MainActivity.SetUnsetSharingBasedOnConditions(true);
                     if (!(e is DirectoryAccessFailure))
                     {
@@ -3632,7 +3631,7 @@ namespace Seeker
 
         public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
                 SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
@@ -3644,7 +3643,7 @@ namespace Seeker
 
         public static void SaveAdditionalDirectorySettingsToSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, SeekerState.CreateCompleteAndIncompleteFolders);
@@ -3659,7 +3658,7 @@ namespace Seeker
 
         public static void SaveMaxConcurrentDownloadsSettings()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers);
@@ -3670,7 +3669,7 @@ namespace Seeker
 
         public static void SaveManualIncompleteDirToSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
