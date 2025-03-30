@@ -17,31 +17,23 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Seeker.Search;
 using Android;
-using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
-using AndroidX.Fragment.App;
 using AndroidX.Lifecycle;
 using AndroidX.ViewPager.Widget;
-using Common;
 using Google.Android.Material.BottomNavigation;
-using Google.Android.Material.Snackbar;
 using Google.Android.Material.Tabs;
 using Java.IO;
 using SlskHelp;
@@ -50,12 +42,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 using static Android.Provider.DocumentsContract;
-using log = Android.Util.Log;
-using Seeker.Serialization;
 using AndroidX.Activity;
 using Seeker.Transfers;
 using Seeker.Exceptions;
@@ -77,49 +66,10 @@ namespace Seeker
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true)]
     public class MainActivity :
         ThemeableActivity,
-        ActivityCompat.IOnRequestPermissionsResultCallback,
         BottomNavigationView.IOnNavigationItemSelectedListener
     {
-        public static object SHARED_PREF_LOCK = new object();
+        public static object SHARED_PREF_LOCK = new();
         public const string logCatTag = "seeker";
-        
-        public static void createNotificationChannel(Context c, string id, string name)
-        {
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                NotificationChannel serviceChannel = new NotificationChannel(
-                    id,
-                    name,
-                    Android.App.NotificationImportance.Low
-                );
-                NotificationManager manager = c.GetSystemService(Context.NotificationService) as NotificationManager;
-                manager.CreateNotificationChannel(serviceChannel);
-            }
-        }
-
-        public void KeyboardChanged(object sender, bool isShown)
-        {
-            var bottomNavigationView =
-                SeekerState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-
-            if (isShown)
-            {
-                bottomNavigationView
-                    .Animate()
-                    .Alpha(0f)
-                    .SetDuration(250)
-                    .SetListener(new BottomNavigationViewAnimationListener());
-            }
-            else
-            {
-                bottomNavigationView.Visibility = ViewStates.Visible;
-                bottomNavigationView
-                    .Animate()
-                    .Alpha(1f)
-                    .SetDuration(300)
-                    .SetListener(null);
-            }
-        }
         
         public static event EventHandler<TransferItem> TransferAddedUINotify;
 
@@ -136,187 +86,19 @@ namespace Seeker
             {
                 return;
             }
-            else
+
+            foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
             {
-                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
-                {
-                    if (d.Target == null) //i.e. static
-                    {
-                        continue;
-                    }
-
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
-                    }
-                }
-            }
-        }
-
-        private List<string> GetRootDirs(DocumentFile dir)
-        {
-            List<string> dirUris = new List<string>();
-            DocumentFile[] files = dir.ListFiles(); // doesn't need to be sorted
-
-            for (int i = 0; i < files.Length; ++i)
-            {
-                DocumentFile file = files[i];
-                if (file.IsDirectory)
-                {
-                    dirUris.Add(file.Uri.ToString());
-                }
-            }
-
-            return dirUris;
-        }
-
-        private static Soulseek.Directory SlskDirFromUri(
-            ContentResolver contentResolver,
-            Android.Net.Uri rootUri,
-            Android.Net.Uri dirUri,
-            string dirToStrip,
-            bool diagFromDirectoryResolver,
-            string volumePath)
-        {
-            // on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
-            string directoryPath = dirUri.LastPathSegment;
-            directoryPath = directoryPath.Replace("/", @"\");
-
-            var documentId = DocumentsContract.GetDocumentId(dirUri);
-            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, documentId);
-
-            var cursorData = new String[]
-            {
-                Document.ColumnDocumentId,
-                Document.ColumnDisplayName,
-                Document.ColumnMimeType,
-                Document.ColumnSize
-            };
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, cursorData, null, null, null);
-
-            List<Soulseek.File> files = new List<Soulseek.File>();
-
-            try
-            {
-                while (c.MoveToNext())
-                {
-                    string docId = c.GetString(0);
-                    string name = c.GetString(1);
-                    string mime = c.GetString(2);
-                    long size = c.GetLong(3);
-                    var childUri = DocumentsContract.BuildDocumentUri(rootUri.Authority, docId);
-
-                    if (!StorageUtils.isDirectory((mime)))
-                    {
-
-                        string fname = CommonHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string folderName = Common.Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
-
-                        // for the brose response should only be the filename!!! 
-                        // when a user tries to download something from a browse resonse,
-                        // the soulseek client on their end must create a fully qualified path for us
-                        // bc we get a path that is:
-                        // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                        // not quite a full URI but it does add quite a bit..
-                        string searchableName = fname;
-
-                        var pathExtension = System.IO.Path.GetExtension(childUri.Path);
-                        var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), size, pathExtension);
-                        files.Add(slskFile);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Debug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
-                Logger.FirebaseDebug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
-            }
-            finally
-            {
-                c.closeQuietly();
-            }
-
-            CommonHelpers.SortSlskDirFiles(files); // otherwise our browse response files will be way out of order
-
-            if (volumePath != null)
-            {
-                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
-                {
-                    directoryPath = directoryPath.Substring(volumePath.Length);
-                }
-            }
-
-            var slskDir = new Soulseek.Directory(directoryPath, files);
-            return slskDir;
-        }
-
-        /// <summary>
-        /// We only use this in Contents Response Resolver.
-        /// </summary>
-        /// <param name="dirFile"></param>
-        /// <param name="dirToStrip"></param>
-        /// <param name="diagFromDirectoryResolver"></param>
-        /// <param name="volumePath"></param>
-        /// <returns></returns>
-        private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, bool diagFromDirectoryResolver,
-            string volumePath)
-        {
-            // on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
-            string directoryPath = dirFile.Uri.LastPathSegment;
-            directoryPath = directoryPath.Replace("/", @"\");
-
-            List<Soulseek.File> files = new List<Soulseek.File>();
-            foreach (DocumentFile f in dirFile.ListFiles())
-            {
-                if (f.IsDirectory)
+                if (d.Target == null) // i.e. static
                 {
                     continue;
                 }
 
-                try
+                if (d.Target.GetType() == target.GetType())
                 {
-                    string fname = null;
-                    string searchableName = null;
-
-                    var isDocumentsAuthority = dirFile.Uri.Authority == "com.android.providers.downloads.documents";
-                    if (isDocumentsAuthority && !f.Uri.Path.Contains(dirFile.Uri.Path))
-                    {
-                        //msd, msf case
-                        fname = f.Name;
-                        searchableName = fname; // for the brose response should only be the filename!!! 
-                    }
-                    else
-                    {
-                        fname = CommonHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
-                        searchableName = fname; // for the brose response should only be the filename!!! 
-                    }
-                    // when a user tries to download something from a browse resonse,
-                    // the soulseek client on their end must create a fully qualified path for us
-                    // bc we get a path that is:
-                    // "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                    // not quite a full URI but it does add quite a bit...
-
-                    var pathExtension = System.IO.Path.GetExtension(f.Uri.Path);
-                    var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), f.Length(), pathExtension);
-                    files.Add(slskFile);
+                    DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
                 }
-                catch (Exception e)
-                {
-                    Logger.Debug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
-                    Logger.FirebaseDebug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
-                }
-
             }
-
-            CommonHelpers.SortSlskDirFiles(files); // otherwise our browse response files will be way out of order
-
-            if (volumePath != null && directoryPath.Substring(0, volumePath.Length) == volumePath)
-            {
-                directoryPath = directoryPath.Substring(volumePath.Length);
-            }
-
-            var slskDir = new Soulseek.Directory(directoryPath, files);
-            return slskDir;
         }
 
         // TODO: Move these methods into the CacheParseResults class
@@ -2859,9 +2641,8 @@ namespace Seeker
                     DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
             }
 
-            var slskDir =
-                SlskDirFromDocumentFile(fullDir, true, 
-                    StorageUtils.GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
+            var slskDir = fullDir.ToSoulseekDirectory(StorageUtils
+                .GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
 
             slskDir = new Directory(directory, slskDir.Files);
             return Task.FromResult(slskDir);
