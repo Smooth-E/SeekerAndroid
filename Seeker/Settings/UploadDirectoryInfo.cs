@@ -1,6 +1,7 @@
 ﻿using AndroidX.DocumentFile.Provider;
 using System;
 using System.Text.Json.Serialization;
+using Seeker.Utils;
 
 namespace Seeker
 {
@@ -37,8 +38,6 @@ namespace Seeker
         [JsonIgnore]
         [NonSerialized]
         public bool IsSubdir;
-        //[System.Xml.Serialization.XmlIgnoreAttribute]
-        //public Android.Net.Uri UploadDirectoryUri;
 
         public void Reset()
         {
@@ -49,7 +48,8 @@ namespace Seeker
             DisplayNameOverride = null;
         }
 
-        public UploadDirectoryInfo(string UploadDataDirectoryUri, bool UploadDataDirectoryUriIsFromTree, bool IsLocked, bool IsHidden, string DisplayNameOverride)
+        public UploadDirectoryInfo(string UploadDataDirectoryUri, bool UploadDataDirectoryUriIsFromTree, 
+            bool IsLocked, bool IsHidden, string DisplayNameOverride)
         {
             this.UploadDataDirectoryUri = UploadDataDirectoryUri;
             this.UploadDataDirectoryUriIsFromTree = UploadDataDirectoryUriIsFromTree;
@@ -63,30 +63,35 @@ namespace Seeker
 
         public string GetPresentableName()
         {
-            if (string.IsNullOrEmpty(this.DisplayNameOverride))
+            if (string.IsNullOrEmpty(DisplayNameOverride))
             {
-                MainActivity.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
+                StorageUtils.GetAllFolderInfo(this, out _, out _, out _, 
+                    out _, out string presentableName);
+                
                 return presentableName;
             }
-            else
-            {
-                return this.DisplayNameOverride;
-            }
+
+            return DisplayNameOverride;
         }
 
         public string GetPresentableName(UploadDirectoryInfo ourTopMostParent)
         {
-            string parentLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
-            string ourLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
+            string parentLastPathSegment = CommonHelpers
+                .GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
+            
+            string ourLastPathSegment = CommonHelpers
+                .GetLastPathSegmentWithSpecialCaseProtection(UploadDirectory, out bool ourMsdCase);
+            
             if (ourMsdCase || msdCase)
             {
-                return ourLastPathSegment; //not great but no good solution for msd. TODO test
+                return ourLastPathSegment; // not great but no good solution for msd. TODO test
             }
-            else
-            {
-                MainActivity.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
-                return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length); //remove parent part and replace it with the parent presentable name.
-            }
+
+            StorageUtils.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, 
+                out _, out _, out string rootOverrideName, out string parentPresentableName);
+                
+            // remove parent part and replace it with the parent presentable name.
+            return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length);
         }
     }
 

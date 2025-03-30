@@ -42,12 +42,12 @@ namespace Seeker
             {
                 try
                 {
-                    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
+                    string volume1 = StorageUtils.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
                     if (everything)
                     {
                         volume1 = SeekerState.RootDocumentFile.Uri.LastPathSegment;
                     }
-                    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
+                    string volume2 = StorageUtils.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
                     if (everything)
                     {
                         volume2 = SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;

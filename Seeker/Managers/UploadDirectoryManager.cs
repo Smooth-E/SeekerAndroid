@@ -4,6 +4,7 @@ using System.Linq;
 using Android.Content;
 using Android.Provider;
 using AndroidX.DocumentFile.Provider;
+using Seeker.Utils;
 
 namespace Seeker.Managers;
 
@@ -142,13 +143,13 @@ public static class UploadDirectoryManager
                 continue;
             }
 
-            MainActivity.GetAllFolderInfo(dirInfo, out _, out _, out _, 
+            StorageUtils.GetAllFolderInfo(dirInfo, out _, out _, out _, 
                 out _, out var presentableName);
                 
             currentRootNames.Add(presentableName);
         }
 
-        MainActivity.GetAllFolderInfo(newDirInfo, out _, out _, out _, 
+        StorageUtils.GetAllFolderInfo(newDirInfo, out _, out _, out _, 
             out _, out var presentableNameNew);
         
         if (currentRootNames.Contains(presentableNameNew))
@@ -194,11 +195,11 @@ public static class UploadDirectoryManager
                         out bool msdCase);
                 if (msdCase)
                 {
-                    interestedVolnames.Add(string.Empty); //primary
+                    interestedVolnames.Add(string.Empty); // primary
                 }
                 else
                 {
-                    string volName = MainActivity.GetVolumeName(lastPathSegment, true, out _);
+                    string volName = StorageUtils.GetVolumeName(lastPathSegment, true, out _);
 
                     //this is for if the chosen volume is not primary external
                     if ((int)Android.OS.Build.VERSION.SdkInt < 29)
