@@ -7317,15 +7317,6 @@ namespace Seeker
 
     }
 
-    public class DownloadAddedEventArgs : EventArgs
-    {
-        public DownloadInfo dlInfo;
-        public DownloadAddedEventArgs(DownloadInfo downloadInfo)
-        {
-            dlInfo = downloadInfo;
-        }
-    }
-
     //TODOORG Managers
     /// <summary>
     /// Manages recent users
