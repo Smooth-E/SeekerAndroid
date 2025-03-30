@@ -5654,13 +5654,7 @@ namespace Seeker
 
             return continuationActionSaveFile;
         }
-
-        private static bool HasNonASCIIChars(string str)
-        {
-            return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
-        }
-
-
+        
         /// <summary>
         /// This is to solve the problem of, are all the toasts part of the same session?  
         /// For example if you download a locked folder of 20 files, you will get immediately 20 toasts
@@ -5669,7 +5663,8 @@ namespace Seeker
         /// <param name="msgToToast"></param>
         /// <param name="caseOrCode"></param>
         /// <param name="usernameIfApplicable"></param>
-        /// <param name="seconds">might be useful to increase this if something has a lot of variance even if requested at the same time, like a timeout.</param>
+        /// <param name="seconds">might be useful to increase this if something has a lot of variance even
+        /// if requested at the same time, like a timeout.</param>
         private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "",
             int seconds = 1)
         {
@@ -5704,11 +5699,7 @@ namespace Seeker
 
         private static System.Collections.Concurrent.ConcurrentDictionary<string, long> ToastUIDebouncer =
             new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
+        
         /// <param name="force">the log in layout is full of hacks. that being said force 
         ///   makes it so that if we are currently logged in to still add the logged in fragment
         ///   if not there, which makes sense. </param>
@@ -5730,9 +5721,7 @@ namespace Seeker
 
             if (!bttnIsAttached && !bttnTwoIsAttached && (!SeekerState.currentlyLoggedIn || force))
             {
-                //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-                //ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
-                //relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
+                // THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
                 var action1 = new Action(() =>
                 {
                     (rootView as ViewGroup).AddView(
@@ -5755,7 +5744,7 @@ namespace Seeker
         {
             var action = new Action(() =>
             {
-                //this is the case where it already has the loggedin fragment loaded.
+                // this is the case where it already has the loggedin fragment loaded.
                 Button bttn = null;
                 TextView welcome = null;
                 ViewGroup loggingInLayout = null;
@@ -5792,26 +5781,16 @@ namespace Seeker
 
                 if (welcome != null)
                 {
-                    //meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).  so I dont think that the welcome here is the right one.. I dont think it exists.
-                    //try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
+                    // meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).
+                    // so I dont think that the welcome here is the right one.. I dont think it exists.
+                    // try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
                     welcome.Visibility = ViewStates.Visible;
 
                     bool isShown = welcome.IsShown;
                     bool isAttachedToWindow = welcome.IsAttachedToWindow;
                     bool isActivated = welcome.Activated;
                     ViewStates viewState = welcome.WindowVisibility;
-
-
-                    //welcome = rootView.FindViewById(Resource.Id.userNameView) as Android.Widget.TextView;
-                    //if(welcome!=null)
-                    //{
-                    //isShown = welcome.IsShown;
-                    //isAttachedToWindow = welcome.IsAttachedToWindow;
-                    //isActivated = welcome.Activated;
-                    //viewState = welcome.WindowVisibility;
-                    //}
-
-
+                    
                     bttn.Visibility = ViewStates.Visible;
                     settings.Visibility = ViewStates.Visible;
 
@@ -5834,7 +5813,7 @@ namespace Seeker
                 }
                 else
                 {
-                    StaticHacks.UpdateUI = true; //if we arent ready rn then do it when we are..
+                    StaticHacks.UpdateUI = true; // if we arent ready rn then do it when we are..
                 }
 
                 if (logInLayout != null)
@@ -5845,6 +5824,7 @@ namespace Seeker
                 }
 
             });
+            
             if (ThreadingUtils.OnUiThread())
             {
                 action();
@@ -5860,12 +5840,7 @@ namespace Seeker
             return (!SeekerState.currentlyLoggedIn) || SeekerState.Username == null || SeekerState.Password == null ||
                    SeekerState.Username == string.Empty;
         }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
+        
         public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
         {
             var action = new Action(() =>
@@ -5889,14 +5864,11 @@ namespace Seeker
                         welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
 
-                        //this is the case we have a bad SAVED user pass....
+                        // this is the case we have a bad SAVED user pass....
                         try
                         {
                             logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
                             buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
                             if (logInLayout == null)
                             {
                                 ViewGroup relLayout =
@@ -5904,19 +5876,13 @@ namespace Seeker
                                         StaticHacks.RootView as ViewGroup, false) as ViewGroup;
                                 relLayout.LayoutParameters =
                                     new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
-                                //var action1 = new Action(() => {
                                 (StaticHacks.RootView as ViewGroup).AddView(
                                     SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login,
                                         StaticHacks.RootView as ViewGroup, false));
-                                //});
                             }
 
-                            //editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etUsername);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
                             settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
                             buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
                             logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
                             buttonLogin.Click -= LogInClick;
                             (StaticHacks.LoginFragment as Seeker.LoginFragment).rootView = StaticHacks.RootView;
@@ -5976,8 +5942,8 @@ namespace Seeker
                         }
                     }
 
-                    loggingInLayout.Visibility =
-                        ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
+                    // can get nullref here!!! (at least before the .AddLoggedInLayout code..
+                    loggingInLayout.Visibility = ViewStates.Gone;
                     welcome.Visibility = ViewStates.Gone;
                     settings.Visibility = ViewStates.Gone;
                     bttn.Visibility = ViewStates.Gone;
@@ -6030,20 +5996,22 @@ namespace Seeker
                 }
                 catch
                 {
-
+                    // Intentional no-op
                 }
 
                 if (logInLayout != null)
                 {
-                    logInLayout.Visibility =
-                        ViewStates
-                            .Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
+                    // TODO: change back..
+                    //       basically when we AddChild we add it UNDER the logInLayout..
+                    //       so making it gone makes everything gone... we need a root layout for it...
+                    logInLayout.Visibility = ViewStates.Gone;
                     AndroidX.Core.View.ViewCompat.SetTranslationZ(
                         logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                     loggingInView.Visibility = ViewStates.Visible;
-                    welcome.Visibility =
-                        ViewStates
-                            .Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
+                    
+                    // WE GET NULLREF HERE. FORCE connection already established exception
+                    // and maybe see what is going on here...
+                    welcome.Visibility = ViewStates.Gone;
                     logoutButton.Visibility = ViewStates.Gone;
                     settingsButton.Visibility = ViewStates.Gone;
                     AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
@@ -6073,11 +6041,7 @@ namespace Seeker
         {
             atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
         }
-
-
-
-
-
+        
         public static object lock_toplevel_ifexist_create = new object();
         public static object lock_album_ifexist_create = new object();
 
@@ -6085,7 +6049,6 @@ namespace Seeker
             out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
             string name = CommonHelpers.GetFileNameFromFile(fullfilename);
-            //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
             bool useDownloadDir = false;
@@ -6115,30 +6078,21 @@ namespace Seeker
                 try
                 {
                     string rootdir = string.Empty;
-                    //if (SeekerState.RootDocumentFile==null)
-                    //{
                     rootdir = Android.OS.Environment
                         .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    //}
-                    //else
-                    //{
-                    //    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    //    rootdir = SeekerState.RootDocumentFile.Uri.Path; //returns junk...
-                    //}
 
                     if (!(new Java.IO.File(rootdir)).Exists())
                     {
                         (new Java.IO.File(rootdir)).Mkdirs();
                     }
 
-                    //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
                     string incompleteDirString = rootdir + @"/Soulseek Incomplete/";
                     lock (lock_toplevel_ifexist_create)
                     {
                         incompleteDir = new Java.IO.File(incompleteDirString);
                         if (!incompleteDir.Exists())
                         {
-                            //make it and add nomedia...
+                            // make it and add nomedia...
                             incompleteDir.Mkdirs();
                             CreateNoMediaFileLegacy(incompleteDirString);
                         }
@@ -6176,12 +6130,13 @@ namespace Seeker
 
                     incompleteUri =
                         Android.Net.Uri.Parse(new Java.IO.File(filePath).ToURI()
-                            .ToString()); //using incompleteUri.Path gives you filePath :)
+                            .ToString()); // using incompleteUri.Path gives you filePath :)
                 }
                 catch (Exception e)
                 {
-                    Logger.FirebaseDebug("Legacy Filesystem Issue: " + e.Message + e.StackTrace + System.Environment.NewLine +
-                                incompleteDir.Exists() + musicDir.Exists() + fileExists);
+                    Logger.FirebaseDebug("Legacy Filesystem Issue: " + e.Message + e.StackTrace 
+                                         + System.Environment.NewLine + incompleteDir.Exists() 
+                                         + musicDir.Exists() + fileExists);
                     throw;
                 }
 
@@ -6189,7 +6144,7 @@ namespace Seeker
             }
             else
             {
-                DocumentFile folderDir1 = null; //this is the desired location.
+                DocumentFile folderDir1 = null; // this is the desired location.
                 DocumentFile rootdir = null;
 
                 bool diagRootDirExistsAndCanWrite = false;
@@ -6229,8 +6184,6 @@ namespace Seeker
                     {
                         Logger.FirebaseDebug("rootdir (nonnull) does not exist: " + rootdir.Uri);
                         diagRootDirExistsAndCanWrite = false;
-                        //dont know how to create self
-                        //rootdir.CreateDirectory();
                     }
                     else if (!rootdir.CanWrite())
                     {
@@ -6242,10 +6195,6 @@ namespace Seeker
                         diagRootDirExistsAndCanWrite = true;
                     }
 
-
-                    //string diagMessage10 = CheckPermissions(rootdir.Uri); //TEST CODE REMOVE
-
-                    //var slskCompleteUri = rootdir.Uri + @"/Soulseek Complete/";
                     DocumentFile slskDir1 = null;
                     lock (lock_toplevel_ifexist_create)
                     {
@@ -6253,7 +6202,6 @@ namespace Seeker
                         if (slskDir1 == null || !slskDir1.Exists())
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Incomplete");
-                            //slskDir1 = rootdir.FindFile("Soulseek Incomplete");
                             if (slskDir1 == null)
                             {
                                 string diagMessage = CheckPermissions(rootdir.Uri);
@@ -6272,9 +6220,7 @@ namespace Seeker
                             CreateNoMediaFile(slskDir1);
                         }
                     }
-
-                    //slskDir1 = rootdir.FindFile("Soulseek Incomplete"); //if it does not exist you then have to get it again!!
-                    //                                                  //else first time the song will be outside the directory
+                    
                     if (slskDir1 == null)
                     {
                         diagSlskDirExistsAfterCreation = false;
@@ -6289,13 +6235,13 @@ namespace Seeker
 
                     string album_folder_name =
                         CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth);
+                    
                     lock (lock_album_ifexist_create)
                     {
-                        folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist
+                        folderDir1 = slskDir1.FindFile(album_folder_name); // does the folder we want to save to exist
                         if (folderDir1 == null || !folderDir1.Exists())
                         {
                             folderDir1 = slskDir1.CreateDirectory(album_folder_name);
-                            //folderDir1 = slskDir1.FindFile(album_folder_name); //if it does not exist you then have to get it again!!
                             if (folderDir1 == null)
                             {
                                 string rootUri = string.Empty;
@@ -6332,13 +6278,9 @@ namespace Seeker
                             CreateNoMediaFile(folderDir1);
                         }
                     }
-
-                    //THE VALID GOOD flags for a directory is Supports Dir Create.  The write is off in all of my cases and not necessary..
-
-                    //string diagMessage2 = CheckPermissions(slskDir1.Uri); //TEST CODE DELETE
-                    //string diagMessage3 = CheckPermissions(folderDir1.Uri); //TEST CODE DELETE
-
-
+                    
+                    // THE VALID GOOD flags for a directory is Supports Dir Create.
+                    // The write is off in all of my cases and not necessary..
                 }
                 catch (Exception e)
                 {
@@ -6359,10 +6301,10 @@ namespace Seeker
                     });
                 }
 
-                //BACKUP IF FOLDER DIR IS NULL
+                // BACKUP IF FOLDER DIR IS NULL
                 if (folderDir1 == null)
                 {
-                    folderDir1 = rootdir; //use the root instead..
+                    folderDir1 = rootdir; // use the root instead..
                 }
 
                 parentUri = folderDir1.Uri;
@@ -6370,10 +6312,10 @@ namespace Seeker
                 filePath = folderDir1.Uri + @"/" + name;
 
                 System.IO.Stream stream = null;
-                DocumentFile potentialFile = folderDir1.FindFile(name); //this will return null if does not exist!!
-                if (potentialFile != null &&
-                    potentialFile
-                        .Exists()) //dont do a check for length 0 because then it will go to else and create another identical file (2)
+                DocumentFile potentialFile = folderDir1.FindFile(name); // this will return null if does not exist!!
+                
+                // don't do a check for length 0 because then it will go to else and create another identical file (2)
+                if (potentialFile != null && potentialFile.Exists();
                 {
                     partialLength = potentialFile.Length();
                     incompleteUri = potentialFile.Uri;
@@ -6382,28 +6324,24 @@ namespace Seeker
                 else
                 {
                     partialLength = 0;
-                    DocumentFile
-                        mFile = CommonHelpers.CreateMediaFile(folderDir1,
-                            name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
-                    //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
-                    incompleteUri =
-                        mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
+                    
+                    // on samsung api 19 it renames song.mp3 to song.mp3.mp3.
+                    // TODO: fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                    
+                    // String: name of new document, without any file extension appended;
+                    // the underlying provider may choose to append the extension.. Whoops...
+                    
+                    // nullref TODO TODO: if null throw custom exception so you can better handle
+                    // it later on in DL continuation action
+                    incompleteUri = mFile.Uri;
                     stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
 
                 return stream;
-                //string type1 = stream.GetType().ToString();
-                //Java.IO.File musicFile = new Java.IO.File(filePath);
-                //FileOutputStream stream = new FileOutputStream(mFile);
-                //stream.Write(bytes);
-                //stream.Close();
             }
-            //return filePath;
         }
-
-
-
-
+        
         /// <summary>
         /// Check Permissions if things dont go right for better diagnostic info
         /// </summary>
@@ -6473,28 +6411,20 @@ namespace Seeker
             finalUri = string.Empty;
             if (SeekerState.UseLegacyStorage() &&
                 (SeekerState.RootDocumentFile == null &&
-                 !SettingsActivity
-                     .UseIncompleteManualFolder())) //if the user didnt select a complete OR incomplete directory. i.e. pure java files.  
+                 // if the user didnt select a complete OR incomplete directory. i.e. pure java files.
+                 !SettingsActivity.UseIncompleteManualFolder()))  
             {
-
-                //this method works just fine if coming from a temp dir.  just not a open doc tree dir.
-
+                // this method works just fine if coming from a temp dir.  just not a open doc tree dir.
                 string rootdir = string.Empty;
-                //if (SeekerState.SaveDataDirectoryUri ==null || SeekerState.SaveDataDirectoryUri == string.Empty)
-                //{
+                
                 rootdir = Android.OS.Environment
                     .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                //}
-                //else
-                //{
-                //    rootdir = SeekerState.SaveDataDirectoryUri;
-                //}
+                
                 if (!(new Java.IO.File(rootdir)).Exists())
                 {
                     (new Java.IO.File(rootdir)).Mkdirs();
                 }
 
-                //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
                 string intermediateFolder = @"/";
                 if (SeekerState.CreateCompleteAndIncompleteFolders)
                 {
@@ -6503,18 +6433,18 @@ namespace Seeker
 
                 if (SeekerState.CreateUsernameSubfolders)
                 {
-                    intermediateFolder =
-                        intermediateFolder + username +
-                        @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
+                    // TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
+                    intermediateFolder = intermediateFolder + username + @"/";
                 }
 
-                string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); //+ @"/" + name;
+                string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); // + @"/" + name;
                 Java.IO.File musicDir = new Java.IO.File(fullDir);
                 musicDir.Mkdirs();
                 filePath = fullDir + @"/" + name;
                 Java.IO.File musicFile = new Java.IO.File(filePath);
                 FileOutputStream stream = new FileOutputStream(musicFile);
                 finalUri = musicFile.ToURI().ToString();
+                
                 if (memoryMode)
                 {
                     stream.Write(bytes);
@@ -6534,18 +6464,13 @@ namespace Seeker
                 if (SeekerState.UseLegacyStorage() && SeekerState.RootDocumentFile == null &&
                     SettingsActivity.UseIncompleteManualFolder())
                 {
-                    //this means that even though rootfile is null, manual folder is set and is a docfile.
-                    //so we must wrap the default root doc file.
+                    // this means that even though rootfile is null, manual folder is set and is a docfile.
+                    // so we must wrap the default root doc file.
                     string legacyRootdir = string.Empty;
-                    //if (SeekerState.SaveDataDirectoryUri ==null || SeekerState.SaveDataDirectoryUri == string.Empty)
-                    //{
+
                     legacyRootdir = Android.OS.Environment
                         .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    //}
-                    //else
-                    //{
-                    //    rootdir = SeekerState.SaveDataDirectoryUri;
-                    //}
+
                     Java.IO.File legacyRoot = (new Java.IO.File(legacyRootdir));
                     if (!legacyRoot.Exists())
                     {
@@ -6558,7 +6483,7 @@ namespace Seeker
 
                 }
 
-                DocumentFile folderDir1 = null; //this is the desired location.
+                DocumentFile folderDir1 = null; // this is the desired location.
                 DocumentFile rootdir = null;
 
                 bool diagRootDirExists = true;
@@ -6577,15 +6502,12 @@ namespace Seeker
                     if (!rootdir.Exists())
                     {
                         diagRootDirExists = false;
-                        //dont know how to create self
-                        //rootdir.CreateDirectory();
                     }
-                    //var slskCompleteUri = rootdir.Uri + @"/Soulseek Complete/";
 
                     DocumentFile slskDir1 = null;
                     if (SeekerState.CreateCompleteAndIncompleteFolders)
                     {
-                        slskDir1 = rootdir.FindFile("Soulseek Complete"); //does Soulseek Complete folder exist
+                        slskDir1 = rootdir.FindFile("Soulseek Complete"); // does Soulseek Complete folder exist
                         if (slskDir1 == null || !slskDir1.Exists())
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
@@ -6614,7 +6536,7 @@ namespace Seeker
                         DocumentFile tempUsernameDir1 = null;
                         lock (string.Intern("IfNotExistCreateAtomic_1"))
                         {
-                            tempUsernameDir1 = slskDir1.FindFile(username); //does username folder exist
+                            tempUsernameDir1 = slskDir1.FindFile(username); // does username folder exist
                             if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
                             {
                                 tempUsernameDir1 = slskDir1.CreateDirectory(username);
@@ -6649,7 +6571,7 @@ namespace Seeker
                         {
                             lock (string.Intern("IfNotExistCreateAtomic_2"))
                             {
-                                folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
+                                folderDir1 = slskDir1.FindFile(dir); // does the folder we want to save to exist
                                 if (folderDir1 == null || !folderDir1.Exists())
                                 {
                                     Logger.Debug("Creating " + dir);
@@ -6675,7 +6597,7 @@ namespace Seeker
                             lock (string.Intern("IfNotExistCreateAtomic_3"))
                             {
                                 folderDirNext =
-                                    folderDir1.FindFile(singleDir); //does the folder we want to save to exist
+                                    folderDir1.FindFile(singleDir); // does the folder we want to save to exist
                                 if (folderDirNext == null || !folderDirNext.Exists())
                                 {
                                     Logger.Debug("Creating " + dir);
@@ -6692,7 +6614,6 @@ namespace Seeker
                             _depth--;
                         }
                     }
-                    //folderDir1 = slskDir1.FindFile(dir); //if it does not exist you then have to get it again!!
                 }
                 catch (Exception e)
                 {
@@ -6710,16 +6631,14 @@ namespace Seeker
                     });
                 }
 
-                //BACKUP IF FOLDER DIR IS NULL
+                // BACKUP IF FOLDER DIR IS NULL
                 if (folderDir1 == null)
                 {
-                    folderDir1 = rootdir; //use the root instead..
+                    folderDir1 = rootdir; // use the root instead..
                 }
 
                 filePath = folderDir1.Uri + @"/" + name;
-
-                //Java.IO.File musicFile = new Java.IO.File(filePath);
-                //FileOutputStream stream = new FileOutputStream(mFile);
+                
                 if (memoryMode)
                 {
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
@@ -6765,57 +6684,68 @@ namespace Seeker
                         try
                         {
                             string realName = string.Empty;
-                            if (SettingsActivity
-                                .UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
+                            
+                            // fix due to above^  otherwise "Play File" silently fails
+                            if (SettingsActivity.UseIncompleteManualFolder())
                             {
-                                var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef,
-                                    uriOfIncomplete); //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                                // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                                var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
                                 realName = df.Name;
                             }
 
                             uri = DocumentsContract.MoveDocument(SeekerState.ActiveActivityRef.ContentResolver,
-                                uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); //ADDED IN API 24!!
+                                uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); // ADDED IN API 24!!
                             DeleteParentIfEmpty(DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef,
                                 parentUriOfIncomplete));
-                            //"/tree/primary:musictemp/document/primary:music2/J when two different uri trees the uri returned from move document is a mismash of the two... even tho it actually moves it correctly.
-                            //folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
-                            if (SettingsActivity
-                                .UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
+                            
+                            // "/tree/primary:musictemp/document/primary:music2/J when two different uri trees the
+                            // uri returned from move document is a mismash of the two...
+                            // even tho it actually moves it correctly.
+                            // folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
+                            
+                            // fix due to above^  otherwise "Play File" silently fails
+                            if (SettingsActivity.UseIncompleteManualFolder())
                             {
-                                uri = folderDir1.FindFile(realName)
-                                    .Uri; //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                                // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                                uri = folderDir1.FindFile(realName).Uri;
                             }
                         }
                         catch (Exception e)
                         {
-                            //move document fails if two different volumes:
-                            //"Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
-                            //{content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
-                            //content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
+                            // move document fails if two different volumes:
+                            // "Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
+                            // {content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
+                            // content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
                             if (e.Message.ToLower().Contains("already exists"))
                             {
                                 try
                                 {
-                                    //set the uri to the existing file...
+                                    // set the uri to the existing file...
                                     var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
                                     string realName = df.Name;
                                     uri = folderDir1.FindFile(realName).Uri;
 
                                     if (folderDir1.Uri == parentUriOfIncomplete)
                                     {
-                                        //case where SDCARD was full - all files were 0 bytes, folders could not be created, documenttree.CreateDirectory() returns null.
-                                        //no errors until you tried to move it. then you would get "alreay exists" since (if Create Complete and Incomplete folders is checked and 
-                                        //the incomplete dir isnt changed) then the destination is the same as the incomplete file (since the incomplete and complete folders
-                                        //couldnt be created.  This error is misleading though so do a more generic error.
+                                        // case where SDCARD was full - all files were 0 bytes, folders could not
+                                        // be created, documenttree.CreateDirectory() returns null.
+                                        // no errors until you tried to move it. then you would ge "alreay exists"
+                                        // since (if Create Complete and Incomplete folders is checked and 
+                                        // the incomplete dir isnt changed) then the destination is the same as the
+                                        // incomplete file (since the incomplete and complete folders
+                                        // couldnt be created.
+                                        // This error is misleading though so do a more generic error.
                                         SeekerApplication.ShowToast($"Filesystem Error for file {realName}.",
                                             ToastLength.Long);
+                                        
                                         Logger.Debug("complete and incomplete locations are the same");
                                     }
                                     else
                                     {
                                         SeekerApplication.ShowToast(
                                             string.Format(
-                                                "File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.",
+                                                "File {0} already exists at {1}.  Delete it and try again " +
+                                                "if you want to overwrite it.",
                                                 realName, uri.LastPathSegment.ToString()), ToastLength.Long);
                                     }
                                 }
@@ -6827,12 +6757,15 @@ namespace Seeker
                             }
                             else
                             {
-                                if (uri == null) //this means doc file failed (else it would be after)
+                                if (uri == null) // this means doc file failed (else it would be after)
                                 {
                                     Logger.FirebaseInfo("uri==null");
-                                    //lets try with the non MoveDocument way.
-                                    //this case can happen (for a legitimate reason) if:
-                                    //  the user is on api <29.  they start downloading an album.  then while its downloading they set the download directory.  the manual one will be file:\\ but the end location will be content:\\
+                                    
+                                    // lets try with the non MoveDocument way.
+                                    // this case can happen (for a legitimate reason) if:
+                                    //  the user is on api <29.  they start downloading an album.
+                                    // then while its downloading they set the download directory.
+                                    // the manual one will be file:\\ but the end location will be content:\\
                                     try
                                     {
 
@@ -6842,7 +6775,6 @@ namespace Seeker
                                         Logger.FirebaseInfo("retrying: incomplete: " + uriOfIncomplete +
                                                                      " complete: " + finalUri + " parent: " +
                                                                      parentUriOfIncomplete);
-                                        //                                        Logger.FirebaseInfo("using temp: " + 
                                         System.IO.Stream stream =
                                             SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                                         MoveFile(
@@ -6869,11 +6801,14 @@ namespace Seeker
                                                              " path dest: " +
                                                              Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
                                     SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                    Logger.Debug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                    
+                                    // Unknown Authority happens when source is
+                                    // file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                    Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
                                 }
                             }
                         }
-                        //throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
+                        // throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
                     }
 
                     if (uri == null)
@@ -6894,7 +6829,7 @@ namespace Seeker
         {
             byte[] buffer = new byte[4096];
             int read;
-            while ((read = from.Read(buffer)) != 0) //C# does 0 for you've reached the end!
+            while ((read = from.Read(buffer)) != 0) // C# does 0 for you've reached the end!
             {
                 to.Write(buffer, 0, read);
             }
@@ -6921,9 +6856,9 @@ namespace Seeker
             {
                 DocumentFile
                     df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef,
-                        toDelete); //this returns a file that doesnt exist with file ://
+                        toDelete); // this returns a file that doesnt exist with file ://
 
-                if (!df.Delete()) //on API 19 this seems to always fail..
+                if (!df.Delete()) // on API 19 this seems to always fail..
                 {
                     Logger.FirebaseDebug("df.Delete() failed to delete");
                 }
@@ -6937,8 +6872,10 @@ namespace Seeker
             }
             else
             {
+                // if from single uri then listing files will give unsupported operation exception...
+                // if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
                 parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef,
-                    parentToDelete); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
+                    parentToDelete);
             }
 
             DeleteParentIfEmpty(parent);
@@ -6951,14 +6888,7 @@ namespace Seeker
                 Logger.FirebaseDebug("null parent");
                 return;
             }
-
-            //LogDebug(parent.Name + "p name");
-            //LogDebug(parent.ListFiles().ToString());
-            //LogDebug(parent.ListFiles().Length.ToString());
-            //foreach (var f in parent.ListFiles())
-            //{
-            //    LogDebug("child: " + f.Name);
-            //}
+            
             try
             {
                 if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
@@ -6976,13 +6906,10 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("Index was outside"))
+                // race condition between checking length of ListFiles() and indexing [0] (twice)
+                if (!ex.Message.Contains("Index was outside"))
                 {
-                    //race condition between checking length of ListFiles() and indexing [0] (twice)
-                }
-                else
-                {
-                    throw ex; //this might be important..
+                    throw ex; // this might be important..
                 }
             }
         }
@@ -6997,7 +6924,8 @@ namespace Seeker
                     Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete .nomedia child...");
                 }
 
-                if (!parent.Delete()) //this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
+                // this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
+                if (!parent.Delete())
                 {
                     Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete parent");
                 }
@@ -7010,7 +6938,7 @@ namespace Seeker
         {
             byte[] buffer = new byte[4096];
             int read;
-            while ((read = from.Read(buffer)) != -1) //unlike C# this method does -1 for no more bytes left..
+            while ((read = from.Read(buffer)) != -1) // unlike C# this method does -1 for no more bytes left..
             {
                 to.Write(buffer, 0, read);
             }
@@ -7024,55 +6952,19 @@ namespace Seeker
             }
 
             DeleteParentIfEmpty(parent);
-            //LogDebug(toDelete.ParentFile.Name + ":" + toDelete.ParentFile.ListFiles().Length.ToString());
         }
 
         private static void SaveFileToMediaStore(string path)
         {
-            //ContentValues contentValues = new ContentValues();
-            //contentValues.Put(MediaStore.MediaColumns.DateAdded, Helpers.GetDateTimeNowSafe().Ticks / TimeSpan.TicksPerMillisecond);
-            //contentValues.Put(MediaStore.Audio.AudioColumns.Data,path);
-            //ContentResolver.Insert(MediaStore.Audio.Media.ExternalContentUri, contentValues);from
-
-
             Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
             Java.IO.File f = new Java.IO.File(path);
             Android.Net.Uri contentUri = Android.Net.Uri.FromFile(f);
             mediaScanIntent.SetData(contentUri);
             SeekerState.ActiveActivityRef.ApplicationContext.SendBroadcast(mediaScanIntent);
         }
-
-        //private void restoreSeekerState(Bundle savedInstanceState) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
-        //{   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSeekerState(bundle) where the bundle was older than shared prefs
-        //    //because saveSeekerState was not called in the meantime...
-        //    if(sharedPreferences != null)
-        //    {
-        //        SeekerState.currentlyLoggedIn = sharedPreferences.GetBoolean(KeyConsts.M_CurrentlyLoggedIn,false);
-        //        SeekerState.Username = sharedPreferences.GetString(KeyConsts.M_Username,"");
-        //        SeekerState.Password = sharedPreferences.GetString(KeyConsts.M_Password,"");
-        //        SeekerState.SaveDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_SaveDataDirectoryUri,"");
-        //        SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, DEFAULT_SEARCH_RESULTS);
-        //        SeekerState.DayNightMode = sharedPreferences.GetInt(KeyConsts.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
-        //        SeekerState.AutoClearComplete = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearComplete, false);
-        //        SeekerState.RememberSearchHistory = sharedPreferences.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
-        //        SeekerState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
-        //        SeekerState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(KeyConsts.M_DisableToastNotifications, false);
-        //        SeekerState.MemoryBackedDownload = sharedPreferences.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
-        //        SearchFragment.FilterSticky = sharedPreferences.GetBoolean(KeyConsts.M_FilterSticky, false);
-        //        SearchFragment.FilterString = sharedPreferences.GetString(KeyConsts.M_FilterStickyString, string.Empty);
-        //        SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(KeyConsts.M_SearchResultStyle, 1));
-        //        SeekerState.UploadSpeed = sharedPreferences.GetInt(KeyConsts.M_UploadSpeed, -1);
-        //        SeekerState.UploadDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_UploadDirectoryUri, "");
-        //        SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn,false);
-        //        SeekerState.UserList = RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
-        //    }
-        //}
-
-
-
+        
         protected override void OnPause()
         {
-            //LogDebug(".view is null " + (StaticHacks.LoginFragment.View==null).ToString()); it is null
             base.OnPause();
 
             TransfersFragment.SaveTransferItems(sharedPreferences);
@@ -7102,7 +6994,6 @@ namespace Seeker
                 editor.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
                 editor.PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification);
                 editor.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
-                //editor.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
                 editor.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
                 editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
 
@@ -7111,10 +7002,7 @@ namespace Seeker
                     editor.PutString(KeyConsts.M_UserList,
                         SerializationHelper.SaveUserListToString(SeekerState.UserList));
                 }
-
-
-
-                //editor.Apply();
+                
                 editor.Commit();
             }
         }
@@ -7142,9 +7030,9 @@ namespace Seeker
             outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
             outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
             outState.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
-            //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
             outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
             outState.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
+            
             if (SeekerState.UserList != null)
             {
                 outState.PutString(KeyConsts.M_UserList,
@@ -7167,7 +7055,7 @@ namespace Seeker
                 }
                 catch
                 {
-                    //not worth throwing over
+                    // not worth throwing over
                 }
             }
         }
@@ -7176,14 +7064,14 @@ namespace Seeker
 
         private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
         {
-            //if we are changing modes and the transfers action mode is not null (i.e. is active)
-            //then we need to get out of it.
+            // if we are changing modes and the transfers action mode is not null (i.e. is active)
+            // then we need to get out of it.
             if (TransfersFragment.TransfersActionMode != null)
             {
                 TransfersFragment.TransfersActionMode.Finish();
             }
 
-            //in addition each fragment is responsible for expanding their menu...
+            // in addition each fragment is responsible for expanding their menu...
             if (e.Position == 0)
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -7196,46 +7084,36 @@ namespace Seeker
                     .InflateMenu(Resource.Menu.account_menu);
             }
 
-            if (e.Position == 1) //search
+            if (e.Position == 1) // search
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                 this.SupportActionBar.SetHomeButtonEnabled(false);
-
-                //string initText = string.Empty;
-                //if (this.SupportActionBar?.CustomView != null) //it is null on device rotation...
-                //{
-                //    AutoCompleteTextView v = this.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                //    if(v!=null)
-                //    {
-                //        initText = v.Text;
-                //    }
-                //}
-                //the SupportActionBar.CustomView will still be here if we leave tabs and come back.. so just set the text on it again.
-
+                
                 this.SupportActionBar.SetDisplayShowCustomEnabled(true);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(false);
                 this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
                 SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView /*, this*/);
-                //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
                 this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar)
                     .InflateMenu(Resource.Menu.account_menu);
+                
                 if (goToSearchTab != int.MaxValue)
                 {
-                    //if(SearchFragment.Instance == null)
-                    //{
-                    //    Logger.Debug("Search Frag Instance is Null");
-                    //}
+                    // this happens if we come from settings activity.
+                    // Main Activity has NOT been started.
+                    // SearchFragment has the .Actvity ref of an OLD activity.
+                    // so we are not ready yet. 
                     if (SearchFragment.Instance?.Activity == null ||
                         !(SearchFragment.Instance.Activity.Lifecycle.CurrentState
                             .IsAtLeast(Lifecycle.State
-                                .Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                                .Started)))
                     {
                         //let onresume go to the search tab..
                         Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
                     }
                     else
                     {
-                        //can we do this now??? or should we pass this down to the search fragment for when it gets created...  maybe we should put this in a like "OnResume"
+                        // can we do this now??? or should we pass this down to the search fragment
+                        // for when it gets created...  maybe we should put this in a like "OnResume"
                         Logger.Debug("Do Go To Wishlist in page selected");
                         SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
                         goToSearchTab = int.MaxValue;
