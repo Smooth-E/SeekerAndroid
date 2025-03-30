@@ -7223,31 +7223,15 @@ namespace Seeker
 
             public void OnPageSelected(int position)
             {
-                //if page changes programmatically we have to do this...
-                //int itemResource = -1;
-                //switch(position)
-                //{
-                //    case 0:
-                //        itemResource = Resource.Id.navigation_home;
-                //        break;
-                //    case 1:
-                //        itemResource = Resource.Id.navigation_search;
-                //        break;
-                //    case 2:
-                //        itemResource = Resource.Id.navigation_transfers;
-                //        break;
-                //    case 3:
-                //        itemResource = Resource.Id.navigation_browse;
-                //        break;
-                //}
-                BottomNavigationView navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                BottomNavigationView navigator = 
+                    SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                
                 if (position != -1 && navigator != null)
                 {
-                    //navigator.SelectedItemId = itemResource;
-                    //navigator.Menu.GetItem(position).SetChecked(true);
-                    AndroidX.AppCompat.View.Menu.MenuBuilder menu = navigator.Menu as AndroidX.AppCompat.View.Menu.MenuBuilder;
+                    AndroidX.AppCompat.View.Menu.MenuBuilder menu = 
+                        navigator.Menu as AndroidX.AppCompat.View.Menu.MenuBuilder;
 
-                    menu.GetItem(position).SetCheckable(true); //this is necessary if side scrolling...
+                    menu.GetItem(position).SetCheckable(true); // this is necessary if side scrolling...
                     menu.GetItem(position).SetChecked(true);
                 }
             }
@@ -7259,23 +7243,13 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            //MenuInflater.Inflate(Resource.Menu.menu_main, menu);
             return base.OnCreateOptionsMenu(menu);
         }
 
-        //public override bool OnOptionsItemSelected(IMenuItem item)
-        //{
-        //    int id = item.ItemId;
-        //    if (id == Resource.Id.action_settings)
-        //    {
-        //        return true;
-        //    }
-
-        //    return base.OnOptionsItemSelected(item);
-        //}
-
-
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+        public override void OnRequestPermissionsResult(
+            int requestCode, 
+            string[] permissions, 
+            [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             switch (requestCode)
@@ -7289,10 +7263,12 @@ namespace Seeker
                     }
                     else
                     {
-                        FinishAndRemoveTask(); //TODO - why?? this was added in initial commit. kills process if permission not granted?
+                        // TODO - why?? this was added in initial commit. kills process if permission not granted?
+                        FinishAndRemoveTask();
                     }
                     break;
             }
+            
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
@@ -7317,62 +7293,6 @@ namespace Seeker
         }
     }
     
-    public class ViewPagerFixed : ViewPager
-    {
-        /// <summary>
-        /// Fixes this:
-        ///ava.lang.IllegalArgumentException: pointerIndex out of range
-        ///at android.view.MotionEvent.nativeGetAxisValue(Native Method)
-        ///at android.view.MotionEvent.getX(MotionEvent.java:1981)
-        ///atAndroidX.Core.View.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
-        ///atAndroidX.Core.View.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
-        ///atAndroidX.Core.View.MotionEventCompat.getX(MotionEventCompat.java:184)
-        ///at AndroidX.ViewPager.Widget.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
-        /// </summary>
-        /// <param name="context"></param>
-
-        public ViewPagerFixed(Context context) : base(context)
-        {
-
-        }
-
-        public ViewPagerFixed(Context context, Android.Util.IAttributeSet attrs) : base(context, attrs)
-        {
-
-        }
-
-        public ViewPagerFixed(IntPtr intPtr, JniHandleOwnership handle) : base(intPtr, handle)
-        {
-
-        }
-
-        public override bool OnTouchEvent(MotionEvent ev)
-        {
-            try
-            {
-                return base.OnTouchEvent(ev);
-            }
-            catch (Exception)
-            {
-
-            }
-            return false;
-        }
-
-        public override bool OnInterceptTouchEvent(MotionEvent ev)
-        {
-            try
-            {
-                return base.OnInterceptTouchEvent(ev); //this can throw a random 
-            }
-            catch (Exception)
-            {
-
-            }
-            return false;
-        }
-    }
-
     public class BrowseResponseEvent
     {
         public TreeNode<Directory> BrowseResponseTree;
