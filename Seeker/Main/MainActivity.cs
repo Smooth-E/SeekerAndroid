@@ -76,7 +76,6 @@ namespace Seeker
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true)]
     public class MainActivity :
         ThemeableActivity,
-        Seeker.MainActivity.DownloadCallback,
         ActivityCompat.IOnRequestPermissionsResultCallback,
         BottomNavigationView.IOnNavigationItemSelectedListener
     {
@@ -7399,23 +7398,16 @@ namespace Seeker
 
         }
 
-        public class OnPageChangeLister1 : Java.Lang.Object, ViewPager.IOnPageChangeListener
+        private class OnPageChangeLister1 : Java.Lang.Object, ViewPager.IOnPageChangeListener
         {
-            //public IntPtr Handle => throw new NotImplementedException();
-
-            //public void Dispose()
-            //{
-            //    //throw new NotImplementedException();
-            //}
-
             public void OnPageScrolled(int position, float positionOffset, int positionOffsetPixels)
             {
-                //throw new NotImplementedException();
+                // Intentional no-op
             }
 
             public void OnPageScrollStateChanged(int state)
             {
-                //throw new NotImplementedException();
+                // Intentional no-op
             }
 
             public void OnPageSelected(int position)
@@ -7432,10 +7424,6 @@ namespace Seeker
                     menu.GetItem(position).SetChecked(true);
                 }
             }
-        }
-
-        internal interface DownloadCallback
-        {
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
