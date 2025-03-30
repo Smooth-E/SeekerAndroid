@@ -7317,23 +7317,6 @@ namespace Seeker
 
     }
 
-    //TODOORG Managers
-
-
-    /// <summary>
-    /// for the lower assembly
-    /// </summary>
-    public class UserListChecker : IUserListChecker
-    {
-        public bool IsInUserList(string user)
-        {
-            return MainActivity.UserListContainsUser(user);
-        }
-    }
-
-
-
-
     // TODOORG manager
     public static class UploadDirectoryManager
     {

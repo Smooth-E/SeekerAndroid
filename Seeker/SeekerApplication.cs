@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+
 using Seeker.Chatroom;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Messages;
 using Seeker.Search;
-using Seeker.Serialization;
 using Seeker.Transfers;
 using Seeker.UPnP;
 using Android.App;
@@ -43,6 +43,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Utils;
 using SlskHelp;
 
 namespace Seeker
