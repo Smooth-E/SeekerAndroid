@@ -18,42 +18,43 @@ using System.Threading.Tasks;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
+using Seeker.Helpers;
 
 namespace Seeker
 {
     public class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
     {
-        private View rootView = null;
+        private View rootView;
 
         /// <summary>
         /// We add these to this dict so we can (1) AddUser to get their statuses and (2) efficiently check them when
         /// we get user status changed events.
         /// This dict may contain a greater number of users than strictly necessary.  as it is just used to save time, 
-        /// and having additional users here will not cause any issues.  (i.e. in case where other user was offline then the 
-        /// user cleared that download, no harm as it will check and see there are no downloads to retry and just remove user)
+        /// and having additional users here will not cause any issues.  (i.e. in case where other user was offline
+        /// then the user cleared that download, no harm as it will check and see there are no downloads
+        /// to retry and just remove user)
         /// </summary>
-        public static Dictionary<string, byte> UsersWhereDownloadFailedDueToOffline = new Dictionary<string, byte>();
+        public static Dictionary<string, byte> UsersWhereDownloadFailedDueToOffline = new();
+        
         public static void AddToUserOffline(string username)
         {
             if (UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
             {
                 return;
             }
-            else
+
+            lock (UsersWhereDownloadFailedDueToOffline)
             {
-                lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
-                {
-                    UsersWhereDownloadFailedDueToOffline[username] = 0x0;
-                }
-                try
-                {
-                    SeekerState.SoulseekClient.AddUserAsync(username);
-                }
-                catch (System.Exception)
-                {
-                    // noop
-                    // if user is not logged in then next time they log in the user will be added...
-                }
+                UsersWhereDownloadFailedDueToOffline[username] = 0x0;
+            }
+            try
+            {
+                SeekerState.SoulseekClient.AddUserAsync(username);
+            }
+            catch (Exception)
+            {
+                // noop
+                // if user is not logged in then next time they log in the user will be added...
             }
         }
 

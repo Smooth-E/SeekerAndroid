@@ -7310,23 +7310,6 @@ namespace Seeker
             }
         }
 
-        //private void MainActivity_Click(object sender, EventArgs e)
-        //{
-        //    this.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-        //}
-
-        private void B_Click(object sender, EventArgs e)
-        {
-            //Works Perfectly
-            //SoulseekClient client = new SoulseekClient();
-            //task.Wait();
-            //var task1 = client.SearchAsync(SearchQuery.FromText("Danse Manatee"));
-            //task1.Wait();
-            //IEnumerable<SearchResponse> responses = task1.Result;
-
-
-        }
-
         private class OnPageChangeLister1 : Java.Lang.Object, ViewPager.IOnPageChangeListener
         {
             public void OnPageScrolled(int position, float positionOffset, int positionOffsetPixels)
@@ -7377,7 +7360,7 @@ namespace Seeker
                     }
                     else
                     {
-                        // TODO - why?? this was added in initial commit. kills process if permission not granted?
+                        // TODO: - why?? this was added in initial commit. kills process if permission not granted?
                         FinishAndRemoveTask();
                     }
 
@@ -7408,16 +7391,6 @@ namespace Seeker
             return true;
         }
     }
-
-    public static class StaticHacks
-    {
-        public static bool LoggingIn = false;
-        public static bool UpdateUI = false;
-        public static View RootView = null;
-        public static AndroidX.Fragment.App.Fragment LoginFragment = null;
-        public static TransfersFragment TransfersFrag = null;
-    }
-
 
     public class MagnetLinkClickableSpan : Android.Text.Style.ClickableSpan
     {
