@@ -36,6 +36,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Models;
 
 namespace Seeker
 {
@@ -2009,12 +2010,10 @@ namespace Seeker
             cachedFilteredDataItemsForListView = null;
             CurrentUsername = e.Username;
             diagnostics_count = e.OriginalBrowseResponse.DirectoryCount;
-            //OriginalBrowseResponse = e.OriginalBrowseResponse;
-            //OurCurrentLocation = e.BrowseResponseTree; //aka root
-            lock (dataItemsForListView) //on non UI thread.
+            
+            lock (dataItemsForListView) // on non UI thread.
             {
-                dataItemsForListView.Clear();//clear old
-                //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
+                dataItemsForListView.Clear(); // clear old
                 username = e.Username;
                 if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
