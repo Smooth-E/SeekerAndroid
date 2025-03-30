@@ -42,6 +42,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using _Microsoft.Android.Resource.Designer;
+using Seeker.Components;
 using Seeker.Utils;
 
 namespace Seeker

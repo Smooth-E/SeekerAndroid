@@ -62,6 +62,7 @@ using Seeker.Exceptions;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
+using Seeker.Components;
 
 //using System.IO;
 //readme:
@@ -7390,99 +7391,6 @@ namespace Seeker
 
             return true;
         }
-    }
-
-    public class MagnetLinkClickableSpan : Android.Text.Style.ClickableSpan
-    {
-        private string textClicked;
-        public MagnetLinkClickableSpan(string _textClicked)
-        {
-            textClicked = _textClicked;
-        }
-        public override void OnClick(View widget)
-        {
-            Logger.Debug("magnet link click");
-            try
-            {
-                Intent followLink = new Intent(Intent.ActionView);
-                followLink.SetData(Android.Net.Uri.Parse(textClicked));
-                SeekerState.ActiveActivityRef.StartActivity(followLink);
-            }
-            catch (Android.Content.ActivityNotFoundException e)
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, "No Activity Found to handle Magnet Links.  Please Install a BitTorrent Client.", ToastLength.Long).Show();
-            }
-        }
-    }
-
-    public class SlskLinkClickableSpan : Android.Text.Style.ClickableSpan
-    {
-        private string textClicked;
-        public SlskLinkClickableSpan(string _textClicked)
-        {
-            textClicked = _textClicked;
-        }
-        public override void OnClick(View widget)
-        {
-            Logger.Debug("slsk link click");
-            CommonHelpers.SlskLinkClickedData = textClicked;
-            CommonHelpers.ShowSlskLinkContextMenu = true;
-            SeekerState.ActiveActivityRef.RegisterForContextMenu(widget);
-            SeekerState.ActiveActivityRef.OpenContextMenu(widget);
-            SeekerState.ActiveActivityRef.UnregisterForContextMenu(widget);
-        }
-    }
-
-    public class MaterialProgressBarPassThrough : LinearLayout
-    {
-        private bool disposed = false;
-        private bool init = false;
-        public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            //var c = new ContextThemeWrapper(context, Resource.Style.MaterialThemeForChip);
-            //LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through, this, true);
-        }
-        public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            //if(init)
-            //{
-            //    return;
-            //}
-            //init = true;
-            Logger.Debug("MaterialProgressBarPassThrough disposed" + disposed);
-            var c = new ContextThemeWrapper(context, Resource.Style.MaterialThemeForChip);
-            LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through, this, true);
-        }
-
-        public static MaterialProgressBarPassThrough inflate(ViewGroup parent)
-        {
-            var c = new ContextThemeWrapper(parent.Context, Resource.Style.MaterialThemeForChip);
-            MaterialProgressBarPassThrough itemView = (MaterialProgressBarPassThrough)LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through_dummy, parent, false);
-
-            return itemView;
-        }
-
-        public MaterialProgressBarPassThrough(IntPtr handle, JniHandleOwnership transfer) : base(handle, transfer)
-        {
-        }
-        public MaterialProgressBarPassThrough(Context context) : this(context, null)
-        {
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposed = true;
-            base.Dispose(disposing);
-        }
-    }
-
-    public enum SharingIcons
-    {
-        Off = 0,
-        Error = 1,
-        On = 2,
-        CurrentlyParsing = 3,
-        OffDueToNetwork = 4,
     }
 }
 
