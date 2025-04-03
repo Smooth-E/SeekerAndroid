@@ -1,4 +1,5 @@
-﻿using Soulseek;
+﻿using Seeker.Main;
+using Soulseek;
 using Seeker.Utils;
 
 namespace Seeker.Transfers

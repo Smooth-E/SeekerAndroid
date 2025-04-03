@@ -38,6 +38,7 @@ using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
 using log = Android.Util.Log;
 using Seeker.Helpers;
+using Seeker.Main;
 using Seeker.Transfers;
 using Seeker.Utils;
 

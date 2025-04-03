@@ -43,6 +43,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Main;
 using Seeker.Utils;
 using SlskHelp;
 

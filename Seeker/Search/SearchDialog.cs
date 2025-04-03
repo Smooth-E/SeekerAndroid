@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using System;
+using Seeker.Main;
 using Seeker.Utils;
 
 namespace Seeker

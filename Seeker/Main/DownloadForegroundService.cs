@@ -3,6 +3,7 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using System;
+using Seeker.Main;
 using Seeker.Managers;
 using Seeker.Utils;
 

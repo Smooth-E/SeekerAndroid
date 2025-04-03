@@ -6,6 +6,7 @@ using Android.Content;
 using Android.Views;
 using Android.Widget;
 using Google.Android.Material.Snackbar;
+using Seeker.Main;
 using Seeker.Utils;
 using Soulseek;
 

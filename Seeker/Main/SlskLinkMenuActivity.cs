@@ -5,6 +5,7 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Seeker.Main;
 using Seeker.Utils;
 
 namespace Seeker

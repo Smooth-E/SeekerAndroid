@@ -6,6 +6,7 @@ using Android.OS;
 using AndroidX.AppCompat.App;
 using AndroidX.Fragment.App;
 using Seeker.Helpers;
+using Seeker.Main;
 using Seeker.Utils;
 
 namespace Seeker;

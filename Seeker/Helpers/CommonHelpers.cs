@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
 using AndroidX.Core.Util;
 using Seeker.Components;
+using Seeker.Main;
 using Seeker.Utils;
 
 namespace Seeker
