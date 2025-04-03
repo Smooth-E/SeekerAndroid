@@ -36,18 +36,16 @@ using AndroidX.ViewPager.Widget;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.Tabs;
 using Java.IO;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
-using Android.Net;
-using Android.Net.Wifi;
+using Android.Views.InputMethods;
 using AndroidX.Activity;
+using AndroidX.AppCompat.View.Menu;
 using Google.Android.Material.Navigation;
 using JetBrains.Annotations;
 using Seeker.Transfers;
@@ -55,13 +53,12 @@ using Seeker.Exceptions;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
-using Seeker.Components;
 using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Seeker
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true)]
-    public class MainActivity : ThemeableActivity, NavigationBarView.IOnItemSelectedListener
+    public class MainActivity : ThemeableActivity
     {
         public const string logCatTag = "seeker";
         
@@ -75,7 +72,9 @@ namespace Seeker
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
         
-        private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
+        public static int GoToSearchTab = int.MaxValue;
+        
+        private const string DEFAULT_MUSIC_URI = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         
         private ISharedPreferences sharedPreferences;
         [NotNull] private ViewPager pager;
@@ -190,7 +189,7 @@ namespace Seeker
                             Logger.Debug("we are on the search page " +
                                          "but we need to wait for OnResume search frag");
 
-                            goToSearchTab = tabId; // we read this we resume
+                            GoToSearchTab = tabId; // we read this we resume
                         }
                         else
                         {
@@ -203,7 +202,7 @@ namespace Seeker
                     Logger.FirebaseInfo("from wishlist clicked - different page");
 
                     // when we move to the page, lets move to our tab, if its not the current one..
-                    goToSearchTab = tabId; // we read this when we move tab...
+                    GoToSearchTab = tabId; // we read this when we move tab...
                     pager.SetCurrentItem(1, false);
                 }
 
@@ -257,7 +256,7 @@ namespace Seeker
                     Logger.Debug("we are on the search page but we need to wait " +
                                  "for OnResume search frag");
 
-                    goToSearchTab = newTabToGoTo; // we read this we resume
+                    GoToSearchTab = newTabToGoTo; // we read this we resume
                 }
             }
 
@@ -317,7 +316,7 @@ namespace Seeker
             SetContentView(ResourceConstant.Layout.activity_main);
 
             navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
-            navigation.SetOnItemSelectedListener(this);
+            navigation.SetOnItemSelectedListener(new NavigationBarItemSelectedListener(pager));
 
 
             toolbar = FindViewById<Toolbar>(Resource.Id.toolbar)!;
@@ -335,7 +334,7 @@ namespace Seeker
 
             pager = FindViewById<ViewPager>(ResourceConstant.Id.pager)!;
             pager.PageSelected += Pager_PageSelected;
-            pager.AddOnPageChangeListener(new OnPageChangeLister1());
+            pager.AddOnPageChangeListener(new MenuChangerOnPageSwitch(navigation));
             pager.Adapter = new TabsPagerAdapter(SupportFragmentManager);
 
             tabs = FindViewById<TabLayout>(ResourceConstant.Id.tabs)!;
@@ -504,7 +503,7 @@ namespace Seeker
                 Android.Net.Uri res;
                 if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
                 {
-                    res = Android.Net.Uri.Parse(defaultMusicUri);
+                    res = Android.Net.Uri.Parse(DEFAULT_MUSIC_URI);
                 }
                 else
                 {
@@ -841,7 +840,7 @@ namespace Seeker
                             Logger.Debug("we are on the search page but we need to wait " + 
                                          "for OnResume search frag");
 
-                            goToSearchTab = tabID; // we read this we resume
+                            GoToSearchTab = tabID; // we read this we resume
                         }
                         else
                         {
@@ -852,7 +851,7 @@ namespace Seeker
                 else
                 {
                     // when we move to the page, lets move to our tab, if its not the current one..
-                    goToSearchTab = tabID; // we read this when we move tab...
+                    GoToSearchTab = tabID; // we read this when we move tab...
                     pager.SetCurrentItem(1, false);
                 }
             }
@@ -1979,7 +1978,7 @@ namespace Seeker
             Android.Net.Uri res = null;
             if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
             {
-                res = Android.Net.Uri.Parse(defaultMusicUri);
+                res = Android.Net.Uri.Parse(DEFAULT_MUSIC_URI);
             }
             else
             {
@@ -4001,32 +4000,31 @@ namespace Seeker
             TransfersFragment.SaveTransferItems(sharedPreferences);
             lock (SeekerApplication.SHARED_PREF_LOCK)
             {
-                var editor = sharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn);
-                editor.PutString(KeyConsts.M_Username, SeekerState.Username);
-                editor.PutString(KeyConsts.M_Password, SeekerState.Password);
-                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree,
-                    SeekerState.SaveDataDirectoryUriIsFromTree);
-                editor.PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults);
-                editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
-                editor.PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads);
-                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads);
-                editor.PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory);
-                editor.PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed);
-                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly);
-                editor.PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch);
-                editor.PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse);
-                editor.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
-                editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
-                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
-                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
-                editor.PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification);
-                editor.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
-                editor.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
-                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
+                var editor = sharedPreferences.Edit()!
+                    .PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn)!
+                    .PutString(KeyConsts.M_Username, SeekerState.Username)!
+                    .PutString(KeyConsts.M_Password, SeekerState.Password)!
+                    .PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri)!
+                    .PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree)!
+                    .PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults)!
+                    .PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode)!
+                    .PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads)!
+                    .PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads)!
+                    .PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory)!
+                    .PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers)!
+                    .PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes)!
+                    .PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed)!
+                    .PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly)!
+                    .PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch)!
+                    .PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse)!
+                    .PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky)!
+                    .PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString)!
+                    .PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload)!
+                    .PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle))!
+                    .PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification)!
+                    .PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed)!
+                    .PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn)!
+                    .PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations)!;
 
                 if (UserListManager.UserList != null)
                 {
@@ -4067,31 +4065,23 @@ namespace Seeker
             {
                 outState.PutString(KeyConsts.M_UserList, UserListManager.AsString());
             }
-
         }
 
-        private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
+        private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs args)
         {
-            System.Console.WriteLine(e.Tab.Position);
-            if (e.Tab.Position != 1) //i.e. if we are not the search tab
+            Logger.Debug(args.Tab!.Position.ToString());
+            
+            if (args.Tab.Position == 1)
             {
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm =
-                        (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(
-                            Context.InputMethodService);
-                    imm.HideSoftInputFromWindow((sender as View).WindowToken, 0);
-                }
-                catch
-                {
-                    // not worth throwing over
-                }
+                // i.e. if we are not the search tab
+                return;
             }
+            
+            var imm = GetSystemService(InputMethodService) as InputMethodManager;
+            imm?.HideSoftInputFromWindow((sender as View)?.WindowToken, 0);
         }
 
-        public static int goToSearchTab = int.MaxValue;
-
-        private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
+        private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs args)
         {
             // if we are changing modes and the transfers action mode is not null (i.e. is active)
             // then we need to get out of it.
@@ -4100,125 +4090,129 @@ namespace Seeker
                 TransfersFragment.TransfersActionMode.Finish();
             }
 
-            // in addition each fragment is responsible for expanding their menu...
-            if (e.Position == 0)
+            // TODO: Why is the support action bar located somewhere else?
+            if (SupportActionBar == null)
             {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar)
-                    .InflateMenu(Resource.Menu.account_menu);
+                return;
             }
 
-            if (e.Position == 1) // search
+            // in addition, each fragment is responsible for expanding their menu...
+            if (args.Position == 0)
             {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
-                
-                this.SupportActionBar.SetDisplayShowCustomEnabled(true);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(false);
-                this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
-                SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView /*, this*/);
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar)
-                    .InflateMenu(Resource.Menu.account_menu);
-                
-                if (goToSearchTab != int.MaxValue)
+                SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                SupportActionBar.SetHomeButtonEnabled(false);
+
+                SupportActionBar.SetDisplayShowCustomEnabled(false);
+                SupportActionBar.SetDisplayShowTitleEnabled(true);
+                SupportActionBar.Title = GetString(ResourceConstant.String.home_tab);
+                toolbar.InflateMenu(ResourceConstant.Menu.account_menu);
+            } 
+            else if (args.Position == 1) // search
+            {
+                SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                SupportActionBar.SetHomeButtonEnabled(false);
+
+                SupportActionBar.SetDisplayShowCustomEnabled(true);
+                SupportActionBar.SetDisplayShowTitleEnabled(false);
+                SupportActionBar.SetCustomView(ResourceConstant.Layout.custom_menu_layout);
+                SearchFragment.ConfigureSupportCustomView(SupportActionBar.CustomView);
+                toolbar.InflateMenu(ResourceConstant.Menu.account_menu);
+
+                if (GoToSearchTab == int.MaxValue)
                 {
-                    // this happens if we come from settings activity.
-                    // Main Activity has NOT been started.
-                    // SearchFragment has the .Actvity ref of an OLD activity.
-                    // so we are not ready yet. 
-                    if (SearchFragment.Instance?.Activity == null ||
-                        !(SearchFragment.Instance.Activity.Lifecycle.CurrentState
-                            .IsAtLeast(Lifecycle.State
-                                .Started)))
-                    {
-                        //let onresume go to the search tab..
-                        Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
-                    }
-                    else
-                    {
-                        // can we do this now??? or should we pass this down to the search fragment
-                        // for when it gets created...  maybe we should put this in a like "OnResume"
-                        Logger.Debug("Do Go To Wishlist in page selected");
-                        SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
-                        goToSearchTab = int.MaxValue;
-                    }
+                    return;
                 }
-            }
-            else if (e.Position == 2)
-            {
-
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-
-
-                SetTransferSupportActionBarState();
-
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar)
-                    .InflateMenu(Resource.Menu.browse_menu_empty); //todo remove?
-            }
-            else if (e.Position == 3)
-            {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
+                
+                // this happens if we come from settings activity.
+                // Main Activity has NOT been started.
+                // SearchFragment has the .Actvity ref of an OLD activity.
+                // so we are not ready yet. 
+                var searchFragmentActivityNotStarted =
+                    !SearchFragment.Instance.Activity!.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started!);
+                
+                if (SearchFragment.Instance?.Activity == null || searchFragmentActivityNotStarted)
                 {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
+                    // let onresume go to the search tab..
+                    Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
                 }
                 else
                 {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " +
-                                                  BrowseFragment.CurrentUsername;
+                    // can we do this now??? or should we pass this down to the search fragment
+                    // for when it gets created...  maybe we should put this in a like "OnResume"
+                    Logger.Debug("Do Go To Wishlist in page selected");
+                    SearchFragment.Instance.GoToTab(GoToSearchTab, false, true);
+                    GoToSearchTab = int.MaxValue;
                 }
+            }
+            else if (args.Position == 2)
+            {
+                SupportActionBar.SetDisplayShowCustomEnabled(false);
+                SupportActionBar.SetDisplayShowTitleEnabled(true);
+                
+                SetTransferSupportActionBarState();
 
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar)
-                    .InflateMenu(Resource.Menu.transfers_menu);
+                toolbar.InflateMenu(ResourceConstant.Menu.browse_menu_empty); //todo remove?
+            }
+            else if (args.Position == 3)
+            {
+                SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                SupportActionBar.SetHomeButtonEnabled(false);
+                SupportActionBar.SetDisplayShowCustomEnabled(false);
+                SupportActionBar.SetDisplayShowTitleEnabled(true);
+                SupportActionBar.Title = string.IsNullOrEmpty(BrowseFragment.CurrentUsername)
+                    ? GetString(ResourceConstant.String.browse_tab)
+                    : $"{GetString(ResourceConstant.String.browse_tab)}: {BrowseFragment.CurrentUsername}";
+                
+                toolbar.InflateMenu(ResourceConstant.Menu.transfers_menu);
             }
         }
 
         public void SetTransferSupportActionBarState()
         {
+            if (SupportActionBar == null)
+            {
+                return;
+            }
+            
             if (TransfersFragment.InUploadsMode)
             {
-                if (TransfersFragment.CurrentlySelectedUploadFolder == null)
-                {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
-                }
-                else
-                {
-                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedUploadFolder.FolderName;
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                    this.SupportActionBar.SetHomeButtonEnabled(true);
-                }
+                var uploadFolderPresent = TransfersFragment.CurrentlySelectedUploadFolder != null;
+                SupportActionBar.Title = uploadFolderPresent
+                    ? TransfersFragment.CurrentlySelectedUploadFolder.FolderName
+                    : GetString(ResourceConstant.String.Uploads);
+                SupportActionBar.SetDisplayHomeAsUpEnabled(uploadFolderPresent);
+                SupportActionBar.SetHomeButtonEnabled(uploadFolderPresent);
+                return;
             }
-            else
-            {
-                if (TransfersFragment.CurrentlySelectedDLFolder == null)
-                {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
-                }
-                else
-                {
-                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedDLFolder.FolderName;
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                    this.SupportActionBar.SetHomeButtonEnabled(true);
-                }
-            }
+
+            var downloadFolderPresent = TransfersFragment.CurrentlySelectedDLFolder != null;
+            SupportActionBar.Title = downloadFolderPresent
+                ? TransfersFragment.CurrentlySelectedDLFolder.FolderName
+                : GetString(ResourceConstant.String.Downloads);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(downloadFolderPresent);
+            SupportActionBar.SetHomeButtonEnabled(downloadFolderPresent);
         }
 
-        private class OnPageChangeLister1 : Java.Lang.Object, ViewPager.IOnPageChangeListener
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions,
+            [GeneratedEnum] Permission[] grantResults)
+        {
+            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            if (requestCode != POST_NOTIFICATION_PERMISSION)
+            {
+                if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                {
+                    return;
+                }
+
+                // TODO: - why?? this was added in initial commit. kills process if permission not granted?
+                FinishAndRemoveTask();
+            }
+            
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        private class MenuChangerOnPageSwitch([NotNull] BottomNavigationView bottomNavigationView) 
+            : Java.Lang.Object, ViewPager.IOnPageChangeListener
         {
             public void OnPageScrolled(int position, float positionOffset, int positionOffsetPixels)
             {
@@ -4232,71 +4226,33 @@ namespace Seeker
 
             public void OnPageSelected(int position)
             {
-                BottomNavigationView navigator =
-                    SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-
-                if (position != -1 && navigator != null)
+                if (position == -1)
                 {
-                    AndroidX.AppCompat.View.Menu.MenuBuilder menu =
-                        navigator.Menu as AndroidX.AppCompat.View.Menu.MenuBuilder;
-
-                    menu.GetItem(position).SetCheckable(true); // this is necessary if side scrolling...
-                    menu.GetItem(position).SetChecked(true);
+                    return;
                 }
+                
+                var menu = bottomNavigationView.Menu as MenuBuilder;
+                menu?.GetItem(position)?.SetCheckable(true); // this is necessary if side scrolling...
+                menu?.GetItem(position)?.SetChecked(true);
             }
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
+        private class NavigationBarItemSelectedListener(ViewPager pager) 
+            : Java.Lang.Object, NavigationBarView.IOnItemSelectedListener
         {
-            return base.OnCreateOptionsMenu(menu);
-        }
-
-        public override void OnRequestPermissionsResult(
-            int requestCode,
-            string[] permissions,
-            [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            switch (requestCode)
+            public bool OnNavigationItemSelected(IMenuItem item)
             {
-                case POST_NOTIFICATION_PERMISSION:
-                    break;
-                default:
-                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        // TODO: - why?? this was added in initial commit. kills process if permission not granted?
-                        FinishAndRemoveTask();
-                    }
+                pager.CurrentItem = item.ItemId switch
+                {
+                    ResourceConstant.Id.navigation_home => 0,
+                    ResourceConstant.Id.navigation_search => 1,
+                    ResourceConstant.Id.navigation_transfers => 2,
+                    ResourceConstant.Id.navigation_browse => 3,
+                    _ => pager.CurrentItem
+                };
 
-                    break;
-            }
-
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
-        public bool OnNavigationItemSelected(IMenuItem item)
-        {
-            switch (item.ItemId)
-            {
-                case Resource.Id.navigation_home:
-                    pager.CurrentItem = 0;
-                    break;
-                case Resource.Id.navigation_search:
-                    pager.CurrentItem = 1;
-                    break;
-                case Resource.Id.navigation_transfers:
-                    pager.CurrentItem = 2;
-                    break;
-                case Resource.Id.navigation_browse:
-                    pager.CurrentItem = 3;
-                    break;
-            }
-
-            return true;
+                return true;
+            }   
         }
     }
 }

@@ -42,11 +42,11 @@ namespace Seeker
             Logger.Debug("Search Fragment On Resume");
             
             // you had a pending intent that could not get handled til now.
-            if (MainActivity.goToSearchTab != int.MaxValue)
+            if (MainActivity.GoToSearchTab != int.MaxValue)
             {
                 Logger.Debug("Search Fragment On Resume for wishlist");
-                GoToTab(MainActivity.goToSearchTab, false, true);
-                MainActivity.goToSearchTab = int.MaxValue;
+                GoToTab(MainActivity.GoToSearchTab, false, true);
+                MainActivity.GoToSearchTab = int.MaxValue;
             }
         }
         
