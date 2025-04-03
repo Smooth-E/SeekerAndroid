@@ -156,12 +156,12 @@ namespace Seeker.Transfers
                     transferItem.State = TransferStates.Cancelled;
                     
                     // otherwise the ui will not refresh.
-                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null));
+                    MainActivity.InvokeDownloadAddedUiNotify(new DownloadAddedEventArgs(null));
                 }
                 else
                 {
                     var e = new DownloadAddedEventArgs(downloadInfo);
-                    MainActivity.InvokeDownloadAddedUINotify(e);
+                    MainActivity.InvokeDownloadAddedUiNotify(e);
                 }
             }
             catch (Exception e)

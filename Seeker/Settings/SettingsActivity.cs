@@ -886,12 +886,12 @@ namespace Seeker
 
         private void UnmeteredConnectionsOnlyCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool oldState = MainActivity.MeetsCurrentSharingConditions();
+            bool oldState = SharingManager.MeetsCurrentSharingConditions();
             SeekerState.AllowUploadsOnMetered = !e.IsChecked;
-            bool newState = MainActivity.MeetsCurrentSharingConditions();
+            bool newState = SharingManager.MeetsCurrentSharingConditions();
             if (oldState != newState)
             {
-                MainActivity.SetUnsetSharingBasedOnConditions(true);
+                SharingManager.SetUnsetSharingBasedOnConditions(true);
                 UpdateShareImageView();
             }
             lock (SeekerApplication.SHARED_PREF_LOCK)
@@ -930,7 +930,7 @@ namespace Seeker
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
             SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
-            CacheManager.SharedFileCache_Refreshed(null, (0, 0));
+            SharedCacheManager.SharedFileCache_Refreshed(null, (0, 0));
             this.UpdateShareImageView();
         }
 
@@ -2265,7 +2265,7 @@ namespace Seeker
 
         private void UpdateShareImageView()
         {
-            Tuple<SharingIcons, string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
+            Tuple<SharingManager.SharingIcons, string> info = SharingManager.GetSharingMessageAndIcon(out bool isParsing);
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
             ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
             if (imageView == null || progressBar == null) return;
@@ -2294,26 +2294,26 @@ namespace Seeker
             }
             switch (info.Item1)
             {
-                case SharingIcons.On:
+                case SharingManager.SharingIcons.On:
                     imageView.SetImageResource(Resource.Drawable.ic_file_upload_black_24dp);
                     break;
-                case SharingIcons.Error:
+                case SharingManager.SharingIcons.Error:
                     imageView.SetImageResource(Resource.Drawable.ic_error_outline_white_24dp);
                     break;
-                case SharingIcons.CurrentlyParsing:
+                case SharingManager.SharingIcons.CurrentlyParsing:
                     imageView.SetImageResource(Resource.Drawable.exclamation_thick);
                     break;
-                case SharingIcons.Off:
+                case SharingManager.SharingIcons.Off:
                     imageView.SetImageResource(Resource.Drawable.ic_sharing_off_black_24dp);
                     break;
-                case SharingIcons.OffDueToNetwork:
+                case SharingManager.SharingIcons.OffDueToNetwork:
                     imageView.SetImageResource(Resource.Drawable.network_strength_off_outline);
                     break;
             }
 
             switch (info.Item1)
             {
-                case SharingIcons.CurrentlyParsing:
+                case SharingManager.SharingIcons.CurrentlyParsing:
                     progressBar.Visibility = ViewStates.Visible;
                     break;
                 default:
@@ -2357,11 +2357,11 @@ namespace Seeker
         private void ShareCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SeekerState.SharingOn = e.IsChecked;
-            MainActivity.SetUnsetSharingBasedOnConditions(true);
-            if (MainActivity.MeetsSharingConditions() && !SeekerState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
+            SharingManager.SetUnsetSharingBasedOnConditions(true);
+            if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !SharingManager.IsSharingSetUpSuccessfully())
             {
                 //try to set up sharing...
-                MainActivity.SetUpSharing(UpdateShareImageView);
+                SharingManager.SetUpSharing(UpdateShareImageView);
             }
             UpdateShareImageView();
             UpdateSharingViewState();
@@ -3361,7 +3361,7 @@ namespace Seeker
                 try
                 {
 
-                    success = CacheManager.InitializeDatabase(null, false, out string errorMessage);
+                    success = SharedCacheManager.InitializeDatabase(null, false, out string errorMessage);
                     if (!success)
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
@@ -3372,9 +3372,9 @@ namespace Seeker
                 {
                     SeekerState.IsParsing = false;
                     
-                    CacheManager.ClearLegacyParsedCacheResults();
-                    CacheManager.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
-                    MainActivity.SetUnsetSharingBasedOnConditions(true);
+                    SharedCacheManager.ClearLegacyParsedCacheResults();
+                    SharedCacheManager.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
+                    SharingManager.SetUnsetSharingBasedOnConditions(true);
                     if (!(e is DirectoryAccessFailure))
                     {
                         Logger.FirebaseDebug("error parsing: " + e.Message + "  " + e.StackTrace);
@@ -3403,7 +3403,7 @@ namespace Seeker
                     this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                 }
                 //setup soulseek client with handlers if all conditions met
-                MainActivity.SetUnsetSharingBasedOnConditions(true, true);
+                SharingManager.SetUnsetSharingBasedOnConditions(true, true);
                 this.RunOnUiThread(new Action(() =>
                 {
                     UpdateShareImageView();

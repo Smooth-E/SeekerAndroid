@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Net;
 using Android.Widget;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker;
@@ -24,7 +25,7 @@ public class ConnectionReceiver : BroadcastReceiver
             if (changed)
             {
                 Logger.Debug("metered state changed.. lets set up our handlers and inform server..");
-                MainActivity.SetUnsetSharingBasedOnConditions(true);
+                SharingManager.SetUnsetSharingBasedOnConditions(true);
                 SeekerState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
             }
 #if DEBUG

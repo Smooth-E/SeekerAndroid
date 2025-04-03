@@ -555,7 +555,7 @@ namespace Seeker
             {
                 MainActivity.KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
                                                                                                      //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
-                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerEllapsed;
+                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerElapsed;
                 MainActivity.KeepAliveInactivityKillTimer.AutoReset = false;
             }
         }
@@ -1583,7 +1583,7 @@ namespace Seeker
                     if (SeekerState.NumberOfSharedDirectoriesIsStale && SeekerState.AttemptedToSetUpSharing)
                     {
                         Logger.Debug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
-                        MainActivity.InformServerOfSharedFiles();
+                        SharingManager.InformServerOfSharedFiles();
                     }
 
                     TransfersController.InitializeService();

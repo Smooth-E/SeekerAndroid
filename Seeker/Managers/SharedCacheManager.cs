@@ -13,8 +13,10 @@ using File = Java.IO.File;
 
 namespace Seeker.Managers;
 
-// TODO: Understand the purpose of this class and come up with a better name
-public static class CacheManager
+// TODO: Rename this class to something like SharedFileCache
+//    Mind the ambiguity of the phrase 'shared cache' as it can mean both 'cache of something shared'
+//    and `a cache collection shared between entities` 
+public static class SharedCacheManager
 {
     private static CachedParseResults GetCachedParseResults(Context c)
     {

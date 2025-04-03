@@ -636,7 +636,7 @@ namespace Seeker
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
-                    if (MainActivity.MeetsSharingConditions())
+                    if (SharingManager.MeetsSharingConditions())
                     {
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                         setupUpSharing.Visibility = ViewStates.Gone;
@@ -2816,7 +2816,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            MainActivity.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
+            SharingManager.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
@@ -2860,7 +2860,7 @@ namespace Seeker
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
-            MainActivity.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
+            SharingManager.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
 
@@ -2871,7 +2871,7 @@ namespace Seeker
         {
 
             MainActivity.ClearDownloadAddedEventsFromTarget(this);
-            MainActivity.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
+            MainActivity.DownloadAddedUiNotify += SeekerState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
