@@ -317,7 +317,6 @@ namespace Seeker
             SetContentView(ResourceConstant.Layout.activity_main);
 
             navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
-            // TODO: Method is obsolete
             navigation.SetOnItemSelectedListener(this);
 
 
@@ -333,18 +332,18 @@ namespace Seeker
             
             sharedPreferences = GetSharedPreferences("SoulSeekPrefs", FileCreationMode.Private);
 
-            tabs = FindViewById<TabLayout>(ResourceConstant.Id.tabs)!;
 
             pager = FindViewById<ViewPager>(ResourceConstant.Id.pager)!;
             pager.PageSelected += Pager_PageSelected;
-            var adapter = new TabsPagerAdapter(SupportFragmentManager);
-
-            tabs.TabSelected += Tabs_TabSelected;
-            pager.Adapter = adapter;
             pager.AddOnPageChangeListener(new OnPageChangeLister1());
+            pager.Adapter = new TabsPagerAdapter(SupportFragmentManager);
+
+            tabs = FindViewById<TabLayout>(ResourceConstant.Id.tabs)!;
+            tabs.TabSelected += Tabs_TabSelected;
             
             HandleOnCreateIntent(recreated);
 
+            // TODO: Do not use static references for Android Context entities
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
 
@@ -360,11 +359,13 @@ namespace Seeker
             }
 
             SeekerState.SharedPreferences = sharedPreferences;
-            SeekerState.MainActivityRef = this;
-            SeekerState.ActiveActivityRef = this;
 
             UpdateForScreenSize();
+            SetupStorage();
+        }
 
+        private void SetupStorage()
+        {
             if (SeekerState.UseLegacyStorage())
             {
                 const string permissionName = Manifest.Permission.WriteExternalStorage;
@@ -500,7 +501,7 @@ namespace Seeker
             else
             {
 
-                Android.Net.Uri res = null;
+                Android.Net.Uri res;
                 if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
                 {
                     res = Android.Net.Uri.Parse(defaultMusicUri);
@@ -599,9 +600,9 @@ namespace Seeker
                     }
                 }
 
-                bool manualSet = false;
+                bool manualSet;
 
-                // TODO: Some dfuplcate code below again, consider revisiting
+                // TODO: Some duplcate code below again, consider revisiting
 
                 // for incomplete case
                 Android.Net.Uri incompleteRes = null;
@@ -665,10 +666,6 @@ namespace Seeker
                         }
                     }
                 }
-
-
-
-
             }
         }
 
@@ -678,33 +675,31 @@ namespace Seeker
             SimpleFileDialog fileDialog =
                 new(SeekerState.ActiveActivityRef, SimpleFileDialog.FileSelectionMode.FolderChoose);
 
-            fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath)
-                .ContinueWith((Task<string> t) =>
+            fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath)
+                .ContinueWith(t =>
                 {
                     if (t.Result == null || t.Result == string.Empty)
                     {
-                        this.OnActivityResult(requestCode, Result.Canceled, new Intent());
+                        OnActivityResult(requestCode, Result.Canceled, new Intent());
                         return;
                     }
-                    else
-                    {
-                        var intent = new Intent();
-                        DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result));
-                        intent.SetData(f.Uri);
-                        this.OnActivityResult(requestCode, Result.Ok, intent);
-                    }
+
+                    var intent = new Intent();
+                    var documentFile = DocumentFile.FromFile(new Java.IO.File(t.Result));
+                    intent.SetData(documentFile.Uri);
+                    OnActivityResult(requestCode, Result.Ok, intent);
                 });
         }
 
         public static Action<Task> GetPostNotifPermissionTask()
         {
-            return new Action<Task>((task) =>
+            return task =>
             {
                 if (task.IsCompletedSuccessfully)
                 {
                     RequestPostNotificationPermissionsIfApplicable();
                 }
-            });
+            };
 
         }
 
@@ -724,7 +719,7 @@ namespace Seeker
 
             postNotficationAlreadyRequestedInSession = true;
 
-            if ((int)Android.OS.Build.VERSION.SdkInt < 33)
+            if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
             {
                 return;
             }
@@ -734,7 +729,7 @@ namespace Seeker
                 var permissionState = ContextCompat
                     .CheckSelfPermission(SeekerState.ActiveActivityRef, Manifest.Permission.PostNotifications);
 
-                if (permissionState == Android.Content.PM.Permission.Denied)
+                if (permissionState == Permission.Denied)
                 {
                     bool alreadyShown = SeekerState.SharedPreferences
                         .GetBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, false);
@@ -780,7 +775,7 @@ namespace Seeker
 
                 ActivityCompat.RequestPermissions(
                     SeekerState.ActiveActivityRef,
-                    new string[] { Manifest.Permission.PostNotifications },
+                    [Manifest.Permission.PostNotifications],
                     POST_NOTIFICATION_PERMISSION
                 );
 
@@ -795,6 +790,8 @@ namespace Seeker
 
         protected override void OnStart()
         {
+            // TODO: onStart is called before onCreate, yet we set main activity ref in onCreate again
+            
             // this fixes a bug as follows:
             // previously we only set MainActivityRef on Create.
             // therefore if one launches MainActivity via a new intent (i.e. go to user list, then search users files)
@@ -802,12 +799,13 @@ namespace Seeker
             // then if you press back twice you will see the original activity but the MainActivityRef will still be set
             // to the now destroyed activity since it was last to call onCreate.
             // so then the FragmentManager will be null among other things...
+            // TODO: Do not use static references for Android Context entities
             SeekerState.MainActivityRef = this;
 
             base.OnStart();
         }
 
-        public static bool fromNotificationMoveToUploads = false;
+        public static bool fromNotificationMoveToUploads;
 
         protected override void OnNewIntent(Intent intent)
         {
@@ -891,7 +889,7 @@ namespace Seeker
         {
             // either we change to uploads mode now (if resumed), or we wait for on resume to do it.
             Logger.FirebaseInfo("from uploads clicked");
-            int currentPage = pager.CurrentItem;
+            var currentPage = pager.CurrentItem;
 
             if (currentPage == 2)
             {
@@ -904,7 +902,7 @@ namespace Seeker
                 {
                     // we can change to uploads mode now
                     Logger.Debug("go to upload now");
-                    StaticHacks.TransfersFrag.MoveToUploadForNotif();
+                    StaticHacks.TransfersFrag?.MoveToUploadForNotif();
                 }
             }
             else
@@ -914,36 +912,15 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// This is responsible for filing the PMs into the data structure...
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SoulseekClient_PrivateMessageReceived(object sender, PrivateMessageReceivedEventArgs e)
-        {
-            AddMessage(e);
-        }
-
-        private void AddMessage(PrivateMessageReceivedEventArgs messageEvent)
-        {
-            // Intentional no-op
-        }
-
-        private void Navigator_ViewAttachedToWindow(object sender, View.ViewAttachedToWindowEventArgs e)
-        {
-            // Intentional no-op
-        }
-
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (CurrentlyLoggedInButDisconnectedState())
             {
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out var reconnectTask))
                 {
-                    t.ContinueWith(new Action<Task>((Task t) =>
+                    reconnectTask.ContinueWith(task =>
                     {
-                        if (t.IsFaulted)
+                        if (task.IsFaulted)
                         {
                             return;
                         }
@@ -952,7 +929,7 @@ namespace Seeker
                         {
                             GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded);
                         });
-                    }));
+                    });
                 }
             }
             else
@@ -1004,9 +981,9 @@ namespace Seeker
                                 {
                                     Toast.MakeText(
                                         SeekerState.ActiveActivityRef,
-                                        SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect),
+                                        SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.failed_to_connect),
                                         ToastLength.Short
-                                    ).Show();
+                                    )?.Show();
                                 }
                             });
 
