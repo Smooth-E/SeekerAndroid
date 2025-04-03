@@ -3,6 +3,7 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using System;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker
@@ -84,7 +85,7 @@ namespace Seeker
 
             try
             {
-                SeekerApplication.AcquireTransferLocksAndResetTimer();
+                KeepAlive.AcquireTransferLocksAndResetTimer();
             }
             catch (System.Exception e)
             {
@@ -121,7 +122,7 @@ namespace Seeker
         public override void OnDestroy()
         {
             SeekerState.DownloadKeepAliveServiceRunning = false;
-            SeekerApplication.ReleaseTransferLocksIfServicesComplete();
+            KeepAlive.ReleaseTransferLocksIfServicesComplete();
             
             // save once complete
             TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);

@@ -45,18 +45,23 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
+using Android.Net;
+using Android.Net.Wifi;
 using AndroidX.Activity;
+using Google.Android.Material.Navigation;
+using JetBrains.Annotations;
 using Seeker.Transfers;
 using Seeker.Exceptions;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
 using Seeker.Components;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Seeker
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true)]
-    public class MainActivity : ThemeableActivity, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ThemeableActivity, NavigationBarView.IOnItemSelectedListener
     {
         public const string logCatTag = "seeker";
         
@@ -72,12 +77,11 @@ namespace Seeker
         
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         
-        private ViewPager pager;
         private ISharedPreferences sharedPreferences;
-
-        public static PowerManager.WakeLock CpuKeepAlive_Transfer;
-        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer;
-        public static System.Timers.Timer KeepAliveInactivityKillTimer;
+        [NotNull] private ViewPager pager;
+        [NotNull] private BottomNavigationView navigation;
+        [NotNull] private Toolbar toolbar;
+        [NotNull] private TabLayout tabs;
 
         public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUiNotify;
 
@@ -107,31 +111,193 @@ namespace Seeker
             }
         }
 
-        // TODO: Move into Keep Alive Utils or something similar
-        public static void KeepAliveInactivityKillTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
+        /// <summary>
+        /// Handle the intent this activity is created with
+        /// </summary>
+        /// <param name="recreated">whether this activity was rebuilt, for example on configuration changes</param>
+        private void HandleOnCreateIntent(bool recreated)
         {
-            if (CpuKeepAlive_Transfer != null)
+            // this is a relatively safe way that prevents rotates from redoing the intent.
+            var alreadyHandled = Intent?.GetBooleanExtra("ALREADY_HANDLED", false) ?? false;
+            Intent = Intent?.PutExtra("ALREADY_HANDLED", true);
+
+            if (Intent == null)
             {
-                CpuKeepAlive_Transfer.Release();
+                return;
+            }
+            
+            if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
+            {
+                pager.SetCurrentItem(2, false);
+                return;
+            }
+            
+            if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+            {
+                pager.SetCurrentItem(2, false);
+                return;
+            }
+            
+            if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+            {
+                pager.SetCurrentItem(3, false);
+                return;
+            }
+            
+            if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+            {
+                pager.SetCurrentItem(1, false);
+                return;
+            }
+            
+            if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)
+            {
+                pager.SetCurrentItem(1, false);
+                return;
+            }
+            
+            // if it's not reborn then the OnNewIntent will handle it...
+            if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !recreated)
+            {
+                SeekerState.MainActivityRef = this; // set these early. they are needed
+                SeekerState.ActiveActivityRef = this;
+
+                Logger.FirebaseInfo("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false));
+                Logger.FirebaseInfo("from wishlist clicked");
+
+                var currentPage = pager.CurrentItem;
+                var tabId = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
+
+                // this is the case even if process previously got am state killed.
+                if (currentPage == 1)
+                {
+                    Logger.FirebaseInfo("from wishlist clicked - current page");
+                    if (tabId == int.MaxValue)
+                    {
+                        Logger.FirebaseDebug("tabID == int.MaxValue");
+                    }
+                    else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabId))
+                    {
+                        Logger.FirebaseDebug("doesnt contain key");
+
+                        Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
+                            .Show();
+                    }
+                    else
+                    {
+                        if (SearchFragment.Instance?.IsResumed ?? false) // !??! this logic is backwards...
+                        {
+                            Logger.Debug("we are on the search page " +
+                                         "but we need to wait for OnResume search frag");
+
+                            goToSearchTab = tabId; // we read this we resume
+                        }
+                        else
+                        {
+                            SearchFragment.Instance?.GoToTab(tabId, false, true);
+                        }
+                    }
+                }
+                else
+                {
+                    Logger.FirebaseInfo("from wishlist clicked - different page");
+
+                    // when we move to the page, lets move to our tab, if its not the current one..
+                    goToSearchTab = tabId; // we read this when we move tab...
+                    pager.SetCurrentItem(1, false);
+                }
+
+                return;
             }
 
-            if (WifiKeepAlive_Transfer != null)
+            var fromTransferUploadStringExtra =
+                Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1);
+            var uploadNotificationExtra = Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1);
+            
+            // else every rotation will change Downloads to Uploads.
+            if ((fromTransferUploadStringExtra == 2 ||  uploadNotificationExtra == 2) && !alreadyHandled)
             {
-                WifiKeepAlive_Transfer.Release();
+                HandleFromNotificationUploadIntent();
+                return;
+            }
+            
+            if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+            {
+                Logger.FirebaseInfo("from browse self");
+                pager.SetCurrentItem(3, false);
+                return;
+            }
+            
+            // this will always create a new instance,
+            // so if its reborn then it's an old intent that we already followed.
+            if (!SearchSendIntentHelper.IsFromActionSend(Intent) || recreated)
+            {
+                return;
+            }
+            
+            SeekerState.MainActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
+            Logger.Debug("MainActivity action send intent");
+
+            // give us a new fresh tab if the current one has a search in it...
+            if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
+            {
+                Logger.Debug("lets go to a new fresh tab");
+                var newTabToGoTo = SearchTabHelper.AddSearchTab();
+
+                Logger.Debug("search fragment null? " + (SearchFragment.Instance == null));
+
+                if (SearchFragment.Instance?.IsResumed ?? false)
+                {
+                    // if resumed is true
+                    SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
+                }
+                else
+                {
+                    Logger.Debug("we are on the search page but we need to wait " +
+                                 "for OnResume search frag");
+
+                    goToSearchTab = newTabToGoTo; // we read this we resume
+                }
             }
 
-            KeepAliveInactivityKillTimer.Stop();
+            // TODO: Do not use static properties to create a dialog.
+            //       Instead, create it right here, add needed properties to the constructor 
+            
+            // go to search tab
+            Logger.Debug("prev search term: " + SearchDialog.SearchTerm);
+            SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
+            SearchDialog.IsFollowingLink = false;
+            pager.SetCurrentItem(1, false);
+
+            if (SearchSendIntentHelper.TryParseIntent(Intent, out var searchTermFound))
+            {
+                // we are done parsing the intent
+                SearchDialog.SearchTerm = searchTermFound;
+            }
+            else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
+            {
+                SearchDialog.IsFollowingLink = true;
+            }
+
+            // close previous instance
+            if (SearchDialog.Instance != null)
+            {
+                Logger.Debug("previous instance exists");
+            }
+
+            var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
+            searchDialog.Show(SupportFragmentManager, "Search Dialog");
         }
-
+        
         protected override void OnCreate(Bundle savedInstanceState)
         {
-
             // basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
             // however, if we say rotate the device or leave
-            // and come back to it (and the activity got destroyed in the mean time) then
+            // and come back to it (and the activity got destroyed in the meantime) then
             // it will re-handle the activity each time.
             // We can check if it is truly "new" by looking at the savedInstanceState.
-            bool reborn = false;
+            var recreated = false;
 
             if (savedInstanceState == null)
             {
@@ -139,225 +305,45 @@ namespace Seeker
             }
             else
             {
-                reborn = true;
+                recreated = true;
                 Logger.Debug("Main Activity On Create REBORN");
             }
 
-            try
-            {
-                if (CpuKeepAlive_Transfer == null)
-                {
-                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService))
-                        .NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
-
-                    CpuKeepAlive_Transfer.SetReferenceCounted(false);
-                }
-
-                if (WifiKeepAlive_Transfer == null)
-                {
-                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService))
-                        .CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
-
-                    WifiKeepAlive_Transfer.SetReferenceCounted(false);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.FirebaseDebug("error init keepalives: " + e.Message + e.StackTrace);
-            }
-
-            if (KeepAliveInactivityKillTimer == null)
-            {
-                // kill after 10 mins of no activity..
-                // remember that this is a fallback. for when foreground service is still running
-                // but nothing is happening otherwise.
-                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10);
-
-                KeepAliveInactivityKillTimer.Elapsed += KeepAliveInactivityKillTimerElapsed;
-                KeepAliveInactivityKillTimer.AutoReset = false;
-            }
+            KeepAlive.Initialize(this);
 
             base.OnCreate(savedInstanceState);
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); // this is what you are supposed to do.
-            SetContentView(Resource.Layout.activity_main);
+            SetContentView(ResourceConstant.Layout.activity_main);
 
-            BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
-            navigation.SetOnNavigationItemSelectedListener(this);
+            navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
+            // TODO: Method is obsolete
+            navigation.SetOnItemSelectedListener(this);
 
 
-            AndroidX.AppCompat.Widget.Toolbar myToolbar =
-                (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
-
-            myToolbar.Title = this.GetString(Resource.String.home_tab);
-            myToolbar.InflateMenu(Resource.Menu.account_menu);
-            SetSupportActionBar(myToolbar);
-            myToolbar.InflateMenu(Resource.Menu.account_menu); // twice??
+            toolbar = FindViewById<Toolbar>(Resource.Id.toolbar)!;
+            toolbar.Title = GetString(ResourceConstant.String.home_tab);
+            // TODO: Is it possible to inflate menus through XML?
+            toolbar.InflateMenu(ResourceConstant.Menu.account_menu);
+            SetSupportActionBar(toolbar);
+            toolbar.InflateMenu(ResourceConstant.Menu.account_menu); // twice??
 
             var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
+            
+            sharedPreferences = GetSharedPreferences("SoulSeekPrefs", FileCreationMode.Private);
 
-            System.Console.WriteLine("Testing.....");
+            tabs = FindViewById<TabLayout>(ResourceConstant.Id.tabs)!;
 
-            sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs", 0);
-
-            TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
-
-            pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
+            pager = FindViewById<ViewPager>(ResourceConstant.Id.pager)!;
             pager.PageSelected += Pager_PageSelected;
-            TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
+            var adapter = new TabsPagerAdapter(SupportFragmentManager);
 
             tabs.TabSelected += Tabs_TabSelected;
             pager.Adapter = adapter;
             pager.AddOnPageChangeListener(new OnPageChangeLister1());
-
-            // this is a relatively safe way that prevents rotates from redoing the intent.
-            bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
-            Intent = Intent.PutExtra("ALREADY_HANDLED", true);
-
-            if (Intent != null)
-            {
-                if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
-                {
-                    pager.SetCurrentItem(2, false);
-                }
-                else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
-                {
-                    pager.SetCurrentItem(2, false);
-                }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
-                {
-                    pager.SetCurrentItem(3, false);
-                }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
-                {
-                    pager.SetCurrentItem(1, false);
-                }
-                else if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)
-                {
-                    pager.SetCurrentItem(1, false);
-                }
-                // if its not reborn then the OnNewIntent will handle it...
-                else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn)
-                {
-                    SeekerState.MainActivityRef = this; // set these early. they are needed
-                    SeekerState.ActiveActivityRef = this;
-
-                    Logger.FirebaseInfo("is resumed: "
-                                                 + (SearchFragment.Instance?.IsResumed ?? false).ToString());
-
-                    Logger.FirebaseInfo("from wishlist clicked");
-
-                    int currentPage = pager.CurrentItem;
-                    int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-
-                    // this is the case even if process previously got am state killed.
-                    if (currentPage == 1)
-                    {
-                        Logger.FirebaseInfo("from wishlist clicked - current page");
-                        if (tabID == int.MaxValue)
-                        {
-                            Logger.FirebaseDebug("tabID == int.MaxValue");
-                        }
-                        else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
-                        {
-                            Logger.FirebaseDebug("doesnt contain key");
-
-                            Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
-                                .Show();
-                        }
-                        else
-                        {
-                            if (SearchFragment.Instance?.IsResumed ?? false) // !??! this logic is backwards...
-                            {
-                                Logger.Debug("we are on the search page " +
-                                             "but we need to wait for OnResume search frag");
-
-                                goToSearchTab = tabID; // we read this we resume
-                            }
-                            else
-                            {
-                                SearchFragment.Instance.GoToTab(tabID, false, true);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Logger.FirebaseInfo("from wishlist clicked - different page");
-
-                        // when we move to the page, lets move to our tab, if its not the current one..
-                        goToSearchTab = tabID; //we read this when we move tab...
-                        pager.SetCurrentItem(1, false);
-                    }
-                }
-                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2)
-                          || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))
-                         && !alreadyHandled) // else every rotation will change Downloads to Uploads.
-                {
-                    HandleFromNotificationUploadIntent();
-                }
-                else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
-                {
-                    Logger.FirebaseInfo("from browse self");
-                    pager.SetCurrentItem(3, false);
-                }
-                // this will always create a new instance,
-                // so if its reborn then its an old intent that we already followed.
-                else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn)
-                {
-                    SeekerState.MainActivityRef = this;
-                    SeekerState.ActiveActivityRef = this;
-                    Logger.Debug("MainActivity action send intent");
-
-                    // give us a new fresh tab if the current one has a search in it...
-                    if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
-                    {
-                        Logger.Debug("lets go to a new fresh tab");
-                        int newTabToGoTo = SearchTabHelper.AddSearchTab();
-
-                        Logger.Debug("search fragment null? " + (SearchFragment.Instance == null).ToString());
-
-                        if (SearchFragment.Instance?.IsResumed ?? false)
-                        {
-                            //if resumed is true
-                            SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
-                        }
-                        else
-                        {
-                            Logger.Debug("we are on the search page but we need to wait " +
-                                         "for OnResume search frag");
-
-                            goToSearchTab = newTabToGoTo; // we read this we resume
-                        }
-                    }
-
-                    // go to search tab
-                    Logger.Debug("prev search term: " + SearchDialog.SearchTerm);
-                    SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
-                    SearchDialog.IsFollowingLink = false;
-                    pager.SetCurrentItem(1, false);
-
-                    if (SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
-                    {
-                        // we are done parsing the intent
-                        SearchDialog.SearchTerm = searchTermFound;
-                    }
-                    else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
-                    {
-                        SearchDialog.IsFollowingLink = true;
-                    }
-
-                    // close previous instance
-                    if (SearchDialog.Instance != null)
-                    {
-                        Logger.Debug("previous instance exists");
-                    }
-
-                    var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
-                    searchDialog.Show(SupportFragmentManager, "Search Dialog");
-                }
-            }
-
+            
+            HandleOnCreateIntent(recreated);
 
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
@@ -381,10 +367,11 @@ namespace Seeker
 
             if (SeekerState.UseLegacyStorage())
             {
-                var permissionName = Manifest.Permission.WriteExternalStorage;
-                if (ContextCompat.CheckSelfPermission(this, permissionName) == Android.Content.PM.Permission.Denied)
+                const string permissionName = Manifest.Permission.WriteExternalStorage;
+                if (ContextCompat.CheckSelfPermission(this, permissionName) == Permission.Denied)
                 {
-                    ActivityCompat.RequestPermissions(this, new string[] { permissionName }, WRITE_EXTERNAL);
+                    ActivityCompat
+                        .RequestPermissions(this, [permissionName], WRITE_EXTERNAL);
                 }
 
                 // file picker with legacy case

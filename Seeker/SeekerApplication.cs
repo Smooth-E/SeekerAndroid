@@ -125,7 +125,7 @@ namespace Seeker
                 SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
             }
 
-            SeekerApplication.SetNetworkState(this);
+            SetNetworkState(this);
 
             if (SeekerState.SoulseekClient == null)
             {
@@ -535,51 +535,6 @@ namespace Seeker
             }
         }
 
-        public static void AcquireTransferLocksAndResetTimer()
-        {
-            if (MainActivity.CpuKeepAlive_Transfer != null && !MainActivity.CpuKeepAlive_Transfer.IsHeld)
-            {
-                MainActivity.CpuKeepAlive_Transfer.Acquire();
-            }
-            if (MainActivity.WifiKeepAlive_Transfer != null && !MainActivity.WifiKeepAlive_Transfer.IsHeld)
-            {
-                MainActivity.WifiKeepAlive_Transfer.Acquire();
-            }
-
-            if (MainActivity.KeepAliveInactivityKillTimer != null)
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //can be null
-                MainActivity.KeepAliveInactivityKillTimer.Start(); //reset the timer..
-            }
-            else
-            {
-                MainActivity.KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
-                                                                                                     //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
-                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerElapsed;
-                MainActivity.KeepAliveInactivityKillTimer.AutoReset = false;
-            }
-        }
-
-        public static void ReleaseTransferLocksIfServicesComplete()
-        {
-            //if all transfers are done..
-            if (!SeekerState.UploadKeepAliveServiceRunning && !SeekerState.DownloadKeepAliveServiceRunning)
-            {
-                if (MainActivity.CpuKeepAlive_Transfer != null)
-                {
-                    MainActivity.CpuKeepAlive_Transfer.Release();
-                }
-                if (MainActivity.WifiKeepAlive_Transfer != null)
-                {
-                    MainActivity.WifiKeepAlive_Transfer.Release();
-                }
-                if (MainActivity.KeepAliveInactivityKillTimer != null)
-                {
-                    MainActivity.KeepAliveInactivityKillTimer.Stop();
-                }
-            }
-        }
-
         public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
 
         public static bool IsShuttingDown(Intent intent)
@@ -936,15 +891,7 @@ namespace Seeker
 
         private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
         {
-            try
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop();
-                MainActivity.KeepAliveInactivityKillTimer.Start();
-            }
-            catch (System.Exception err)
-            {
-                Logger.FirebaseDebug("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
-            }
+            KeepAlive.RestartInactivityKillTimer();
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
 
@@ -1139,19 +1086,10 @@ namespace Seeker
 
         private void SoulseekClient_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
         {
-            //Its possible to get a nullref here IF the system orientation changes..
-            //throttle this maybe...
-
-            //Logger.Debug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
-            try
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
-                MainActivity.KeepAliveInactivityKillTimer.Start();
-            }
-            catch (System.Exception err)
-            {
-                Logger.FirebaseDebug("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
-            }
+            // It's possible to get a nullref here IF the system orientation changes.
+            // throttle this maybe...
+            KeepAlive.RestartInactivityKillTimer();
+            
             TransferItem relevantItem = null;
             if (TransfersFragment.TransferItemManagerDL == null)
             {
