@@ -351,7 +351,7 @@ namespace Seeker
 
                 MainActivity.AddLoggedInLayout(this.rootView);
 
-                MainActivity.UpdateUIForLoggedIn(this.rootView, LogoutClick, cWelcome, cbttn, cLoading, Settings_Click);
+                MainActivity.UpdateUiForLoggedIn(this.rootView, LogoutClick, cWelcome, cbttn, cLoading, Settings_Click);
 
 
             }
@@ -432,7 +432,7 @@ namespace Seeker
                     alreadyConnected = true;
                     SeekerState.currentlyLoggedIn = true;
                     MainActivity.AddLoggedInLayout(this.rootView, true);
-                    MainActivity.UpdateUIForLoggedIn(this.rootView);
+                    MainActivity.UpdateUiForLoggedIn(this.rootView);
                 }
                 else
                 {
@@ -449,7 +449,7 @@ namespace Seeker
                 MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
                 if (!alreadyConnected)
                 {
-                    MainActivity.UpdateUIForLoggingInLoading(this.rootView);
+                    MainActivity.UpdateUiForLoggingInLoading(this.rootView);
                 }
                 SeekerState.Username = this.usernameTextEdit.Text;
                 SeekerState.Password = this.passwordTextEdit.Text;

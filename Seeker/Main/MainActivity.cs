@@ -37,6 +37,7 @@ using AndroidX.Activity;
 using AndroidX.AppCompat.View.Menu;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
+using AndroidX.Core.View;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Lifecycle;
 using AndroidX.ViewPager.Widget;
@@ -1047,7 +1048,7 @@ public class MainActivity : ThemeableActivity
                         {
                             var userIsOfflineString = SeekerApplication.GetString(Resource.String.UserXIsOffline);
                             var formattedString = string.Format(userIsOfflineString, username);
-                            ToastUIWithDebouncer(formattedString, "_6_", username);
+                            ToastUiWithDebouncer(formattedString, "_6_", username);
                         }
                     }
                     else if (t.Exception?.InnerException?.Message != null
@@ -1071,7 +1072,7 @@ public class MainActivity : ThemeableActivity
                             var cannotConnectString =
                                 SeekerApplication.GetString(Resource.String.CannotConnectUserX);
 
-                            ToastUIWithDebouncer(string.Format(cannotConnectString, username), "_7_", username);
+                            ToastUiWithDebouncer(string.Format(cannotConnectString, username), "_7_", username);
                         }
                     }
                     else if (t.Exception?.InnerException?.Message != null &&
@@ -1084,7 +1085,7 @@ public class MainActivity : ThemeableActivity
                         if (!silent)
                         {
                             var messageString = SeekerApplication.GetString(Resource.String.TimeoutQueueUserX);
-                            ToastUIWithDebouncer(string.Format(messageString, username), "_8_", username, 6);
+                            ToastUiWithDebouncer(string.Format(messageString, username), "_8_", username, 6);
                         }
                     }
                     else if (t.Exception?.InnerException?.Message != null
@@ -1100,14 +1101,14 @@ public class MainActivity : ThemeableActivity
                                 username
                             );
 
-                            ToastUIWithDebouncer(formattedString, "_9_", username, 6);
+                            ToastUiWithDebouncer(formattedString, "_9_", username, 6);
                         }
                     }
                     else
                     {
                         if (!silent)
                         {
-                            ToastUIWithDebouncer($"Error getting queue position from {username}", "_9_", username);
+                            ToastUiWithDebouncer($"Error getting queue position from {username}", "_9_", username);
                         }
 
                         Logger.FirebaseDebug("GetDownloadPlaceInQueue" + t.Exception.ToString());
@@ -2164,7 +2165,7 @@ public class MainActivity : ThemeableActivity
                             {
                                 action = () =>
                                 {
-                                    ToastUIWithDebouncer(
+                                    ToastUiWithDebouncer(
                                         SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL),
                                         "_16_"
                                     );
@@ -2255,7 +2256,7 @@ public class MainActivity : ThemeableActivity
                                 SeekerState.ActiveActivityRef.GetString(Resource.String
                                     .FailedDownloadDirectoryNotSet);
 
-                            ToastUIWithDebouncer(messageString, "_17_");
+                            ToastUiWithDebouncer(messageString, "_17_");
                         };
                     }
                     else if
@@ -2293,7 +2294,7 @@ public class MainActivity : ThemeableActivity
                                     SeekerState.ActiveActivityRef.GetString(Resource.String
                                         .transfer_rejected_file_not_shared);
 
-                                ToastUIWithDebouncer(messageString, "_2_");
+                                ToastUiWithDebouncer(messageString, "_2_");
                             }; // needed
                         }
                         else
@@ -2302,7 +2303,7 @@ public class MainActivity : ThemeableActivity
                             {
                                 var messageString =
                                     SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected);
-                                ToastUIWithDebouncer(messageString, "_2_");
+                                ToastUiWithDebouncer(messageString, "_2_");
                             }; // needed
                         }
 
@@ -2312,7 +2313,7 @@ public class MainActivity : ThemeableActivity
                     {
                         action = () =>
                         {
-                            ToastUIWithDebouncer(
+                            ToastUiWithDebouncer(
                                 string.Format(SeekerState.ActiveActivityRef
                                         .GetString(Resource.String.failed_to_establish_connection_to_peer),
                                     e.dlInfo.username),
@@ -2325,7 +2326,7 @@ public class MainActivity : ThemeableActivity
                     {
                         action = () =>
                         {
-                            ToastUIWithDebouncer(
+                            ToastUiWithDebouncer(
                                 task.Exception.InnerException.Message,
                                 "_3_",
                                 e?.dlInfo?.username ?? string.Empty
@@ -2340,7 +2341,7 @@ public class MainActivity : ThemeableActivity
                         Logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
                         action = () =>
                         {
-                            ToastUIWithDebouncer(
+                            ToastUiWithDebouncer(
                                 SeekerState.ActiveActivityRef
                                     .GetString(Resource.String.failed_to_establish_direct_or_indirect),
                                 "_4_"
@@ -2423,7 +2424,7 @@ public class MainActivity : ThemeableActivity
                         Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () =>
                         {
-                            ToastUIWithDebouncer(
+                            ToastUiWithDebouncer(
                                 SeekerState.ActiveActivityRef
                                     .GetString(Resource.String.failed_to_establish_direct_or_indirect),
                                 "_5_"
@@ -2637,7 +2638,7 @@ public class MainActivity : ThemeableActivity
                     bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
                         .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
 
-                    string path = SaveToFile(
+                    string path = StorageUtils.SaveToFile(
                         e.dlInfo.fullFilename,
                         e.dlInfo.username,
                         tbyte.Result,
@@ -2648,7 +2649,7 @@ public class MainActivity : ThemeableActivity
                         noSubfolder,
                         out finalUri);
 
-                    SaveFileToMediaStore(path);
+                    StorageUtils.SaveFileToMediaStore(path);
                 }
                 else if (task is Task<Tuple<string, string>> tString)
                 {
@@ -2656,7 +2657,7 @@ public class MainActivity : ThemeableActivity
                     bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
                         .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
 
-                    string path = SaveToFile(
+                    string path = StorageUtils.SaveToFile(
                         e.dlInfo.fullFilename,
                         e.dlInfo.username,
                         null,
@@ -2667,7 +2668,7 @@ public class MainActivity : ThemeableActivity
                         noSubfolder,
                         out finalUri);
 
-                    SaveFileToMediaStore(path);
+                    StorageUtils.SaveFileToMediaStore(path);
                 }
                 else
                 {
@@ -2695,7 +2696,7 @@ public class MainActivity : ThemeableActivity
     /// <param name="usernameIfApplicable"></param>
     /// <param name="seconds">might be useful to increase this if something has a lot of variance even
     /// if requested at the same time, like a timeout.</param>
-    private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "",
+    private static void ToastUiWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "",
         int seconds = 1)
     {
         long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -2706,10 +2707,10 @@ public class MainActivity : ThemeableActivity
         Logger.Debug("curtime " + curTime);
         
         bool stale = false;
-        long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime,
+        long updatedTime = _toastUiDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime,
             (key, oldValue) =>
             {
-                Logger.Debug("key exists: " + (curTime - oldValue).ToString());
+                Logger.Debug("key exists: " + (curTime - oldValue));
                 stale = (curTime - oldValue) < (seconds * 1000);
                 if (stale)
                 {
@@ -2727,8 +2728,7 @@ public class MainActivity : ThemeableActivity
         }
     }
 
-    private static System.Collections.Concurrent.ConcurrentDictionary<string, long> ToastUIDebouncer =
-        new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
+    private static System.Collections.Concurrent.ConcurrentDictionary<string, long> _toastUiDebouncer = new();
     
     /// <param name="force">the log in layout is full of hacks. that being said force 
     ///   makes it so that if we are currently logged in to still add the logged in fragment
@@ -2737,8 +2737,8 @@ public class MainActivity : ThemeableActivity
     {
         View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
         View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-        bool bttnIsAttached = false;
-        bool bttnTwoIsAttached = false;
+        var bttnIsAttached = false;
+        var bttnTwoIsAttached = false;
         if (bttn != null && bttn.IsAttachedToWindow)
         {
             bttnIsAttached = true;
@@ -2749,33 +2749,36 @@ public class MainActivity : ThemeableActivity
             bttnTwoIsAttached = true;
         }
 
-        if (!bttnIsAttached && !bttnTwoIsAttached && (!SeekerState.currentlyLoggedIn || force))
+        if (bttnIsAttached || bttnTwoIsAttached || (SeekerState.currentlyLoggedIn && !force))
         {
-            // THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-            var action1 = new Action(() =>
-            {
-                (rootView as ViewGroup).AddView(
-                    SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin,
-                        rootView as ViewGroup, false));
-            });
-            if (ThreadingUtils.OnUiThread())
-            {
-                action1();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action1);
-            }
+            return;
+        }
+        
+        // THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
+        var action1 = new Action(() =>
+        {
+            (rootView as ViewGroup)?.AddView(
+                SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin,
+                    rootView as ViewGroup, false));
+        });
+        
+        if (ThreadingUtils.OnUiThread())
+        {
+            action1();
+        }
+        else
+        {
+            SeekerState.MainActivityRef.RunOnUiThread(action1);
         }
     }
 
-    public static void UpdateUIForLoggedIn(View rootView = null, EventHandler BttnClick = null,
-        View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler SettingClick = null)
+    public static void UpdateUiForLoggedIn(View rootView = null, EventHandler btnClick = null,
+        View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler settingClick = null)
     {
         var action = new Action(() =>
         {
             // this is the case where it already has the loggedin fragment loaded.
-            Button bttn = null;
+            Button btn = null;
             TextView welcome = null;
             ViewGroup loggingInLayout = null;
             ViewGroup logInLayout = null;
@@ -2785,7 +2788,7 @@ public class MainActivity : ThemeableActivity
             {
                 if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
                 {
-                    bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                    btn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                     welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
                     loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
 
@@ -2795,7 +2798,7 @@ public class MainActivity : ThemeableActivity
                 }
                 else
                 {
-                    bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                    btn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                     welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                     loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
 
@@ -2806,33 +2809,28 @@ public class MainActivity : ThemeableActivity
             }
             catch
             {
-
+                // Intentional no-op
             }
 
             if (welcome != null)
             {
                 // meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).
-                // so I dont think that the welcome here is the right one.. I dont think it exists.
+                // so I don't think that the welcome here is the right one.. I dont think it exists.
                 // try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
                 welcome.Visibility = ViewStates.Visible;
-
-                bool isShown = welcome.IsShown;
-                bool isAttachedToWindow = welcome.IsAttachedToWindow;
-                bool isActivated = welcome.Activated;
-                ViewStates viewState = welcome.WindowVisibility;
                 
-                bttn.Visibility = ViewStates.Visible;
+                btn.Visibility = ViewStates.Visible;
                 settings.Visibility = ViewStates.Visible;
 
 
-                settings.Click -= SettingClick;
-                settings.Click += SettingClick;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 90);
-                bttn.Click -= BttnClick;
-                bttn.Click += BttnClick;
+                settings.Click -= settingClick;
+                settings.Click += settingClick;
+                AndroidX.Core.View.ViewCompat.SetTranslationZ(btn, 90);
+                btn.Click -= btnClick;
+                btn.Click += btnClick;
                 loggingInLayout.Visibility = ViewStates.Gone;
-                welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome),
-                    SeekerState.Username);
+                welcome.Text = string
+                    .Format(SeekerApplication.GetString(ResourceConstant.String.welcome), SeekerState.Username);
             }
             else if (cWelcome != null)
             {
@@ -2843,14 +2841,14 @@ public class MainActivity : ThemeableActivity
             }
             else
             {
-                StaticHacks.UpdateUI = true; // if we arent ready rn then do it when we are..
+                StaticHacks.UpdateUI = true; // if we arent ready rn then do it when we are...
             }
 
             if (logInLayout != null)
             {
+                var loginButton = logInLayout.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
+                ViewCompat.SetTranslationZ(loginButton, 0);
                 logInLayout.Visibility = ViewStates.Gone;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(
-                    logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
             }
 
         });
@@ -2867,11 +2865,11 @@ public class MainActivity : ThemeableActivity
 
     public static bool IsNotLoggedIn()
     {
-        return (!SeekerState.currentlyLoggedIn) || SeekerState.Username == null || SeekerState.Password == null ||
+        return !SeekerState.currentlyLoggedIn || SeekerState.Username == null || SeekerState.Password == null ||
                SeekerState.Username == string.Empty;
     }
     
-    public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
+    public static void BackToLogInLayout(View rootView, EventHandler logInClick, bool clearUserPass = true)
     {
         var action = new Action(() =>
         {
@@ -2890,33 +2888,36 @@ public class MainActivity : ThemeableActivity
                 if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
                 {
                     Logger.Debug("StaticHacks.RootView != null");
-                    bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+                    bttn = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    welcome = StaticHacks.RootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
 
                     // this is the case we have a bad SAVED user pass....
                     try
                     {
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                        buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
+                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
+                        buttonLogin = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
                         if (logInLayout == null)
                         {
-                            ViewGroup relLayout =
-                                SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login,
+                            var relLayout = SeekerState.MainActivityRef
+                                .LayoutInflater.Inflate(ResourceConstant.Layout.login,
                                     StaticHacks.RootView as ViewGroup, false) as ViewGroup;
-                            relLayout.LayoutParameters =
+                            
+                            relLayout!.LayoutParameters =
                                 new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
-                            (StaticHacks.RootView as ViewGroup).AddView(
-                                SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login,
-                                    StaticHacks.RootView as ViewGroup, false));
+                            
+                            (StaticHacks.RootView as ViewGroup)?.AddView(
+                                SeekerState.MainActivityRef.LayoutInflater
+                                    .Inflate(ResourceConstant.Layout.login,
+                                        StaticHacks.RootView as ViewGroup, false));
                         }
 
-                        settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                        buttonLogin.Click -= LogInClick;
-                        (StaticHacks.LoginFragment as Seeker.LoginFragment).rootView = StaticHacks.RootView;
-                        (StaticHacks.LoginFragment as Seeker.LoginFragment).SetUpLogInLayout();
+                        settings = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
+                        buttonLogin = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
+                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
+                        buttonLogin!.Click -= logInClick;
+                        (StaticHacks.LoginFragment as LoginFragment)!.rootView = StaticHacks.RootView;
+                        (StaticHacks.LoginFragment as LoginFragment)!.SetUpLogInLayout();
                     }
                     catch (Exception ex)
                     {
@@ -2927,12 +2928,12 @@ public class MainActivity : ThemeableActivity
                 else
                 {
                     Logger.Debug("StaticHacks.RootView == null");
-                    bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                    logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                    buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                    settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+                    bttn = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    welcome = rootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                    logInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
+                    buttonLogin = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
+                    settings = rootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
                 }
             }
             catch
@@ -2940,7 +2941,7 @@ public class MainActivity : ThemeableActivity
                 // Intentional no-op
             }
 
-            Logger.Debug("logInLayout is here? " + (logInLayout != null).ToString());
+            Logger.Debug("logInLayout is here? " + (logInLayout != null));
             if (logInLayout != null)
             {
                 logInLayout.Visibility = ViewStates.Visible;
@@ -2950,25 +2951,25 @@ public class MainActivity : ThemeableActivity
                     logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SeekerState.Password;
                 }
 
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
+                ViewCompat.SetTranslationZ(buttonLogin, 90);
 
                 if (loading == null)
                 {
-                    MainActivity.AddLoggedInLayout(rootView);
+                    AddLoggedInLayout(rootView);
                     if (rootView != null)
                     {
-                        bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+                        bttn = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                        welcome = rootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                        loggingInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                        settings = rootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
                     }
 
                     if (rootView == null && loading == null && StaticHacks.RootView != null)
                     {
-                        bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
+                        bttn = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                        welcome = StaticHacks.RootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                        settings = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
                     }
                 }
 
@@ -2977,7 +2978,7 @@ public class MainActivity : ThemeableActivity
                 welcome.Visibility = ViewStates.Gone;
                 settings.Visibility = ViewStates.Gone;
                 bttn.Visibility = ViewStates.Gone;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
+                ViewCompat.SetTranslationZ(bttn, 0);
 
 
             }
@@ -2993,7 +2994,7 @@ public class MainActivity : ThemeableActivity
         }
     }
     
-    public static void UpdateUIForLoggingInLoading(View rootView = null)
+    public static void UpdateUiForLoggingInLoading(View rootView = null)
     {
         Logger.Debug("UpdateUIForLoggingInLoading");
         var action = new Action(() =>
@@ -3008,20 +3009,20 @@ public class MainActivity : ThemeableActivity
             {
                 if (StaticHacks.RootView != null && rootView == null)
                 {
-                    logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                    logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+                    logoutButton = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    settingsButton = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
+                    welcome = StaticHacks.RootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                    logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
 
                 }
-                else
+                else if (rootView != null)
                 {
-                    logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInView = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                    logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+                    logoutButton = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    settingsButton = rootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
+                    welcome = rootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInView = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                    logInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
                 }
             }
             catch
@@ -3029,23 +3030,24 @@ public class MainActivity : ThemeableActivity
                 // Intentional no-op
             }
 
-            if (logInLayout != null)
+            if (logInLayout == null)
             {
-                // TODO: change back..
-                //       basically when we AddChild we add it UNDER the logInLayout..
-                //       so making it gone makes everything gone... we need a root layout for it...
-                logInLayout.Visibility = ViewStates.Gone;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(
-                    logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
-                loggingInView.Visibility = ViewStates.Visible;
-                
-                // WE GET NULLREF HERE. FORCE connection already established exception
-                // and maybe see what is going on here...
-                welcome.Visibility = ViewStates.Gone;
-                logoutButton.Visibility = ViewStates.Gone;
-                settingsButton.Visibility = ViewStates.Gone;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
+                return;
             }
+            
+            // TODO: change back..
+            //       basically when we AddChild we add it UNDER the logInLayout..
+            //       so making it gone makes everything gone... we need a root layout for it...
+            logInLayout.Visibility = ViewStates.Gone;
+            ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(ResourceConstant.Id.buttonLogin)!, 0);
+            loggingInView!.Visibility = ViewStates.Visible;
+                
+            // WE GET NULLREF HERE. FORCE connection already established exception
+            // and maybe see what is going on here...
+            welcome!.Visibility = ViewStates.Gone;
+            logoutButton!.Visibility = ViewStates.Gone;
+            settingsButton!.Visibility = ViewStates.Gone;
+            ViewCompat.SetTranslationZ(logoutButton, 0);
 
         });
         if (ThreadingUtils.OnUiThread())
@@ -3066,14 +3068,9 @@ public class MainActivity : ThemeableActivity
             noMediaRootFile.CreateNewFile();
         }
     }
-
-    private static void CreateNoMediaFile(DocumentFile atDirectory)
-    {
-        atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
-    }
     
-    public static object lock_toplevel_ifexist_create = new object();
-    public static object lock_album_ifexist_create = new object();
+    public static object lock_toplevel_ifexist_create = new();
+    public static object lock_album_ifexist_create = new();
 
     public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth,
         out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
@@ -3247,7 +3244,7 @@ public class MainActivity : ThemeableActivity
                             Logger.FirebaseDebug("slskDir1 cannot write" + rootdir.Uri);
                         }
 
-                        CreateNoMediaFile(slskDir1);
+                        StorageUtils.CreateNoMediaFile(slskDir1);
                     }
                 }
                 
@@ -3272,19 +3269,16 @@ public class MainActivity : ThemeableActivity
                     if (folderDir1 == null || !folderDir1.Exists())
                     {
                         folderDir1 = slskDir1.CreateDirectory(album_folder_name);
+                        var rootUri = string.Empty;
                         if (folderDir1 == null)
                         {
-                            string rootUri = string.Empty;
                             if (SeekerState.RootDocumentFile != null)
                             {
                                 rootUri = SeekerState.RootDocumentFile.Uri.ToString();
                             }
 
-                            bool slskDirExistsWriteable = false;
-                            if (slskDir1 != null)
-                            {
-                                slskDirExistsWriteable = slskDir1.Exists() && slskDir1.CanWrite();
-                            }
+                            bool slskDirExistsWriteable;
+                            slskDirExistsWriteable = slskDir1.Exists() && slskDir1.CanWrite();
 
                             string diagMessage = CheckPermissions(slskDir1.Uri);
                             
@@ -3305,7 +3299,7 @@ public class MainActivity : ThemeableActivity
                             Logger.FirebaseDebug("folderDir1 cannot write:" + album_folder_name);
                         }
 
-                        CreateNoMediaFile(folderDir1);
+                        StorageUtils.CreateNoMediaFile(folderDir1);
                     }
                 }
                 
@@ -3326,22 +3320,15 @@ public class MainActivity : ThemeableActivity
             {
                 SeekerState.MainActivityRef.RunOnUiThread(() =>
                 {
-                    ToastUi.Long(
-                        SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files));
+                    ToastUi.Long(ResourceConstant.String.seeker_cannot_access_files);
                 });
             }
 
             // BACKUP IF FOLDER DIR IS NULL
-            if (folderDir1 == null)
-            {
-                folderDir1 = rootdir; // use the root instead..
-            }
+            folderDir1 ??= rootdir;
 
             parentUri = folderDir1.Uri;
-
-            filePath = folderDir1.Uri + @"/" + name;
-
-            System.IO.Stream stream = null;
+            System.IO.Stream stream;
             DocumentFile potentialFile = folderDir1.FindFile(name); // this will return null if does not exist!!
             
             // don't do a check for length 0 because then it will go to else and create another identical file (2)
@@ -3379,618 +3366,31 @@ public class MainActivity : ThemeableActivity
     /// <returns></returns>
     private static string CheckPermissions(Android.Net.Uri folder)
     {
-        if (SeekerState.ActiveActivityRef != null)
+        if (SeekerState.ActiveActivityRef == null)
         {
-            var cursor = SeekerState.ActiveActivityRef.ContentResolver.Query(folder,
-                new string[] { DocumentsContract.Document.ColumnFlags }, null, null, null);
-            int flags = 0;
-            if (cursor.MoveToFirst())
-            {
-                flags = cursor.GetInt(0);
-            }
-
-            cursor.Close();
-            bool canWrite = (flags & (int)DocumentContractFlags.SupportsWrite) != 0;
-            bool canDirCreate = (flags & (int)DocumentContractFlags.DirSupportsCreate) != 0;
-            if (canWrite && canDirCreate)
-            {
-                return "Can Write and DirSupportsCreate";
-            }
-            else if (canWrite)
-            {
-                return "Can Write and not DirSupportsCreate";
-            }
-            else if (canDirCreate)
-            {
-                return "Can not Write and can DirSupportsCreate";
-            }
-            else
-            {
-                return "No permissions";
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private static string SaveToFile(
-        string fullfilename,
-        string username,
-        byte[] bytes,
-        Android.Net.Uri uriOfIncomplete,
-        Android.Net.Uri parentUriOfIncomplete,
-        bool memoryMode,
-        int depth,
-        bool noSubFolder,
-        out string finalUri)
-    {
-        string name = CommonHelpers.GetFileNameFromFile(fullfilename);
-        string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
-        string filePath = string.Empty;
-
-        if (memoryMode && (bytes == null || bytes.Length == 0))
-        {
-            Logger.FirebaseDebug("EMPTY or NULL BYTE ARRAY in mem mode");
-        }
-
-        if (!memoryMode && uriOfIncomplete == null)
-        {
-            Logger.FirebaseDebug("no URI in file mode");
-        }
-
-        finalUri = string.Empty;
-        if (SeekerState.UseLegacyStorage() &&
-            (SeekerState.RootDocumentFile == null &&
-             // if the user didnt select a complete OR incomplete directory. i.e. pure java files.
-             !SettingsActivity.UseIncompleteManualFolder()))  
-        {
-            // this method works just fine if coming from a temp dir.  just not a open doc tree dir.
-            string rootdir = string.Empty;
-            
-            rootdir = Android.OS.Environment
-                .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-            
-            if (!(new Java.IO.File(rootdir)).Exists())
-            {
-                (new Java.IO.File(rootdir)).Mkdirs();
-            }
-
-            string intermediateFolder = @"/";
-            if (SeekerState.CreateCompleteAndIncompleteFolders)
-            {
-                intermediateFolder = @"/Soulseek Complete/";
-            }
-
-            if (SeekerState.CreateUsernameSubfolders)
-            {
-                // TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
-                intermediateFolder = intermediateFolder + username + @"/";
-            }
-
-            string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); // + @"/" + name;
-            Java.IO.File musicDir = new Java.IO.File(fullDir);
-            musicDir.Mkdirs();
-            filePath = fullDir + @"/" + name;
-            Java.IO.File musicFile = new Java.IO.File(filePath);
-            FileOutputStream stream = new FileOutputStream(musicFile);
-            finalUri = musicFile.ToURI().ToString();
-            
-            if (memoryMode)
-            {
-                stream.Write(bytes);
-                stream.Close();
-            }
-            else
-            {
-                Java.IO.File inFile = new Java.IO.File(uriOfIncomplete.Path);
-                Java.IO.File inDir = new Java.IO.File(parentUriOfIncomplete.Path);
-                MoveFile(new FileInputStream(inFile), stream, inFile, inDir);
-            }
-        }
-        else
-        {
-            bool useLegacyDocFileToJavaFileOverride = false;
-            DocumentFile legacyRootDir = null;
-            if (SeekerState.UseLegacyStorage() && SeekerState.RootDocumentFile == null &&
-                SettingsActivity.UseIncompleteManualFolder())
-            {
-                // this means that even though rootfile is null, manual folder is set and is a docfile.
-                // so we must wrap the default root doc file.
-                string legacyRootdir = string.Empty;
-
-                legacyRootdir = Android.OS.Environment
-                    .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-
-                Java.IO.File legacyRoot = (new Java.IO.File(legacyRootdir));
-                if (!legacyRoot.Exists())
-                {
-                    legacyRoot.Mkdirs();
-                }
-
-                legacyRootDir = DocumentFile.FromFile(legacyRoot);
-
-                useLegacyDocFileToJavaFileOverride = true;
-
-            }
-
-            DocumentFile folderDir1 = null; // this is the desired location.
-            DocumentFile rootdir = null;
-
-            bool diagRootDirExists = true;
-            bool diagDidWeCreateSoulSeekDir = false;
-            bool diagSlskDirExistsAfterCreation = true;
-            bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
-            try
-            {
-                rootdir = SeekerState.RootDocumentFile;
-
-                if (useLegacyDocFileToJavaFileOverride)
-                {
-                    rootdir = legacyRootDir;
-                }
-
-                if (!rootdir.Exists())
-                {
-                    diagRootDirExists = false;
-                }
-
-                DocumentFile slskDir1 = null;
-                if (SeekerState.CreateCompleteAndIncompleteFolders)
-                {
-                    slskDir1 = rootdir.FindFile("Soulseek Complete"); // does Soulseek Complete folder exist
-                    if (slskDir1 == null || !slskDir1.Exists())
-                    {
-                        slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
-                        Logger.Debug("Creating Soulseek Complete");
-                        diagDidWeCreateSoulSeekDir = true;
-                    }
-
-                    if (slskDir1 == null)
-                    {
-                        diagSlskDirExistsAfterCreation = false;
-                    }
-                    else if (!slskDir1.Exists())
-                    {
-                        diagSlskDirExistsAfterCreation = false;
-                    }
-                }
-                else
-                {
-                    slskDir1 = rootdir;
-                }
-
-                bool diagUsernameDirExistsAfterCreation = false;
-                bool diagDidWeCreateUsernameDir = false;
-                if (SeekerState.CreateUsernameSubfolders)
-                {
-                    DocumentFile tempUsernameDir1 = null;
-                    lock (string.Intern("IfNotExistCreateAtomic_1"))
-                    {
-                        tempUsernameDir1 = slskDir1.FindFile(username); // does username folder exist
-                        if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
-                        {
-                            tempUsernameDir1 = slskDir1.CreateDirectory(username);
-                            Logger.Debug(string.Format("Creating {0} dir", username));
-                            diagDidWeCreateUsernameDir = true;
-                        }
-                    }
-
-                    if (tempUsernameDir1 == null)
-                    {
-                        diagUsernameDirExistsAfterCreation = false;
-                    }
-                    else if (!slskDir1.Exists())
-                    {
-                        diagUsernameDirExistsAfterCreation = false;
-                    }
-                    else
-                    {
-                        diagUsernameDirExistsAfterCreation = true;
-                    }
-
-                    slskDir1 = tempUsernameDir1;
-                }
-
-                if (depth == 1)
-                {
-                    if (noSubFolder)
-                    {
-                        folderDir1 = slskDir1;
-                    }
-                    else
-                    {
-                        lock (string.Intern("IfNotExistCreateAtomic_2"))
-                        {
-                            folderDir1 = slskDir1.FindFile(dir); // does the folder we want to save to exist
-                            if (folderDir1 == null || !folderDir1.Exists())
-                            {
-                                Logger.Debug("Creating " + dir);
-                                folderDir1 = slskDir1.CreateDirectory(dir);
-                            }
-
-                            if (folderDir1 == null || !folderDir1.Exists())
-                            {
-                                Logger.FirebaseDebug("folderDir is null or does not exists");
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    DocumentFile folderDirNext = null;
-                    folderDir1 = slskDir1;
-                    int _depth = depth;
-                    while (_depth > 0)
-                    {
-                        var parts = dir.Split('\\');
-                        string singleDir = parts[parts.Length - _depth];
-                        lock (string.Intern("IfNotExistCreateAtomic_3"))
-                        {
-                            folderDirNext =
-                                folderDir1.FindFile(singleDir); // does the folder we want to save to exist
-                            if (folderDirNext == null || !folderDirNext.Exists())
-                            {
-                                Logger.Debug("Creating " + dir);
-                                folderDirNext = folderDir1.CreateDirectory(singleDir);
-                            }
-
-                            if (folderDirNext == null || !folderDirNext.Exists())
-                            {
-                                Logger.FirebaseDebug("folderDir is null or does not exists, depth" + _depth);
-                            }
-                        }
-
-                        folderDir1 = folderDirNext;
-                        _depth--;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.FirebaseDebug("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation +
-                                         diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull +
-                                         SeekerState.CreateUsernameSubfolders);
-            }
-
-            if (rootdir == null && !SeekerState.UseLegacyStorage())
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    ToastUi.Long(
-                        SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files));
-                });
-            }
-
-            // BACKUP IF FOLDER DIR IS NULL
-            if (folderDir1 == null)
-            {
-                folderDir1 = rootdir; // use the root instead..
-            }
-
-            filePath = folderDir1.Uri + @"/" + name;
-            
-            if (memoryMode)
-            {
-                DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
-                finalUri = mFile.Uri.ToString();
-                System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                stream.Write(bytes);
-                stream.Close();
-            }
-            else
-            {
-
-                //106ms for 32mb
-                Android.Net.Uri uri = null;
-                if (SeekerState.PreMoveDocument() ||
-                    SettingsActivity
-                        .UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
-                    (SeekerState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() &&
-                     SeekerState.RootDocumentFile ==
-                     null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                    CommonHelpers.CompleteIncompleteDifferentVolume() ||
-                    !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree ||
-                    !SeekerState.SaveDataDirectoryUriIsFromTree)
-                {
-                    try
-                    {
-                        DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
-                        uri = mFile.Uri;
-                        finalUri = mFile.Uri.ToString();
-                        System.IO.Stream stream =
-                            SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                        MoveFile(SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete),
-                            stream, uriOfIncomplete, parentUriOfIncomplete);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR pre" + e.Message);
-                        SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                        Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        string realName = string.Empty;
-                        
-                        // fix due to above^  otherwise "Play File" silently fails
-                        if (SettingsActivity.UseIncompleteManualFolder())
-                        {
-                            // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
-                            var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
-                            realName = df.Name;
-                        }
-
-                        uri = DocumentsContract.MoveDocument(SeekerState.ActiveActivityRef.ContentResolver,
-                            uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); // ADDED IN API 24!!
-                        DeleteParentIfEmpty(DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef,
-                            parentUriOfIncomplete));
-                        
-                        // "/tree/primary:musictemp/document/primary:music2/J when two different uri trees the
-                        // uri returned from move document is a mismash of the two...
-                        // even tho it actually moves it correctly.
-                        // folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
-                        
-                        // fix due to above^  otherwise "Play File" silently fails
-                        if (SettingsActivity.UseIncompleteManualFolder())
-                        {
-                            // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
-                            uri = folderDir1.FindFile(realName).Uri;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        // move document fails if two different volumes:
-                        // "Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
-                        // {content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
-                        // content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
-                        if (e.Message.ToLower().Contains("already exists"))
-                        {
-                            try
-                            {
-                                // set the uri to the existing file...
-                                var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
-                                string realName = df.Name;
-                                uri = folderDir1.FindFile(realName).Uri;
-
-                                if (folderDir1.Uri == parentUriOfIncomplete)
-                                {
-                                    // case where SDCARD was full - all files were 0 bytes, folders could not
-                                    // be created, documenttree.CreateDirectory() returns null.
-                                    // no errors until you tried to move it. then you would ge "alreay exists"
-                                    // since (if Create Complete and Incomplete folders is checked and 
-                                    // the incomplete dir isnt changed) then the destination is the same as the
-                                    // incomplete file (since the incomplete and complete folders
-                                    // couldnt be created.
-                                    // This error is misleading though so do a more generic error.
-                                    SeekerApplication.ShowToast($"Filesystem Error for file {realName}.",
-                                        ToastLength.Long);
-                                    
-                                    Logger.Debug("complete and incomplete locations are the same");
-                                }
-                                else
-                                {
-                                    SeekerApplication.ShowToast(
-                                        string.Format(
-                                            "File {0} already exists at {1}.  Delete it and try again " +
-                                            "if you want to overwrite it.",
-                                            realName, uri.LastPathSegment.ToString()), ToastLength.Long);
-                                }
-                            }
-                            catch (Exception e2)
-                            {
-                                Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
-                            }
-
-                        }
-                        else
-                        {
-                            if (uri == null) // this means doc file failed (else it would be after)
-                            {
-                                Logger.FirebaseInfo("uri==null");
-                                
-                                // lets try with the non MoveDocument way.
-                                // this case can happen (for a legitimate reason) if:
-                                //  the user is on api <29.  they start downloading an album.
-                                // then while its downloading they set the download directory.
-                                // the manual one will be file:\\ but the end location will be content:\\
-                                try
-                                {
-
-                                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
-                                    uri = mFile.Uri;
-                                    finalUri = mFile.Uri.ToString();
-                                    Logger.FirebaseInfo("retrying: incomplete: " + uriOfIncomplete +
-                                                                 " complete: " + finalUri + " parent: " +
-                                                                 parentUriOfIncomplete);
-                                    System.IO.Stream stream =
-                                        SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                                    MoveFile(
-                                        SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(
-                                            uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
-                                }
-                                catch (Exception secondTryErr)
-                                {
-                                    Logger.FirebaseDebug(
-                                        "Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" +
-                                        secondTryErr.Message);
-                                    SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                    Logger.Debug(secondTryErr.Message + " " + uriOfIncomplete.Path);
-                                }
-                            }
-                            else
-                            {
-                                Logger.FirebaseInfo("uri!=null");
-                                Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR " + e.Message +
-                                                         " path child: " +
-                                                         Android.Net.Uri.Decode(uriOfIncomplete.ToString()) +
-                                                         " path parent: " +
-                                                         Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) +
-                                                         " path dest: " +
-                                                         Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
-                                SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                
-                                // Unknown Authority happens when source is
-                                // file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
-                                Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
-                            }
-                        }
-                    }
-                    // throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
-                }
-
-                if (uri == null)
-                {
-                    Logger.FirebaseDebug("DocumentsContract MoveDocument FAILED, override incomplete: " +
-                                SeekerState.OverrideDefaultIncompleteLocations);
-                }
-
-                finalUri = uri.ToString();
-            }
-        }
-
-        return filePath;
-    }
-
-    private static void MoveFile(System.IO.Stream from, System.IO.Stream to, Android.Net.Uri toDelete,
-        Android.Net.Uri parentToDelete)
-    {
-        byte[] buffer = new byte[4096];
-        int read;
-        while ((read = from.Read(buffer)) != 0) // C# does 0 for you've reached the end!
-        {
-            to.Write(buffer, 0, read);
-        }
-
-        from.Close();
-        to.Flush();
-        to.Close();
-
-        if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
-        {
-            try
-            {
-                if (!(new Java.IO.File(toDelete.Path)).Delete())
-                {
-                    Logger.FirebaseDebug("Java.IO.File.Delete() failed to delete");
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.FirebaseDebug("Java.IO.File.Delete() threw" + e.Message + e.StackTrace);
-            }
-        }
-        else
-        {
-            DocumentFile
-                df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef,
-                    toDelete); // this returns a file that doesnt exist with file ://
-
-            if (!df.Delete()) // on API 19 this seems to always fail..
-            {
-                Logger.FirebaseDebug("df.Delete() failed to delete");
-            }
-        }
-
-        DocumentFile parent = null;
-        if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() ||
-            parentToDelete.Scheme == "file")
-        {
-            parent = DocumentFile.FromFile(new Java.IO.File(parentToDelete.Path));
-        }
-        else
-        {
-            // if from single uri then listing files will give unsupported operation exception...
-            // if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
-            parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef,
-                parentToDelete);
-        }
-
-        DeleteParentIfEmpty(parent);
-    }
-
-    public static void DeleteParentIfEmpty(DocumentFile parent)
-    {
-        if (parent == null)
-        {
-            Logger.FirebaseDebug("null parent");
-            return;
+            return string.Empty;
         }
         
-        try
+        var cursor = SeekerState.ActiveActivityRef.ContentResolver!.Query(folder,
+            [DocumentsContract.Document.ColumnFlags], null, null, null)!;
+        
+        var flags = 0;
+        if (cursor.MoveToFirst())
         {
-            if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
-            {
-                if (!parent.ListFiles()[0].Delete())
-                {
-                    Logger.FirebaseDebug("parent.Delete() failed to delete .nomedia child...");
-                }
-
-                if (!parent.Delete())
-                {
-                    Logger.FirebaseDebug("parent.Delete() failed to delete parent");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // race condition between checking length of ListFiles() and indexing [0] (twice)
-            if (!ex.Message.Contains("Index was outside"))
-            {
-                throw ex; // this might be important..
-            }
-        }
-    }
-
-
-    public static void DeleteParentIfEmpty(Java.IO.File parent)
-    {
-        if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
-        {
-            if (!parent.ListFiles()[0].Delete())
-            {
-                Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete .nomedia child...");
-            }
-
-            // this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
-            if (!parent.Delete())
-            {
-                Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete parent");
-            }
-        }
-    }
-
-
-    private static void MoveFile(Java.IO.FileInputStream from, Java.IO.FileOutputStream to, Java.IO.File toDelete,
-        Java.IO.File parent)
-    {
-        byte[] buffer = new byte[4096];
-        int read;
-        while ((read = from.Read(buffer)) != -1) // unlike C# this method does -1 for no more bytes left..
-        {
-            to.Write(buffer, 0, read);
+            flags = cursor.GetInt(0);
         }
 
-        from.Close();
-        to.Flush();
-        to.Close();
-        if (!toDelete.Delete())
+        cursor.Close();
+        
+        var canWrite = (flags & (int)DocumentContractFlags.SupportsWrite) != 0;
+        var canDirCreate = (flags & (int)DocumentContractFlags.DirSupportsCreate) != 0;
+        return canWrite switch
         {
-            Logger.FirebaseDebug("LEGACY df.Delete() failed to delete ()");
-        }
+            true when canDirCreate => "Can Write and DirSupportsCreate",
+            true => "Can Write and not DirSupportsCreate",
+            _ => canDirCreate ? "Can not Write and can DirSupportsCreate" : "No permissions"
+        };
 
-        DeleteParentIfEmpty(parent);
-    }
-
-    private static void SaveFileToMediaStore(string path)
-    {
-        Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
-        Java.IO.File f = new Java.IO.File(path);
-        Android.Net.Uri contentUri = Android.Net.Uri.FromFile(f);
-        mediaScanIntent.SetData(contentUri);
-        SeekerState.ActiveActivityRef.ApplicationContext.SendBroadcast(mediaScanIntent);
     }
     
     protected override void OnPause()

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using _Microsoft.Android.Resource.Designer;
 using Android.Content;
 using Android.Provider;
+using Android.Widget;
 using AndroidX.DocumentFile.Provider;
+using Java.IO;
 using Seeker.Managers;
 using SlskHelp;
 using Soulseek;
@@ -824,5 +827,574 @@ public static class StorageUtils
         }
 
         return false;
+    }
+    
+        private static void MoveFile(System.IO.Stream from, System.IO.Stream to, Android.Net.Uri toDelete,
+        Android.Net.Uri parentToDelete)
+    {
+        var buffer = new byte[4096];
+        int read;
+        while ((read = from.Read(buffer)) != 0) // C# does 0 for you've reached the end!
+        {
+            to.Write(buffer, 0, read);
+        }
+
+        from.Close();
+        to.Flush();
+        to.Close();
+
+        if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
+        {
+            try
+            {
+                if (!(new Java.IO.File(toDelete.Path)).Delete())
+                {
+                    Logger.FirebaseDebug("Java.IO.File.Delete() failed to delete");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseDebug("Java.IO.File.Delete() threw" + e.Message + e.StackTrace);
+            }
+        }
+        else
+        {
+            // this returns a file that doesn't exist with file ://
+            var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, toDelete);
+
+            if (df?.Delete() != true) // on API 19 this seems to always fail
+            {
+                Logger.FirebaseDebug("df.Delete() failed to delete");
+            }
+        }
+
+        DocumentFile parent;
+        if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentToDelete.Scheme == "file")
+        {
+            parent = DocumentFile.FromFile(new Java.IO.File(parentToDelete.Path));
+        }
+        else
+        {
+            // if from single uri then listing files will give unsupported operation exception...
+            // if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
+            parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentToDelete);
+        }
+
+        DeleteParentIfEmpty(parent);
+    }
+
+    public static void DeleteParentIfEmpty(DocumentFile parent)
+    {
+        if (parent == null)
+        {
+            Logger.FirebaseDebug("null parent");
+            return;
+        }
+        
+        try
+        {
+            if (parent.ListFiles().Length != 1 || parent.ListFiles()[0].Name != ".nomedia")
+            {
+                return;
+            }
+            
+            if (!parent.ListFiles()[0].Delete())
+            {
+                Logger.FirebaseDebug("parent.Delete() failed to delete .nomedia child...");
+            }
+
+            if (!parent.Delete())
+            {
+                Logger.FirebaseDebug("parent.Delete() failed to delete parent");
+            }
+        }
+        catch (Exception ex)
+        {
+            // race condition between checking length of ListFiles() and indexing [0] (twice)
+            if (!ex.Message.Contains("Index was outside"))
+            {
+                throw; // this might be important
+            }
+        }
+    }
+
+
+    public static void DeleteParentIfEmpty(Java.IO.File parent)
+    {
+        var files = parent.ListFiles();
+        
+        if (files is not { Length: 1 } || files[0].Name != ".nomedia")
+        {
+            return;
+        }
+        
+        if (!files[0].Delete())
+        {
+            Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete .nomedia child...");
+        }
+
+        // this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
+        if (!parent.Delete())
+        {
+            Logger.FirebaseDebug("LEGACY parent.Delete() failed to delete parent");
+        }
+    }
+
+
+    private static void MoveFile(FileInputStream from, FileOutputStream to, Java.IO.File toDelete, Java.IO.File parent)
+    {
+        var buffer = new byte[4096];
+        int read;
+        while ((read = from.Read(buffer)) != -1) // unlike C# this method does -1 for no more bytes left..
+        {
+            to.Write(buffer, 0, read);
+        }
+
+        from.Close();
+        to.Flush();
+        to.Close();
+        if (!toDelete.Delete())
+        {
+            Logger.FirebaseDebug("LEGACY df.Delete() failed to delete ()");
+        }
+
+        DeleteParentIfEmpty(parent);
+    }
+
+// The call is only reachable on API 21
+#pragma warning disable CA1422
+    public static void SaveFileToMediaStore(string path)
+    {
+        var mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
+        var f = new Java.IO.File(path);
+        var contentUri = Android.Net.Uri.FromFile(f);
+        mediaScanIntent.SetData(contentUri);
+        SeekerState.ActiveActivityRef.ApplicationContext?.SendBroadcast(mediaScanIntent);
+    }
+#pragma warning restore CA1422
+    
+     public static string SaveToFile(
+        string fullfilename,
+        string username,
+        byte[] bytes,
+        Android.Net.Uri uriOfIncomplete,
+        Android.Net.Uri parentUriOfIncomplete,
+        bool memoryMode,
+        int depth,
+        bool noSubFolder,
+        out string finalUri)
+    {
+        string name = CommonHelpers.GetFileNameFromFile(fullfilename);
+        string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
+        string filePath = string.Empty;
+
+        if (memoryMode && (bytes == null || bytes.Length == 0))
+        {
+            Logger.FirebaseDebug("EMPTY or NULL BYTE ARRAY in mem mode");
+        }
+
+        if (!memoryMode && uriOfIncomplete == null)
+        {
+            Logger.FirebaseDebug("no URI in file mode");
+        }
+
+        finalUri = string.Empty;
+        if (SeekerState.UseLegacyStorage() &&
+            (SeekerState.RootDocumentFile == null &&
+             // if the user didnt select a complete OR incomplete directory. i.e. pure java files.
+             !SettingsActivity.UseIncompleteManualFolder()))  
+        {
+            // this method works just fine if coming from a temp dir.  just not a open doc tree dir.
+            string rootdir = string.Empty;
+            
+            rootdir = Android.OS.Environment
+                .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+            
+            if (!(new Java.IO.File(rootdir)).Exists())
+            {
+                (new Java.IO.File(rootdir)).Mkdirs();
+            }
+
+            string intermediateFolder = @"/";
+            if (SeekerState.CreateCompleteAndIncompleteFolders)
+            {
+                intermediateFolder = @"/Soulseek Complete/";
+            }
+
+            if (SeekerState.CreateUsernameSubfolders)
+            {
+                // TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
+                intermediateFolder = intermediateFolder + username + @"/";
+            }
+
+            string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); // + @"/" + name;
+            Java.IO.File musicDir = new Java.IO.File(fullDir);
+            musicDir.Mkdirs();
+            filePath = fullDir + @"/" + name;
+            Java.IO.File musicFile = new Java.IO.File(filePath);
+            FileOutputStream stream = new FileOutputStream(musicFile);
+            finalUri = musicFile.ToURI().ToString();
+            
+            if (memoryMode)
+            {
+                stream.Write(bytes);
+                stream.Close();
+            }
+            else
+            {
+                Java.IO.File inFile = new Java.IO.File(uriOfIncomplete.Path);
+                Java.IO.File inDir = new Java.IO.File(parentUriOfIncomplete.Path);
+                MoveFile(new FileInputStream(inFile), stream, inFile, inDir);
+            }
+        }
+        else
+        {
+            bool useLegacyDocFileToJavaFileOverride = false;
+            DocumentFile legacyRootDir = null;
+            if (SeekerState.UseLegacyStorage() && SeekerState.RootDocumentFile == null &&
+                SettingsActivity.UseIncompleteManualFolder())
+            {
+                // this means that even though rootfile is null, manual folder is set and is a docfile.
+                // so we must wrap the default root doc file.
+                string legacyRootdir = string.Empty;
+
+                legacyRootdir = Android.OS.Environment
+                    .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+
+                Java.IO.File legacyRoot = (new Java.IO.File(legacyRootdir));
+                if (!legacyRoot.Exists())
+                {
+                    legacyRoot.Mkdirs();
+                }
+
+                legacyRootDir = DocumentFile.FromFile(legacyRoot);
+
+                useLegacyDocFileToJavaFileOverride = true;
+
+            }
+
+            DocumentFile folderDir1 = null; // this is the desired location.
+            DocumentFile rootdir = null;
+
+            bool diagRootDirExists = true;
+            bool diagDidWeCreateSoulSeekDir = false;
+            bool diagSlskDirExistsAfterCreation = true;
+            bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
+            try
+            {
+                rootdir = SeekerState.RootDocumentFile;
+
+                if (useLegacyDocFileToJavaFileOverride)
+                {
+                    rootdir = legacyRootDir;
+                }
+
+                if (!rootdir.Exists())
+                {
+                    diagRootDirExists = false;
+                }
+
+                DocumentFile slskDir1;
+                if (SeekerState.CreateCompleteAndIncompleteFolders)
+                {
+                    slskDir1 = rootdir.FindFile("Soulseek Complete"); // does Soulseek Complete folder exist
+                    if (slskDir1 == null || !slskDir1.Exists())
+                    {
+                        slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
+                        Logger.Debug("Creating Soulseek Complete");
+                        diagDidWeCreateSoulSeekDir = true;
+                    }
+
+                    if (slskDir1 == null)
+                    {
+                        diagSlskDirExistsAfterCreation = false;
+                    }
+                    else if (!slskDir1.Exists())
+                    {
+                        diagSlskDirExistsAfterCreation = false;
+                    }
+                }
+                else
+                {
+                    slskDir1 = rootdir;
+                }
+                
+                if (SeekerState.CreateUsernameSubfolders)
+                {
+                    DocumentFile tempUsernameDir1;
+                    lock (string.Intern("IfNotExistCreateAtomic_1"))
+                    {
+                        tempUsernameDir1 = slskDir1?.FindFile(username); // does username folder exist
+                        if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
+                        {
+                            tempUsernameDir1 = slskDir1.CreateDirectory(username);
+                            Logger.Debug(string.Format("Creating {0} dir", username));
+                        }
+                    }
+
+                    slskDir1 = tempUsernameDir1;
+                }
+
+                if (depth == 1)
+                {
+                    if (noSubFolder)
+                    {
+                        folderDir1 = slskDir1;
+                    }
+                    else
+                    {
+                        lock (string.Intern("IfNotExistCreateAtomic_2"))
+                        {
+                            folderDir1 = slskDir1?.FindFile(dir); // does the folder we want to save to exist
+                            if (folderDir1 == null || !folderDir1.Exists())
+                            {
+                                Logger.Debug("Creating " + dir);
+                                folderDir1 = slskDir1.CreateDirectory(dir);
+                            }
+
+                            if (folderDir1 == null || !folderDir1.Exists())
+                            {
+                                Logger.FirebaseDebug("folderDir is null or does not exists");
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    DocumentFile folderDirNext = null;
+                    folderDir1 = slskDir1;
+                    var localDepth = depth;
+                    while (localDepth > 0)
+                    {
+                        var parts = dir.Split('\\');
+                        var singleDir = parts[parts.Length - localDepth];
+                        lock (string.Intern("IfNotExistCreateAtomic_3"))
+                        {
+                            folderDirNext =
+                                folderDir1.FindFile(singleDir); // does the folder we want to save to exist
+                            if (folderDirNext == null || !folderDirNext.Exists())
+                            {
+                                Logger.Debug("Creating " + dir);
+                                folderDirNext = folderDir1.CreateDirectory(singleDir);
+                            }
+
+                            if (folderDirNext == null || !folderDirNext.Exists())
+                            {
+                                Logger.FirebaseDebug("folderDir is null or does not exists, depth" + localDepth);
+                            }
+                        }
+
+                        folderDir1 = folderDirNext;
+                        localDepth--;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseDebug("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation +
+                                         diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull +
+                                         SeekerState.CreateUsernameSubfolders);
+            }
+
+            if (rootdir == null && !SeekerState.UseLegacyStorage())
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    ToastUi.Long(ResourceConstant.String.seeker_cannot_access_files);
+                });
+            }
+
+            // BACKUP IF FOLDER DIR IS NULL
+            folderDir1 ??= rootdir;
+
+            filePath = folderDir1.Uri + "/" + name;
+            
+            if (memoryMode)
+            {
+                var mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                finalUri = mFile.Uri.ToString();
+                var stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                stream.Write(bytes);
+                stream.Close();
+            }
+            else
+            {
+                //106ms for 32mb
+                Android.Net.Uri uri = null;
+                if (SeekerState.PreMoveDocument() ||
+                    // i.e. if use temp dir which is file: // rather than content: //
+                    SettingsActivity.UseTempDirectory() ||
+                    // i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
+                    (SeekerState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() 
+                                                    && SeekerState.RootDocumentFile == null) || 
+                    CommonHelpers.CompleteIncompleteDifferentVolume() ||
+                    !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree ||
+                    !SeekerState.SaveDataDirectoryUriIsFromTree)
+                {
+                    try
+                    {
+                        DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                        uri = mFile.Uri;
+                        finalUri = mFile.Uri.ToString();
+                        System.IO.Stream stream =
+                            SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                        MoveFile(SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete),
+                            stream, uriOfIncomplete, parentUriOfIncomplete);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR pre" + e.Message);
+                        SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                        Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        string realName = string.Empty;
+                        
+                        // fix due to above^  otherwise "Play File" silently fails
+                        if (SettingsActivity.UseIncompleteManualFolder())
+                        {
+                            // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                            var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
+                            realName = df.Name;
+                        }
+
+                        uri = DocumentsContract.MoveDocument(SeekerState.ActiveActivityRef.ContentResolver,
+                            uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); // ADDED IN API 24!!
+                        DeleteParentIfEmpty(DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef,
+                            parentUriOfIncomplete));
+                        
+                        // "/tree/primary:musictemp/document/primary:music2/J when two different uri trees the
+                        // uri returned from move document is a mismash of the two...
+                        // even tho it actually moves it correctly.
+                        // folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
+                        
+                        // fix due to above^  otherwise "Play File" silently fails
+                        if (SettingsActivity.UseIncompleteManualFolder())
+                        {
+                            // dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                            uri = folderDir1.FindFile(realName).Uri;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        // move document fails if two different volumes:
+                        // "Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
+                        // {content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
+                        // content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
+                        if (e.Message.ToLower().Contains("already exists"))
+                        {
+                            try
+                            {
+                                // set the uri to the existing file...
+                                var df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, uriOfIncomplete);
+                                string realName = df.Name;
+                                uri = folderDir1.FindFile(realName).Uri;
+
+                                if (folderDir1.Uri == parentUriOfIncomplete)
+                                {
+                                    // case where SDCARD was full - all files were 0 bytes, folders could not
+                                    // be created, documenttree.CreateDirectory() returns null.
+                                    // no errors until you tried to move it. then you would ge "alreay exists"
+                                    // since (if Create Complete and Incomplete folders is checked and 
+                                    // the incomplete dir isnt changed) then the destination is the same as the
+                                    // incomplete file (since the incomplete and complete folders
+                                    // couldnt be created.
+                                    // This error is misleading though so do a more generic error.
+                                    SeekerApplication.ShowToast($"Filesystem Error for file {realName}.",
+                                        ToastLength.Long);
+                                    
+                                    Logger.Debug("complete and incomplete locations are the same");
+                                }
+                                else
+                                {
+                                    SeekerApplication.ShowToast(
+                                        string.Format(
+                                            "File {0} already exists at {1}.  Delete it and try again " +
+                                            "if you want to overwrite it.",
+                                            realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                }
+                            }
+                            catch (Exception e2)
+                            {
+                                Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
+                            }
+
+                        }
+                        else
+                        {
+                            if (uri == null) // this means doc file failed (else it would be after)
+                            {
+                                Logger.FirebaseInfo("uri==null");
+                                
+                                // lets try with the non MoveDocument way.
+                                // this case can happen (for a legitimate reason) if:
+                                //  the user is on api <29.  they start downloading an album.
+                                // then while its downloading they set the download directory.
+                                // the manual one will be file:\\ but the end location will be content:\\
+                                try
+                                {
+
+                                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                                    uri = mFile.Uri;
+                                    finalUri = mFile.Uri.ToString();
+                                    Logger.FirebaseInfo("retrying: incomplete: " + uriOfIncomplete +
+                                                                 " complete: " + finalUri + " parent: " +
+                                                                 parentUriOfIncomplete);
+                                    System.IO.Stream stream =
+                                        SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                                    MoveFile(
+                                        SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(
+                                            uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
+                                }
+                                catch (Exception secondTryErr)
+                                {
+                                    Logger.FirebaseDebug(
+                                        "Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" +
+                                        secondTryErr.Message);
+                                    SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                    Logger.Debug(secondTryErr.Message + " " + uriOfIncomplete.Path);
+                                }
+                            }
+                            else
+                            {
+                                Logger.FirebaseInfo("uri!=null");
+                                Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR " + e.Message +
+                                                         " path child: " +
+                                                         Android.Net.Uri.Decode(uriOfIncomplete.ToString()) +
+                                                         " path parent: " +
+                                                         Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) +
+                                                         " path dest: " +
+                                                         Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
+                                SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                
+                                // Unknown Authority happens when source is
+                                // file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
+                            }
+                        }
+                    }
+                    // throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
+                }
+
+                if (uri == null)
+                {
+                    Logger.FirebaseDebug("DocumentsContract MoveDocument FAILED, override incomplete: " +
+                                SeekerState.OverrideDefaultIncompleteLocations);
+                }
+
+                finalUri = uri.ToString();
+            }
+        }
+
+        return filePath;
+    }
+     
+    public static void CreateNoMediaFile(DocumentFile atDirectory)
+    {
+        atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
     }
 }

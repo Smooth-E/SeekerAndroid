@@ -127,7 +127,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                StorageUtils.DeleteParentIfEmpty(parent);
             }
             else
             {
@@ -141,7 +141,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed LEGACY");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                StorageUtils.DeleteParentIfEmpty(parent);
             }
         }
         
