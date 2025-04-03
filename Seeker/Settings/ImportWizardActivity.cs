@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using AndroidX.Activity;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker
@@ -273,7 +274,7 @@ namespace Seeker
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (SeekerState.UserList)
+                lock (UserListManager.UserList)
                 {
                     UserListActivity.AddUserAPI(this, uname, null, true);
                 }
@@ -290,12 +291,12 @@ namespace Seeker
             SearchTabHelper.SaveHeadersToSharedPrefs();
             //SearchTabHelper.SaveAllSearchTabsToDisk(SeekerState.ActiveActivityRef); //there are no additional results...
             CommonHelpers.SaveUserNotes();
-            if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
+            if (SeekerState.SharedPreferences != null && UserListManager.UserList != null)
             {
                 lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                    editor.PutString(KeyConsts.M_UserList, UserListManager.AsString());
                     editor.Commit();
                 }
             }
@@ -304,7 +305,7 @@ namespace Seeker
                 lock (SeekerApplication.SHARED_PREF_LOCK)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+                    editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());
                     editor.Commit();
                 }
             }
@@ -738,7 +739,7 @@ namespace Seeker
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHave = SeekerState.UserList.Select(item => item.Username).ToList();
+                    var currentlyHave = UserListManager.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
                     var alreadyAddedList = data.UserList.Except(notYetAdded).ToList();
                     if (alreadyAddedList.Count == 0)

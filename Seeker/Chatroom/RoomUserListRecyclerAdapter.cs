@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Managers;
 
 namespace Seeker.Chatroom
 {
@@ -273,7 +274,7 @@ namespace Seeker.Chatroom
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_cancel);
                 imageFriendIgnored.Visibility = ViewStates.Visible;
             }
-            else if (MainActivity.UserListContainsUser(userData.Username))
+            else if (UserListManager.UserListContainsUser(userData.Username))
             {
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_star);
                 imageFriendIgnored.Visibility = ViewStates.Visible;

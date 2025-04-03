@@ -22,6 +22,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker
@@ -2921,7 +2922,7 @@ namespace Seeker
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.UserList)
             {
-                if (SeekerState.UserList == null || SeekerState.UserList.Count == 0)
+                if (UserListManager.UserList == null || UserListManager.UserList.Count == 0)
                 {
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
@@ -2930,7 +2931,7 @@ namespace Seeker
                     ));
                     return;
                 }
-                scope = new SearchScope(SearchScopeType.User, SeekerState.UserList.Select(item => item.Username).ToArray());
+                scope = new SearchScope(SearchScopeType.User, UserListManager.UserList.Select(item => item.Username).ToArray());
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
             {

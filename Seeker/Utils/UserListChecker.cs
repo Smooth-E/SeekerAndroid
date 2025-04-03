@@ -3,12 +3,7 @@
 namespace Seeker.Utils;
 
 /// <summary>
-/// for the lower assembly
+/// for the lower assembly // TODO: What does the summary here mean?
 /// </summary>
-public class UserListChecker : IUserListChecker
-{
-    public bool IsInUserList(string user)
-    {
-        return MainActivity.UserListContainsUser(user);
-    }
-}
+// TODO: Move this and other user list utilities to a separate and more concise util class
+

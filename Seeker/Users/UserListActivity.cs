@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker
@@ -113,7 +114,7 @@ namespace Seeker
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:
-                    MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
+                    UserListManager.UserListRemoveUser(PopUpMenuOwnerHack);
                     this.NotifyItemRemoved(PopUpMenuOwnerHack);
                     return true;
                 case Resource.Id.removeUserFromIgnored:
@@ -170,10 +171,10 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
             this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            if (SeekerState.UserList == null)
+            if (UserListManager.UserList == null)
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
-                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(KeyConsts.M_UserList, ""));
+                UserListManager.UserList = UserListManager.FromString(sharedPref.GetString(KeyConsts.M_UserList, ""));
             }
 
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
@@ -283,10 +284,10 @@ namespace Seeker
         private static List<UserListItem> ParseUserListForPresentation()
         {
             List<UserListItem> forAdapter = new List<UserListItem>();
-            if (SeekerState.UserList.Count != 0)
+            if (UserListManager.UserList.Count != 0)
             {
                 forAdapter.Add(new UserListItem(SeekerState.ActiveActivityRef.GetString(Resource.String.friends), UserRole.Category));
-                forAdapter.AddRange(GetSortedUserList(SeekerState.UserList, false));
+                forAdapter.AddRange(GetSortedUserList(UserListManager.UserList, false));
             }
             if (SeekerState.IgnoreUserList.Count != 0)
             {
@@ -298,9 +299,9 @@ namespace Seeker
 
         public void RefreshUserList()
         {
-            if (SeekerState.UserList != null)
+            if (UserListManager.UserList != null)
             {
-                lock (SeekerState.UserList) //shouldnt we also lock IgnoreList?
+                lock (UserListManager.UserList) //shouldnt we also lock IgnoreList?
                 {
                     recyclerAdapter = new RecyclerUserListAdapter(this, ParseUserListForPresentation());
                     recyclerViewUserList.SetAdapter(recyclerAdapter);
@@ -439,15 +440,15 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.UserListAddUser(t.Result);
+                    UserListManager.UserListAddUser(t.Result);
                     if (!massImportCase)
                     {
-                        if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
+                        if (SeekerState.SharedPreferences != null && UserListManager.UserList != null)
                         {
                             lock (SeekerApplication.SHARED_PREF_LOCK)
                             {
                                 var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                                editor.PutString(KeyConsts.M_UserList, UserListManager.AsString());
                                 editor.Commit();
                             }
                         }
@@ -478,7 +479,7 @@ namespace Seeker
                 return;
             }
 
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListManager.UserListContainsUser(username))
             {
                 Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
                 return;

@@ -73,26 +73,6 @@ namespace Seeker
             }
         }
 
-        public static MessagePackSerializerOptions UserListOptions
-        {
-            get
-            {
-                var searchResponseResolver = MessagePack.Resolvers.CompositeResolver.Create(
-                    new IMessagePackFormatter[]
-                    {
-                        new UserListItemFormatter(),
-                        new UserStatusFormatter(),
-                        new UserInfoFormatter(),
-                        MessagePack.Formatters.TypelessFormatter.Instance
-                    },
-                    new IFormatterResolver[]
-                    {
-                        ContractlessStandardResolver.Instance
-                    });
-                return MessagePackSerializerOptions.Standard.WithResolver(searchResponseResolver);
-            }
-        }
-
         private static bool isBinaryFormatterSerialized(string base64string) 
         {
             return base64string.StartsWith(@"AAEAAAD/////");
@@ -226,32 +206,6 @@ namespace Seeker
             }
 
             return DeserializeFromString<ConcurrentDictionary<string, byte>>(base64onlineAlerts);
-        }
-
-
-
-        public static string SaveUserListToString(List<UserListItem> userList)
-        {
-            if (userList == null || userList.Count == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                var bytes = MessagePack.MessagePackSerializer.Serialize(userList, options: UserListOptions);
-                return Convert.ToBase64String(bytes);
-            }
-        }
-
-        public static List<UserListItem> RestoreUserListFromString(string base64userList)
-        {
-            if (base64userList == string.Empty)
-            {
-                return new List<UserListItem>();
-            }
-            return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
-                Convert.FromBase64String(base64userList), 
-                options: UserListOptions);
         }
 
 

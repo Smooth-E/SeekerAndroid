@@ -1489,125 +1489,6 @@ namespace Seeker
             return notification;
         }
 
-        public static bool UserListContainsUser(string username)
-        {
-            lock (SeekerState.UserList)
-            {
-                if (SeekerState.UserList == null)
-                {
-                    return false;
-                }
-
-                return SeekerState.UserList.FirstOrDefault((userlistinfo) =>
-                {
-                    return userlistinfo.Username == username;
-                }) != null;
-            }
-        }
-
-        public static bool UserListSetDoesNotExist(string username)
-        {
-            bool found = false;
-            lock (SeekerState.UserList)
-            {
-                foreach (UserListItem item in SeekerState.UserList)
-                {
-                    if (item.Username == username)
-                    {
-                        found = true;
-                        item.DoesNotExist = true;
-                        break;
-                    }
-                }
-            }
-
-            return found;
-        }
-
-        /// <summary>
-        /// This is for adding new users...
-        /// </summary>
-        /// <returns>true if user was already added</returns>
-        public static bool UserListAddUser(UserData userData, UserPresence? status = null)
-        {
-            lock (SeekerState.UserList)
-            {
-                bool found = false;
-                foreach (UserListItem item in SeekerState.UserList)
-                {
-                    if (item.Username == userData.Username)
-                    {
-                        found = true;
-                        if (userData != null)
-                        {
-                            if (status != null)
-                            {
-                                var oldStatus = item.UserStatus;
-                                item.UserStatus = new UserStatus(status.Value, oldStatus?.IsPrivileged ?? false);
-                            }
-
-                            item.UserData = userData;
-                            item.DoesNotExist = false;
-
-
-                        }
-
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    // this is the normal case..
-                    var item = new UserListItem(userData.Username);
-                    item.UserData = userData;
-
-                    // if added an ignored user, then unignore the user.  the two are mutually exclusive.....
-                    if (SeekerApplication.IsUserInIgnoreList(userData.Username))
-                    {
-                        SeekerApplication.RemoveFromIgnoreList(userData.Username);
-                    }
-
-                    SeekerState.UserList.Add(item);
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-
-            }
-        }
-
-        /// <summary>
-        /// Remove user from user list.
-        /// </summary>
-        /// <returns>true if user was found (if false then bad..)</returns>
-        public static bool UserListRemoveUser(string username)
-        {
-            lock (SeekerState.UserList)
-            {
-                UserListItem itemToRemove = null;
-                foreach (UserListItem item in SeekerState.UserList)
-                {
-                    if (item.Username == username)
-                    {
-                        itemToRemove = item;
-                        break;
-                    }
-                }
-
-                if (itemToRemove == null)
-                {
-                    return false;
-                }
-
-                SeekerState.UserList.Remove(itemToRemove);
-                return true;
-            }
-
-        }
-
         public void SetUpLoginContinueWith(Task t)
         {
             if (t == null)
@@ -4147,10 +4028,9 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
                 editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
 
-                if (SeekerState.UserList != null)
+                if (UserListManager.UserList != null)
                 {
-                    editor.PutString(KeyConsts.M_UserList,
-                        SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                    editor.PutString(KeyConsts.M_UserList, UserListManager.AsString());
                 }
                 
                 editor.Commit();
@@ -4183,10 +4063,9 @@ namespace Seeker
             outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
             outState.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
             
-            if (SeekerState.UserList != null)
+            if (UserListManager.UserList != null)
             {
-                outState.PutString(KeyConsts.M_UserList,
-                    SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                outState.PutString(KeyConsts.M_UserList, UserListManager.AsString());
             }
 
         }

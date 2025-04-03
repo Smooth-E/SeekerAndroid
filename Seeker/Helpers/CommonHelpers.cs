@@ -292,7 +292,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (MainActivity.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
+                if (UserListManager.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
                     {
@@ -358,7 +358,7 @@ namespace Seeker
             // if we added this user as a friend do not show the option to ignore. they must be removed first.
             if (!string.IsNullOrEmpty(username))
             {
-                bool isInUserList = MainActivity.UserListContainsUser(username);
+                bool isInUserList = UserListManager.UserListContainsUser(username);
                 var menuItem = menu.FindItem(Resource.Id.action_ignore);
                 menuItem?.SetVisible(!isInUserList);
             }
@@ -381,7 +381,7 @@ namespace Seeker
         public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
         {
             string title = null;
-            if (!MainActivity.UserListContainsUser(username))
+            if (!UserListManager.UserListContainsUser(username))
             {
                 if (full_title)
                 {
@@ -416,7 +416,7 @@ namespace Seeker
         public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListManager.UserListContainsUser(username))
             {
                 return;
             }
@@ -712,7 +712,7 @@ namespace Seeker
                 ToastUi.Long(string.Format(SeekerState.ActiveActivityRef
                     .GetString(ResourceConstant.String.removed_user), usernameInQuestion));
                 
-                MainActivity.UserListRemoveUser(usernameInQuestion);
+                UserListManager.UserListRemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }

@@ -170,7 +170,7 @@ namespace Seeker
             SlskHelp.CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
             SlskHelp.CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
-            SlskHelp.CommonHelpers.UserListChecker = new UserListChecker();
+            SlskHelp.CommonHelpers.UserListChecker = new UserListManager.UserListChecker();
 
             //shouldnt we also connect??? TODO TODO
 
@@ -1464,9 +1464,9 @@ namespace Seeker
             {
                 try
                 {
-                    lock (SeekerState.UserList)
+                    lock (UserListManager.UserList)
                     {
-                        foreach (UserListItem item in SeekerState.UserList)
+                        foreach (UserListItem item in UserListManager.UserList)
                         {
                             Logger.Debug("adding user: " + item.Username);
                             SeekerState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
@@ -1573,9 +1573,9 @@ namespace Seeker
                 {
                     string username = t.Result.Username;
                     Logger.Debug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
-                    if (MainActivity.UserListContainsUser(username))
+                    if (UserListManager.UserListContainsUser(username))
                     {
-                        MainActivity.UserListAddUser(t.Result, t.Result.Status);
+                        UserListManager.UserListAddUser(t.Result, t.Result.Status);
                     }
 
 
@@ -1585,9 +1585,9 @@ namespace Seeker
                     if (t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
                     {
                         string username = t.Exception.InnerException.Message.Split(null)[1];
-                        if (MainActivity.UserListContainsUser(username))
+                        if (UserListManager.UserListContainsUser(username))
                         {
-                            MainActivity.UserListSetDoesNotExist(username);
+                            UserListManager.UserListSetDoesNotExist(username);
                         }
                     }
                     else
@@ -1645,9 +1645,9 @@ namespace Seeker
             //typically its tough to add a user to ignore list from the UI if they are in the User List.
             //but for example if you ignore a user based on their message.
             //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListManager.UserListContainsUser(username))
             {
-                MainActivity.UserListRemoveUser(username);
+                UserListManager.UserListRemoveUser(username);
             }
 
             lock (SeekerState.IgnoreUserList)
@@ -1664,7 +1664,7 @@ namespace Seeker
             lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+                editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());
                 editor.Commit();
             }
             return true;
@@ -1703,7 +1703,7 @@ namespace Seeker
             lock (SHARED_PREF_LOCK)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+                editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());
                 editor.Commit();
             }
             return true;
@@ -1811,10 +1811,10 @@ namespace Seeker
         {
             UserPresence? prevStatus = UserPresence.Offline;
             bool found = false;
-            lock (SeekerState.UserList)
+            lock (UserListManager.UserList)
             {
 
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in UserListManager.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -1979,11 +1979,11 @@ namespace Seeker
 
                 SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn, false);
                 //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_UserList_Legacy, KeyConsts.M_UserList);
-                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
+                UserListManager.UserList = UserListManager.FromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
 
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
                 //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_IgnoreUserList_Legacy, KeyConsts.M_IgnoreUserList);
-                SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
+                SeekerState.IgnoreUserList = UserListManager.FromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
                 SeekerState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
                 SeekerState.StartServiceOnStartup = sharedPreferences.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
                 SeekerState.NoSubfolderForSingle = sharedPreferences.GetBoolean(KeyConsts.M_NoSubfolderForSingle, false);
@@ -2089,9 +2089,9 @@ namespace Seeker
                 {
                     //dont show people that we have already added...
                     var recents = SeekerState.RecentUsersManager.GetRecentUserList();
-                    lock (SeekerState.UserList)
+                    lock (UserListManager.UserList)
                     {
-                        foreach (var uli in SeekerState.UserList)
+                        foreach (var uli in UserListManager.UserList)
                         {
                             recents.Remove(uli.Username);
                         }
@@ -2137,10 +2137,10 @@ namespace Seeker
             SeekerState.RecentUsersManager = new RecentUserManager();
             if (xmlRecentUsersList == string.Empty)
             {
-                int count = SeekerState.UserList?.Count ?? 0;
+                int count = UserListManager.UserList?.Count ?? 0;
                 if (count > 0)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(UserListManager.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
@@ -2193,7 +2193,7 @@ namespace Seeker
             }
             else
             {
-                if (SeekerState.UserList == null)
+                if (UserListManager.UserList == null)
                 {
                     Logger.FirebaseDebug("UserList is null on user data receive");
                 }
@@ -2272,7 +2272,7 @@ namespace Seeker
             else
             {
                 //we get user status changed for those we are in the same room as us
-                if (SeekerState.UserList != null)
+                if (UserListManager.UserList != null)
                 {
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
                     if (found)

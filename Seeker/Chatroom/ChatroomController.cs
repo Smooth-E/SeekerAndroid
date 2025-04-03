@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker.Chatroom
@@ -375,8 +376,8 @@ namespace Seeker.Chatroom
 
                 if (PutFriendsOnTop)
                 {
-                    bool xFriend = MainActivity.UserListContainsUser(x.Username);
-                    bool yFriend = MainActivity.UserListContainsUser(y.Username);
+                    bool xFriend = UserListManager.UserListContainsUser(x.Username);
+                    bool yFriend = UserListManager.UserListContainsUser(y.Username);
                     if (xFriend && !yFriend)
                     {
                         return -1; //x is better
