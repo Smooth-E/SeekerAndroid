@@ -84,7 +84,7 @@ namespace Seeker.Transfers
                 var file = files[i];
                 var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
                 var e = new DownloadAddedEventArgs(dlInfo);
-                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUI(e);
+                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUi(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
                 // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next 
                 await waitForNext;

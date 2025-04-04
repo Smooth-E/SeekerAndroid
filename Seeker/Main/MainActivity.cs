@@ -73,6 +73,10 @@ public class MainActivity : ThemeableActivity
     private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN = 0x42D;
     private const int POST_NOTIFICATION_PERMISSION = 0x42E;
     
+    public const string UPLOADS_CHANNEL_ID = "upload channel ID";
+    public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
+    private const string UPLOADS_NOTIFICATION_EXTRA = "From Upload";
+    
     public static int GoToSearchTab = int.MaxValue;
     
     private const string DEFAULT_MUSIC_URI = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
@@ -180,8 +184,8 @@ public class MainActivity : ThemeableActivity
                 {
                     Logger.FirebaseDebug("doesnt contain key");
 
-                    Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
-                        .Show();
+                    Toast.MakeText(this, GetString(ResourceConstant.String.wishlist_tab_error), ToastLength.Long)
+                        ?.Show();
                 }
                 else
                 {
@@ -212,7 +216,7 @@ public class MainActivity : ThemeableActivity
 
         var fromTransferUploadStringExtra =
             Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1);
-        var uploadNotificationExtra = Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1);
+        var uploadNotificationExtra = Intent.GetIntExtra(UPLOADS_NOTIFICATION_EXTRA, -1);
         
         // else every rotation will change Downloads to Uploads.
         if ((fromTransferUploadStringExtra == 2 ||  uploadNotificationExtra == 2) && !alreadyHandled)
@@ -320,14 +324,14 @@ public class MainActivity : ThemeableActivity
         navigation.SetOnItemSelectedListener(new NavigationBarItemSelectedListener(pager));
 
 
-        toolbar = FindViewById<Toolbar>(Resource.Id.toolbar)!;
+        toolbar = FindViewById<Toolbar>(ResourceConstant.Id.toolbar)!;
         toolbar.Title = GetString(ResourceConstant.String.home_tab);
         // TODO: Is it possible to inflate menus through XML?
         toolbar.InflateMenu(ResourceConstant.Menu.account_menu);
         SetSupportActionBar(toolbar);
         toolbar.InflateMenu(ResourceConstant.Menu.account_menu); // twice??
 
-        var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+        var backPressedCallback = new GenericOnBackPressedCallback(true, OnBackPressedAction);
         OnBackPressedDispatcher.AddCallback(backPressedCallback);
         
         sharedPreferences = GetSharedPreferences("SoulSeekPrefs", FileCreationMode.Private);
@@ -380,8 +384,8 @@ public class MainActivity : ThemeableActivity
             {
                 // an example of a random bad url that passes parsing but fails FromTreeUri:
                 // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
-                bool canWrite = false;
+                var chosenUri = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
+                var canWrite = false;
 
                 try
                 {
@@ -392,14 +396,14 @@ public class MainActivity : ThemeableActivity
                     // at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
                     if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree)
                     {
-                        canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
+                        canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri!.Path!)).CanWrite();
                     }
                     else
                     {
                         // on changing the code and restarting for api 22 
                         // persistenduripermissions is empty
                         // and exists is false, cannot list files
-                        canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
+                        canWrite = DocumentFile.FromTreeUri(this, chosenUri!)!.CanWrite();
                     }
                 }
                 catch (Exception e)
@@ -419,18 +423,13 @@ public class MainActivity : ThemeableActivity
 
                 if (canWrite)
                 {
-                    if (SeekerState.PreOpenDocumentTree())
-                    {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path));
-                    }
-                    else
-                    {
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, chosenUri);
-                    }
+                    SeekerState.RootDocumentFile = SeekerState.PreOpenDocumentTree() 
+                        ? DocumentFile.FromFile(new Java.IO.File(chosenUri.Path!)) 
+                        : DocumentFile.FromTreeUri(this, chosenUri);
                 }
                 else
                 {
-                    Logger.FirebaseDebug("cannot write" + chosenUri?.ToString() ?? "null");
+                    Logger.FirebaseDebug("cannot write" + chosenUri?.ToString());
                 }
             }
 
@@ -440,10 +439,8 @@ public class MainActivity : ThemeableActivity
             {
                 // an example of a random bad url that passes parsing but fails FromTreeUri:
                 // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                Android.Net.Uri chosenIncompleteUri =
-                    Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
-
-                bool canWrite = false;
+                var chosenIncompleteUri = Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
+                var canWrite = false;
                 try
                 {
                     //a phone failed 4 times with //POCO X3 Pro
@@ -454,22 +451,22 @@ public class MainActivity : ThemeableActivity
                     if (SeekerState.PreOpenDocumentTree()
                         || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
                     {
-                        canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
+                        canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri!.Path!)).CanWrite();
                     }
                     else
                     {
                         // on changing the code and restarting for api 22 
                         // persistenduripermissions is empty
                         // and exists is false, cannot list file
-                        canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri).CanWrite();
+                        canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri)!.CanWrite();
                     }
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
                     if (chosenIncompleteUri != null)
                     {
                         Logger.FirebaseDebug("legacy Incomplete DocumentFile.FromTreeUri failed with URI: "
-                                    + chosenIncompleteUri.ToString() + " " + e.Message);
+                                    + chosenIncompleteUri.ToString() + " " + exception.Message);
                     }
                     else
                     {
@@ -482,7 +479,7 @@ public class MainActivity : ThemeableActivity
                     if (SeekerState.PreOpenDocumentTree())
                     {
                         SeekerState.RootIncompleteDocumentFile =
-                            DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path));
+                            DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path!));
                     }
                     else
                     {
@@ -492,7 +489,7 @@ public class MainActivity : ThemeableActivity
                 }
                 else
                 {
-                    Logger.FirebaseDebug("cannot write incomplete" + chosenIncompleteUri?.ToString() ?? "null");
+                    Logger.FirebaseDebug("cannot write incomplete" + chosenIncompleteUri?.ToString());
                 }
             }
 
@@ -500,21 +497,14 @@ public class MainActivity : ThemeableActivity
         }
         else
         {
-
-            Android.Net.Uri res;
-            if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
-            {
-                res = Android.Net.Uri.Parse(DEFAULT_MUSIC_URI);
-            }
-            else
-            {
-                // an example of a random bad url that passes parsing but fails FromTreeUri:
-                // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
-            }
+            // an example of a random bad url that passes parsing but fails FromTreeUri:
+            // "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+            var res = Android.Net.Uri.Parse(string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri)
+                ? DEFAULT_MUSIC_URI 
+                : SeekerState.SaveDataDirectoryUri);
 
             // TODO: Below code seems to be duplicate from what is above, as even the comment is the same
-            bool canWrite = false;
+            var canWrite = false;
             try
             {
                 // a phone failed 4 times with //POCO X3 Pro
@@ -531,7 +521,7 @@ public class MainActivity : ThemeableActivity
                 }
                 else
                 {
-                    canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
+                    canWrite = DocumentFile.FromTreeUri(this, res)!.CanWrite();
                 }
             }
             catch (Exception e)
@@ -549,43 +539,42 @@ public class MainActivity : ThemeableActivity
             if (!canWrite)
             {
 
-                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-                b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
-                b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                var dialogBuilder = new AndroidX.AppCompat.App.AlertDialog
+                        .Builder(this, ResourceConstant.Style.MyAlertDialogTheme)!
+                    .SetTitle(GetString(ResourceConstant.String.seeker_needs_dl_dir))!
+                    .SetMessage(GetString(ResourceConstant.String.seeker_needs_dl_dir_content))!;
 
-                ManualResetEvent mre = new ManualResetEvent(false);
-                EventHandler<DialogClickEventArgs> eventHandler = new(
-                    (object sender, DialogClickEventArgs okayArgs) =>
+                EventHandler<DialogClickEventArgs> eventHandler = (_, _) =>
+                {
+                    var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
+                    var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
+                    intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
+
+                    intent.AddFlags(ActivityFlags.GrantPersistableUriPermission
+                                    | ActivityFlags.GrantReadUriPermission
+                                    | ActivityFlags.GrantWriteUriPermission
+                                    | ActivityFlags.GrantPrefixUriPermission);
+
+                    try
                     {
-                        var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
-                        var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
-                        intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
-
-                        intent.AddFlags(ActivityFlags.GrantPersistableUriPermission
-                                        | ActivityFlags.GrantReadUriPermission
-                                        | ActivityFlags.GrantWriteUriPermission
-                                        | ActivityFlags.GrantPrefixUriPermission);
-
-                        try
+                        StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
+                    }
+                    catch (Exception exception)
+                    {
+                        if (exception.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                         {
-                            this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
+                            FallbackFileSelectionEntry(false);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
-                            {
-                                FallbackFileSelectionEntry(false);
-                            }
-                            else
-                            {
-                                throw ex;
-                            }
+                            throw;
                         }
-                    });
+                    }
+                };
 
-                b.SetPositiveButton(Resource.String.okay, eventHandler);
-                b.SetCancelable(false);
-                b.Show();
+                dialogBuilder.SetPositiveButton(ResourceConstant.String.okay, eventHandler)!
+                    .SetCancelable(false)!
+                    .Show();
             }
             else
             {
@@ -636,7 +625,7 @@ public class MainActivity : ThemeableActivity
                     }
                     else
                     {
-                        canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes).CanWrite();
+                        canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes)!.CanWrite();
                     }
                 }
                 catch (Exception e)
@@ -652,24 +641,26 @@ public class MainActivity : ThemeableActivity
                     }
                 }
 
-                if (canWriteIncomplete)
+                if (!canWriteIncomplete)
                 {
-                    if (SeekerState.PreOpenDocumentTree()
-                        || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
-                    {
-                        SeekerState.RootIncompleteDocumentFile =
-                            DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
-                    }
-                    else
-                    {
-                        SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
-                    }
+                    return;
+                }
+                
+                if (SeekerState.PreOpenDocumentTree()
+                    || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                {
+                    SeekerState.RootIncompleteDocumentFile =
+                        DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path!));
+                }
+                else
+                {
+                    SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
                 }
             }
         }
     }
 
-    public void FallbackFileSelection(int requestCode)
+    private void FallbackFileSelection(int requestCode)
     {
         // Create FolderOpenDialog
         SimpleFileDialog fileDialog =
@@ -678,7 +669,7 @@ public class MainActivity : ThemeableActivity
         fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory?.AbsolutePath)
             .ContinueWith(t =>
             {
-                if (t.Result == null || t.Result == string.Empty)
+                if (string.IsNullOrEmpty(t.Result))
                 {
                     OnActivityResult(requestCode, Result.Canceled, new Intent());
                     return;
@@ -691,7 +682,7 @@ public class MainActivity : ThemeableActivity
             });
     }
 
-    public static Action<Task> GetPostNotifPermissionTask()
+    public static Action<Task> GetPostNotificationsPermissionTask()
     {
         return task =>
         {
@@ -703,7 +694,7 @@ public class MainActivity : ThemeableActivity
 
     }
 
-    private static bool postNotficationAlreadyRequestedInSession = false;
+    private static bool _postNotificationsAlreadyRequestedInSession;
 
     /// <summary>
     /// As far as where to place this, doing it on launch is no good (as they will already
@@ -712,12 +703,12 @@ public class MainActivity : ThemeableActivity
     /// </summary>
     private static void RequestPostNotificationPermissionsIfApplicable()
     {
-        if (postNotficationAlreadyRequestedInSession)
+        if (_postNotificationsAlreadyRequestedInSession)
         {
             return;
         }
 
-        postNotficationAlreadyRequestedInSession = true;
+        _postNotificationsAlreadyRequestedInSession = true;
 
         if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
         {
@@ -832,7 +823,7 @@ public class MainActivity : ThemeableActivity
                 else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                 {
                     Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
-                        .Show();
+                        ?.Show();
                 }
                 else
                 {
@@ -845,7 +836,7 @@ public class MainActivity : ThemeableActivity
                     }
                     else
                     {
-                        SearchFragment.Instance.GoToTab(tabID, false, true);
+                        SearchFragment.Instance?.GoToTab(tabID, false, true);
                     }
                 }
             }
@@ -858,7 +849,7 @@ public class MainActivity : ThemeableActivity
         }
         // else every rotation will change Downloads to Uploads.
         else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2)
-                  || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)))
+                  || (Intent.GetIntExtra(UPLOADS_NOTIFICATION_EXTRA, -1) == 2)))
         {
             HandleFromNotificationUploadIntent();
         }
@@ -939,20 +930,16 @@ public class MainActivity : ThemeableActivity
     }
 
 
-    public static void GetDownloadPlaceInQueueBatchLogic(
-        List<TransferItem> transferItems,
-        bool addIfNotAdded,
-        Func<TransferItem, object> actionOnComplete = null)
+    private static void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded)
     {
-        foreach (TransferItem transferItem in transferItems)
+        foreach (var transferItem in transferItems)
         {
             GetDownloadPlaceInQueueLogic(
                 transferItem.Username,
                 transferItem.FullFilename,
                 addIfNotAdded,
                 true,
-                transferItem,
-                null
+                transferItem
             );
         }
     }
@@ -966,14 +953,13 @@ public class MainActivity : ThemeableActivity
         Func<TransferItem, object> actionOnComplete = null)
     {
 
-        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+        if (CurrentlyLoggedInButDisconnectedState())
         {
-            Task t;
-            if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+            if (!ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out var reconnectTask))
             {
-                t.ContinueWith(new Action<Task>((Task t) =>
+                reconnectTask.ContinueWith(task =>
                 {
-                    if (t.IsFaulted)
+                    if (task.IsFaulted)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
@@ -1001,7 +987,7 @@ public class MainActivity : ThemeableActivity
                             actionOnComplete
                         );
                     });
-                }));
+                });
             }
         }
         else
@@ -1026,14 +1012,14 @@ public class MainActivity : ThemeableActivity
         Func<TransferItem, object> actionOnComplete = null)
     {
 
-        Action<Task<int>> updateTask = new Action<Task<int>>(
-            (Task<int> t) =>
+        var updateTask = new Action<Task<int>>(
+            taask =>
             {
-                if (t.IsFaulted)
+                if (taask.IsFaulted)
                 {
                     bool transitionToNextState = false;
-                    Soulseek.TransferStates state = TransferStates.Errored;
-                    if (t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
+                    TransferStates state = TransferStates.Errored;
+                    if (taask.Exception?.InnerException is UserOfflineException)
                     {
                         // Nicotine always immediately transitions from queued to user offline
                         // the second the user goes offline. We dont do it immediately but on next check.
@@ -1051,9 +1037,10 @@ public class MainActivity : ThemeableActivity
                             ToastUiWithDebouncer(formattedString, "_6_", username);
                         }
                     }
-                    else if (t.Exception?.InnerException?.Message != null
-                             && t.Exception.InnerException.Message.ToLower()
-                                 .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                    else if (taask.Exception?.InnerException?.Message != null
+                             && taask.Exception.InnerException.Message.Contains(
+                                 SoulseekClient.FailedToEstablishDirectOrIndirectStringLower,
+                                 StringComparison.CurrentCultureIgnoreCase))
                     {
                         // Nicotine transitions from Queued to Cannot Connect
                         // IF you pause and resume. Otherwise you stay in Queued.
@@ -1075,32 +1062,25 @@ public class MainActivity : ThemeableActivity
                             ToastUiWithDebouncer(string.Format(cannotConnectString, username), "_7_", username);
                         }
                     }
-                    else if (t.Exception?.InnerException?.Message != null &&
-                             t.Exception.InnerException is System.TimeoutException)
+                    else if (taask.Exception?.InnerException?.Message != null &&
+                             taask.Exception.InnerException is System.TimeoutException)
                     {
                         // they may just not be sending queue position messages.
                         // that is okay, we can still connect to them just fine for download time.
-                        transitionToNextState = false;
-
                         if (!silent)
                         {
-                            var messageString = SeekerApplication.GetString(Resource.String.TimeoutQueueUserX);
+                            var messageString = SeekerApplication.GetString(ResourceConstant.String.TimeoutQueueUserX);
                             ToastUiWithDebouncer(string.Format(messageString, username), "_8_", username, 6);
                         }
                     }
-                    else if (t.Exception?.InnerException?.Message != null
-                             && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
+                    else if (taask.Exception?.InnerException?.Message != null
+                             && taask.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
                     {
                         // can be server connection (get user endpoint) or peer connection.
-                        transitionToNextState = false;
-
                         if (!silent)
                         {
-                            var formattedString = string.Format(
-                                "Failed to get queue position for {0}: Connection was unexpectedly closed.",
-                                username
-                            );
-
+                            var formattedString =
+                                $"Failed to get queue position for {username}: Connection was unexpectedly closed.";
                             ToastUiWithDebouncer(formattedString, "_9_", username, 6);
                         }
                     }
@@ -1111,72 +1091,53 @@ public class MainActivity : ThemeableActivity
                             ToastUiWithDebouncer($"Error getting queue position from {username}", "_9_", username);
                         }
 
-                        Logger.FirebaseDebug("GetDownloadPlaceInQueue" + t.Exception.ToString());
+                        Logger.FirebaseDebug("GetDownloadPlaceInQueue" + taask.Exception);
                     }
 
-                    if (transitionToNextState)
+                    if (!transitionToNextState)
                     {
-                        // update the transferItem array
-                        if (transferItemInQuestion == null)
-                        {
-                            transferItemInQuestion = TransfersFragment.TransferItemManagerDL
-                                .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                        }
-
-                        if (transferItemInQuestion == null)
-                        {
-                            return;
-                        }
-
-                        try
-                        {
-                            transferItemInQuestion.CancellationTokenSource.Cancel();
-                        }
-                        catch (Exception err)
-                        {
-                            Logger.FirebaseDebug("cancellation token src issue: " + err.Message);
-                        }
-
-                        transferItemInQuestion.State = state;
+                        return;
                     }
-                }
-                else
-                {
-                    bool queuePositionChanged = false;
-
+                    
                     // update the transferItem array
-                    if (transferItemInQuestion == null)
-                    {
-                        transferItemInQuestion = TransfersFragment.TransferItemManagerDL
-                            .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                    }
+                    transferItemInQuestion ??= TransfersFragment.TransferItemManagerDL
+                        .GetTransferItemWithIndexFromAll(fullFileName, username, out _);
 
                     if (transferItemInQuestion == null)
                     {
                         return;
                     }
-                    else
+
+                    try
                     {
-                        queuePositionChanged = transferItemInQuestion.QueueLength != t.Result;
-
-                        if (t.Result >= 0)
-                        {
-                            transferItemInQuestion.QueueLength = t.Result;
-                        }
-                        else
-                        {
-                            transferItemInQuestion.QueueLength = int.MaxValue;
-                        }
-
-                        if (queuePositionChanged)
-                        {
-                            Logger.Debug($"Queue Position of {fullFileName} has changed to {t.Result}");
-                        }
-                        else
-                        {
-                            Logger.Debug($"Queue Position of {fullFileName} is still {t.Result}");
-                        }
+                        transferItemInQuestion.CancellationTokenSource.Cancel();
                     }
+                    catch (Exception err)
+                    {
+                        Logger.FirebaseDebug("cancellation token src issue: " + err.Message);
+                    }
+
+                    transferItemInQuestion.State = state;
+                }
+                else
+                {
+                    bool queuePositionChanged;
+
+                    // update the transferItem array
+                    transferItemInQuestion ??= TransfersFragment.TransferItemManagerDL
+                        .GetTransferItemWithIndexFromAll(fullFileName, username, out _);
+
+                    if (transferItemInQuestion == null)
+                    {
+                        return;
+                    }
+
+                    queuePositionChanged = transferItemInQuestion.QueueLength != taask.Result;
+                    transferItemInQuestion.QueueLength = taask.Result >= 0 ? taask.Result : int.MaxValue;
+
+                    Logger.Debug(queuePositionChanged
+                        ? $"Queue Position of {fullFileName} has changed to {taask.Result}"
+                        : $"Queue Position of {fullFileName} is still {taask.Result}");
 
                     if (actionOnComplete != null)
                     {
@@ -1198,14 +1159,14 @@ public class MainActivity : ThemeableActivity
             }
         );
 
-        Task<int> getDownloadPlace = null;
+        Task<int> getDownloadPlace;
         try
         {
             getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(
                 username,
                 fullFileName,
                 null,
-                transferItemInQuestion.ShouldEncodeFileLatin1(),
+                transferItemInQuestion!.ShouldEncodeFileLatin1(),
                 transferItemInQuestion.ShouldEncodeFolderLatin1()
             );
         }
@@ -1214,23 +1175,19 @@ public class MainActivity : ThemeableActivity
             if (addIfNotAdded)
             {
                 // it is not downloading... therefore retry the download...
-                if (transferItemInQuestion == null)
-                {
-                    transferItemInQuestion = TransfersFragment.TransferItemManagerDL
-                        .GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                }
+                transferItemInQuestion ??= TransfersFragment.TransferItemManagerDL
+                    .GetTransferItemWithIndexFromAll(fullFileName, username, out _);
 
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                var cancellationTokenSource = new CancellationTokenSource();
                 try
                 {
                     transferItemInQuestion.QueueLength = int.MaxValue;
-                    Android.Net.Uri incompleteUri = null;
 
                     // else when you go to cancel you are cancelling an already cancelled useless token!!
                     TransfersFragment
                         .SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _);
 
-                    Task task = TransfersUtil.DownloadFileAsync(
+                    var task = TransfersUtil.DownloadFileAsync(
                         transferItemInQuestion.Username,
                         transferItemInQuestion.FullFilename,
                         transferItemInQuestion.GetSizeForDL(),
@@ -1240,7 +1197,7 @@ public class MainActivity : ThemeableActivity
                         isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1()
                     );
 
-                    task.ContinueWith(DownloadContinuationActionUI(
+                    task.ContinueWith(DownloadContinuationActionUi(
                         new DownloadAddedEventArgs(
                             new DownloadInfo(
                                 transferItemInQuestion.Username,
@@ -1252,16 +1209,16 @@ public class MainActivity : ThemeableActivity
                                 transferItemInQuestion.GetDirectoryLevel()
                             ) { TransferItemReference = transferItemInQuestion }
                         )
-                    ));
+                    ), cancellationTokenSource.Token);
                 }
                 catch (DuplicateTransferException)
                 {
                     // happens due to button mashing...
                     return;
                 }
-                catch (System.Exception error)
+                catch (Exception error)
                 {
-                    Action a = new Action(() =>
+                    var a = () =>
                     {
                         // TODO: Logging errors through toasts isn't a good practice
                         Toast.MakeText(
@@ -1269,7 +1226,7 @@ public class MainActivity : ThemeableActivity
                             SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message,
                             ToastLength.Long
                         );
-                    });
+                    };
 
                     if (error.Message == null || !error.Message.ToString().Contains("must be connected and logged"))
                     {
@@ -1304,14 +1261,12 @@ public class MainActivity : ThemeableActivity
 
                 return;
             }
-            else
-            {
-                Logger.Debug("Transfer Item we are trying to get queue position " +
-                             "of is not currently being downloaded.");
-                return;
-            }
+
+            Logger.Debug("Transfer Item we are trying to get queue position " +
+                         "of is not currently being downloaded.");
+            return;
         }
-        catch (System.Exception e)
+        catch (Exception)
         {
             return;
         }
@@ -1324,76 +1279,69 @@ public class MainActivity : ThemeableActivity
 
     private void OnCloseClick(object sender, DialogClickEventArgs e)
     {
-        (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+        (sender as AndroidX.AppCompat.App.AlertDialog)?.Dismiss();
     }
 
     public override bool OnOptionsItemSelected(IMenuItem item)
     {
         switch (item.ItemId)
         {
-            case Resource.Id.user_list_action:
-                Intent intent = new Intent(SeekerState.MainActivityRef, typeof(UserListActivity));
+            case ResourceConstant.Id.user_list_action:
+                var intent = new Intent(SeekerState.MainActivityRef, typeof(UserListActivity));
                 SeekerState.MainActivityRef.StartActivityForResult(intent, 141);
                 return true;
-            case Resource.Id.messages_action:
-                Intent intentMessages = new Intent(SeekerState.MainActivityRef, typeof(MessagesActivity));
+            case ResourceConstant.Id.messages_action:
+                var intentMessages = new Intent(SeekerState.MainActivityRef, typeof(MessagesActivity));
                 SeekerState.MainActivityRef.StartActivityForResult(intentMessages, 142);
                 return true;
-            case Resource.Id.chatroom_action:
-                Intent intentChatroom = new Intent(SeekerState.MainActivityRef, typeof(ChatroomActivity));
+            case ResourceConstant.Id.chatroom_action:
+                var intentChatroom = new Intent(SeekerState.MainActivityRef, typeof(ChatroomActivity));
                 SeekerState.MainActivityRef.StartActivityForResult(intentChatroom, 143);
                 return true;
-            case Resource.Id.settings_action:
-                Intent intent2 = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
+            case ResourceConstant.Id.settings_action:
+                var intent2 = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
                 SeekerState.MainActivityRef.StartActivityForResult(intent2, 140);
                 return true;
-            case Resource.Id.shutdown_action:
-                Intent intent3 = new Intent(this, typeof(CloseActivity));
+            case ResourceConstant.Id.shutdown_action:
+                var intent3 = new Intent(this, typeof(CloseActivity));
                 // Clear all activities and start new task
                 // ClearTask - causes any existing task that would be associated with the activity 
                 //  to be cleared before the activity is started. can only be used in conjunction with NewTask.
                 //  basically it clears all activities in the current task.
                 intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                this.StartActivity(intent3);
+                StartActivity(intent3);
 
-                if ((int)Android.OS.Build.VERSION.SdkInt < 21)
+                if ((int)Build.VERSION.SdkInt < 21)
                 {
-                    this.FinishAffinity();
+                    FinishAffinity();
                 }
                 else
                 {
-                    this.FinishAndRemoveTask();
+                    FinishAndRemoveTask();
                 }
 
                 return true;
-            case Resource.Id.about_action:
+            case ResourceConstant.Id.about_action:
                 var builder =
-                    new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                    new AndroidX.AppCompat.App.AlertDialog.Builder(this, ResourceConstant.Style.MyAlertDialogTheme);
 
-                var diag = builder.SetMessage(Resource.String.about_body)
-                    .SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-                diag.Show();
+                var diag = builder.SetMessage(ResourceConstant.String.about_body)
+                    ?.SetPositiveButton(ResourceConstant.String.close, OnCloseClick).Create();
+                diag?.Show();
 
                 // this is a literal CDATA string.
                 var origString = string.Format(
-                    SeekerState.ActiveActivityRef.GetString(Resource.String.about_body),
+                    SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.about_body),
                     SeekerApplication.GetVersionString()
                 );
 
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
-                {
-                    // this can be slow so do NOT do it in loops...
-                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted =
-                        Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy);
-                }
-                else
-                {
-                    // this can be slow so do NOT do it in loops...
-                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted =
-                        Android.Text.Html.FromHtml(origString);
-                }
+                // this can be slow so do NOT do it in loops...
+                ((TextView)diag?.FindViewById(Android.Resource.Id.Message))!.TextFormatted = 
+                    (int)Build.VERSION.SdkInt >= 24 
+                        ? Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy) 
+                        : Android.Text.Html.FromHtml(origString);
 
-                ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod =
+                ((TextView)diag?.FindViewById(Android.Resource.Id.Message))!.MovementMethod =
                     Android.Text.Method.LinkMovementMethod.Instance;
 
                 return true;
@@ -1401,41 +1349,37 @@ public class MainActivity : ThemeableActivity
 
         return base.OnOptionsItemSelected(item);
     }
-    
-    public const string UPLOADS_CHANNEL_ID = "upload channel ID";
-    public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
-    public const string UPLOADS_NOTIF_EXTRA = "From Upload";
 
     public static Notification CreateUploadNotification(
         Context context,
-        String username,
-        List<String> directories,
+        string username,
+        List<string> directories,
         int numFiles)
     {
-        string fileS = numFiles == 1
-            ? SeekerState.ActiveActivityRef.GetString(Resource.String.file)
-            : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
+        var fileS = numFiles == 1
+            ? SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.file)
+            : SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.files);
 
-        string titleText = string.Format(
-            SeekerState.ActiveActivityRef.GetString(Resource.String.upload_f_string),
+        var titleText = string.Format(
+            SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.upload_f_string),
             numFiles,
             fileS,
             username
         );
 
-        string directoryString = string.Empty;
+        string directoryString;
 
         if (directories.Count == 1)
         {
-            directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directory)
+            directoryString = SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.from_directory)
                               + ": " + directories[0];
         }
         else
         {
-            directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directories)
+            directoryString = SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.from_directories)
                               + ": " + directories[0];
 
-            for (int i = 0; i < directories.Count; i++)
+            for (var i = 0; i < directories.Count; i++)
             {
                 if (i == 0)
                 {
@@ -1446,23 +1390,23 @@ public class MainActivity : ThemeableActivity
             }
         }
 
-        string contextText = directoryString;
-        Intent notifIntent = new Intent(context, typeof(MainActivity));
-        notifIntent.AddFlags(ActivityFlags.SingleTop);
-        notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
+        var contextText = directoryString;
+        var notificationIntent = new Intent(context, typeof(MainActivity));
+        notificationIntent.AddFlags(ActivityFlags.SingleTop);
+        notificationIntent.PutExtra(UPLOADS_NOTIFICATION_EXTRA, 2);
 
         PendingIntent pendingIntent = PendingIntent.GetActivity(
             context,
             username.GetHashCode(),
-            notifIntent,
+            notificationIntent,
             CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)
         );
 
         // no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
         // a "channel" is a category in the UI to the end user.
-        Notification notification = null;
+        Notification notification;
 
-        if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
         {
             notification = new Notification.Builder(context, UPLOADS_CHANNEL_ID)
                 .SetContentTitle(titleText)
@@ -1475,12 +1419,10 @@ public class MainActivity : ThemeableActivity
         else
         {
             notification =
-#pragma warning disable CS0618 // Type or member is obsolete
                 new Notification.Builder(context)
-#pragma warning restore CS0618 // Type or member is obsolete
                     .SetContentTitle(titleText)
                     .SetContentText(contextText)
-                    .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                    .SetSmallIcon(ResourceConstant.Drawable.ic_stat_soulseekicontransparent)
                     .SetContentIntent(pendingIntent)
                     .SetOnlyAlertOnce(true) //maybe
                     .SetTicker(titleText).Build();
@@ -1489,81 +1431,77 @@ public class MainActivity : ThemeableActivity
         return notification;
     }
 
-    public void SetUpLoginContinueWith(Task t)
+    public void SetUpLoginContinueWith(Task continuationTask)
     {
-        if (t == null)
+        if (continuationTask == null)
         {
             return;
         }
 
-        if (SharingManager.MeetsSharingConditions())
+        if (!SharingManager.MeetsSharingConditions())
         {
-
-            Action<Task> getAndSetLoggedInInfoAction = t =>
-            {
-                // we want to 
-                // UpdateStatus ??
-                // inform server if we are sharing..
-                // get our upload speed..
-                if (t.Status == TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
-                {
-                    return;
-                }
-
-                // don't need to get the result of this one.
-                SharingManager.InformServerOfSharedFiles();
-
-                // the result of this one if from an event handler..
-                SeekerState.SoulseekClient.GetUserDataAsync(SeekerState.Username);
-            };
-
-            t.ContinueWith(getAndSetLoggedInInfoAction);
+            return;
         }
+        
+        Action<Task> getAndSetLoggedInInfoAction = task =>
+        {
+            // we want to 
+            // UpdateStatus ??
+            // inform server if we are sharing..
+            // get our upload speed..
+            if (task.Status == TaskStatus.Faulted || task.IsFaulted || task.IsCanceled)
+            {
+                return;
+            }
+
+            // don't need to get the result of this one.
+            SharingManager.InformServerOfSharedFiles();
+
+            // the result of this one if from an event handler
+            SeekerState.SoulseekClient.GetUserDataAsync(SeekerState.Username);
+        };
+
+        continuationTask.ContinueWith(getAndSetLoggedInInfoAction);
     }
 
     public bool OnBrowseTab()
     {
-        try
-        {
-            var pager = (ViewPager)FindViewById(ResourceConstant.Id.pager);
-            return pager.CurrentItem == 3;
-        }
-        catch
-        {
-            Logger.FirebaseDebug("OnBrowseTab failed");
-        }
-
-        return false;
+        return pager.CurrentItem == 3;
     }
 
-    private void onBackPressedAction(OnBackPressedCallback callback)
+    private void OnBackPressedAction(OnBackPressedCallback callback)
     {
         bool relevant = false;
         try
         {
-            var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
-            if (pager.CurrentItem == 3) //browse tab
+            switch (pager.CurrentItem)
             {
-                relevant = BrowseFragment.Instance.BackButton();
-            }
-            else if (pager.CurrentItem == 2) // transfer tab
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
+                //browse tab
+                case 3:
+                    relevant = BrowseFragment.Instance.BackButton();
+                    break;
+                // transfer tab
+                case 2:
                 {
-                    if (TransfersFragment.InUploadsMode)
+                    if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                     {
-                        TransfersFragment.CurrentlySelectedUploadFolder = null;
-                    }
-                    else
-                    {
-                        TransfersFragment.CurrentlySelectedDLFolder = null;
+                        if (TransfersFragment.InUploadsMode)
+                        {
+                            TransfersFragment.CurrentlySelectedUploadFolder = null;
+                        }
+                        else
+                        {
+                            TransfersFragment.CurrentlySelectedDLFolder = null;
+                        }
+
+                        SetTransferSupportActionBarState();
+                        InvalidateOptionsMenu();
+                        StaticHacks.TransfersFrag.SetRecyclerAdapter();
+                        StaticHacks.TransfersFrag.RestoreScrollPosition();
+                        relevant = true;
                     }
 
-                    SetTransferSupportActionBarState();
-                    this.InvalidateOptionsMenu();
-                    StaticHacks.TransfersFrag.SetRecyclerAdapter();
-                    StaticHacks.TransfersFrag.RestoreScrollPosition();
-                    relevant = true;
+                    break;
                 }
             }
         }
@@ -1574,12 +1512,14 @@ public class MainActivity : ThemeableActivity
             Logger.FirebaseDebug("During Back Button: " + e.Message);
         }
 
-        if (!relevant)
+        if (relevant)
         {
-            callback.Enabled = false;
-            OnBackPressedDispatcher.OnBackPressed();
-            callback.Enabled = true;
+            return;
         }
+        
+        callback.Enabled = false;
+        OnBackPressedDispatcher.OnBackPressed();
+        callback.Enabled = true;
     }
 
     public static void DebugLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
@@ -1611,7 +1551,7 @@ public class MainActivity : ThemeableActivity
             {
                 SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(
                     action,
-                    System.Threading.CancellationToken.None,
+                    CancellationToken.None,
                     TaskContinuationOptions.None,
                     TaskScheduler.Default
                 );
@@ -1639,16 +1579,13 @@ public class MainActivity : ThemeableActivity
 
     public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
     {
-        if (c == null)
-        {
-            c = SeekerState.MainActivityRef;
-        }
+        c ??= SeekerState.MainActivityRef;
 
-        if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) // tested..
+        if (Looper.MainLooper?.Thread == Java.Lang.Thread.CurrentThread()) // tested..
         {
             if (!silent)
             {
-                Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short).Show();
+                Toast.MakeText(c, c.GetString(ResourceConstant.String.temporary_disconnected), ToastLength.Short)?.Show();
             }
         }
         else
@@ -1657,8 +1594,8 @@ public class MainActivity : ThemeableActivity
             {
                 SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short)
-                        .Show();
+                    Toast.MakeText(c, c.GetString(ResourceConstant.String.temporary_disconnected), ToastLength.Short)
+                        ?.Show();
                 });
             }
         }
@@ -1685,10 +1622,9 @@ public class MainActivity : ThemeableActivity
 
     public static bool CurrentlyLoggedInButDisconnectedState()
     {
-        return (SeekerState.currentlyLoggedIn &&
-                (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected)
-                 || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting))
-            );
+        return SeekerState.currentlyLoggedIn &&
+               (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected)
+                || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting));
     }
 
     public static void SetStatusApi(bool away)
@@ -1721,7 +1657,7 @@ public class MainActivity : ThemeableActivity
                 {
                     SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
                     SeekerState.OurCurrentStatusIsAway = away;
-                    string statusString = away ? "away" : "online"; // not user facing
+                    var statusString = away ? "away" : "online"; // not user facing
                     Logger.Debug($"We successfully changed our status to {statusString}");
                 }
                 else
@@ -1730,9 +1666,9 @@ public class MainActivity : ThemeableActivity
                 }
             });
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            Logger.Debug("SetStatusApi FAILED " + e.Message + e.StackTrace);
+            Logger.Debug("SetStatusApi FAILED " + exception.Message + exception.StackTrace);
         }
     }
 
@@ -1745,20 +1681,19 @@ public class MainActivity : ThemeableActivity
 
         try
         {
-            TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
-            LinearLayout vg = (LinearLayout)tabs.GetChildAt(0);
-            int tabsCount = vg.ChildCount;
+            var vg = (LinearLayout)tabs.GetChildAt(0);
+            var tabsCount = vg!.ChildCount;
 
-            for (int j = 0; j < tabsCount; j++)
+            for (var j = 0; j < tabsCount; j++)
             {
-                ViewGroup vgTab = (ViewGroup)vg.GetChildAt(j);
-                int tabChildsCount = vgTab.ChildCount;
-                for (int i = 0; i < tabChildsCount; i++)
+                var vgTab = vg.GetChildAt(j) as ViewGroup;
+                var tabChildrenCount = vgTab?.ChildCount;
+                for (var i = 0; i < tabChildrenCount; i++)
                 {
-                    View tabViewChild = vgTab.GetChildAt(i);
-                    if (tabViewChild is TextView)
+                    var tabViewChild = vgTab.GetChildAt(i);
+                    if (tabViewChild is TextView textView)
                     {
-                        ((TextView)tabViewChild).SetAllCaps(false);
+                        textView.SetAllCaps(false);
                     }
                 }
             }
@@ -1766,19 +1701,6 @@ public class MainActivity : ThemeableActivity
         catch
         {
             // not worth throwing over..
-        }
-    }
-
-    public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
-    {
-        if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)
-        {
-            SupportFragmentManager.BeginTransaction().Detach(f).CommitNowAllowingStateLoss();
-            SupportFragmentManager.BeginTransaction().Attach(f).CommitNowAllowingStateLoss();
-        }
-        else
-        {
-            SupportFragmentManager.BeginTransaction().Detach(f).Attach(f).CommitNow();
         }
     }
 
@@ -1790,15 +1712,15 @@ public class MainActivity : ThemeableActivity
             || NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode
             || NEW_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN == requestCode)
         {
-            Action showDirectoryButton = new Action(() =>
+            var showDirectoryButton = new Action(() =>
             {
-                ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
-                AddLoggedInLayout(StaticHacks.LoginFragment.View); // TODO: nullref
+                ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_error);
+                AddLoggedInLayout(StaticHacks.LoginFragment.View); // TODO: null ref
                 if (!SeekerState.currentlyLoggedIn)
                 {
-                    MainActivity.BackToLogInLayout(
+                    BackToLogInLayout(
                         StaticHacks.LoginFragment.View,
-                        (StaticHacks.LoginFragment as LoginFragment).LogInClick
+                        (StaticHacks.LoginFragment as LoginFragment)!.LogInClick
                     );
                 }
 
@@ -1806,22 +1728,21 @@ public class MainActivity : ThemeableActivity
                 {
                     // .View is a method so it can return null.
                     // I tested it on MainActivity.OnPause and it was in fact null.
-
-                    var toastMessage =
-                        SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings);
-                    ToastUi.Long(toastMessage);
+                    ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_choose_settings);
                     Logger.FirebaseDebug("StaticHacks.LoginFragment.View is null");
                     return;
                 }
 
-                Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
+                var button = StaticHacks.LoginFragment.View
+                    .FindViewById<Button>(ResourceConstant.Id.mustSelectDirectory);
 
-                if (bttn != null)
+                if (button == null)
                 {
-                    bttn.Visibility = ViewStates.Visible;
-                    bttn.Click += MustSelectDirectoryClick;
+                    return;
                 }
+                
+                button.Visibility = ViewStates.Visible;
+                button.Click += MustSelectDirectoryClick;
             });
 
             if (NEW_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN == requestCode)
@@ -1834,40 +1755,38 @@ public class MainActivity : ThemeableActivity
                     FallbackFileSelection(NEW_WRITE_EXTERNAL_VIA_LEGACY);
                     return;
                 }
+
+                if (ThreadingUtils.OnUiThread())
+                {
+                    showDirectoryButton();
+                }
                 else
                 {
-                    if (ThreadingUtils.OnUiThread())
-                    {
-                        showDirectoryButton();
-                    }
-                    else
-                    {
-                        RunOnUiThread(showDirectoryButton);
-                    }
-
-                    return;
+                    RunOnUiThread(showDirectoryButton);
                 }
+
+                return;
             }
 
             if (resultCode == Result.Ok)
             {
-                if (NEW_WRITE_EXTERNAL == requestCode)
+                switch (requestCode)
                 {
-                    var x = data.Data;
-                    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                    SeekerState.SaveDataDirectoryUriIsFromTree = true;
+                    case NEW_WRITE_EXTERNAL:
+                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data!.Data!);
+                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
+                        SeekerState.SaveDataDirectoryUriIsFromTree = true;
 
-                    this.ContentResolver.TakePersistableUriPermission(
-                        data.Data,
-                        ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
-                    );
-                }
-                else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
-                {
-                    SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                    SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                    SeekerState.SaveDataDirectoryUriIsFromTree = false;
+                        ContentResolver?.TakePersistableUriPermission(
+                            data.Data,
+                            ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
+                        );
+                        break;
+                    case NEW_WRITE_EXTERNAL_VIA_LEGACY:
+                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data!.Data!.Path!));
+                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
+                        SeekerState.SaveDataDirectoryUriIsFromTree = false;
+                        break;
                 }
             }
             else
@@ -1887,15 +1806,15 @@ public class MainActivity : ThemeableActivity
                  MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN == requestCode)
         {
 
-            Action reiterate = new Action(() =>
+            var reiterate = new Action(() =>
             {
-                ToastUi.Long(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_error);
             });
 
-            Action hideButton = new Action(() =>
+            var hideButton = new Action(() =>
             {
-                Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                bttn.Visibility = ViewStates.Gone;
+                StaticHacks.LoginFragment.View!.FindViewById<Button>(ResourceConstant.Id.mustSelectDirectory)!
+                    .Visibility = ViewStates.Gone;
             });
 
             if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_SETTINGS_SCREEN == requestCode)
@@ -1925,21 +1844,22 @@ public class MainActivity : ThemeableActivity
 
             if (resultCode == Result.Ok)
             {
-                if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
+                switch (requestCode)
                 {
-                    SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                    SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                    SeekerState.SaveDataDirectoryUriIsFromTree = false;
-                }
-                else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
-                {
-                    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                    SeekerState.SaveDataDirectoryUriIsFromTree = true;
-                    this.ContentResolver.TakePersistableUriPermission(
-                        data.Data,
-                        ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
-                    );
+                    case MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY:
+                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data!.Data!.Path!));
+                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
+                        SeekerState.SaveDataDirectoryUriIsFromTree = false;
+                        break;
+                    case MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL:
+                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
+                        SeekerState.SaveDataDirectoryUriIsFromTree = true;
+                        ContentResolver?.TakePersistableUriPermission(
+                            data.Data,
+                            ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission
+                        );
+                        break;
                 }
 
                 // hide the button
@@ -1968,38 +1888,39 @@ public class MainActivity : ThemeableActivity
 
     private void MustSelectDirectoryClick(object sender, EventArgs e)
     {
+        if (Build.VERSION.SdkInt < BuildVersionCodes.Lollipop)
+        {
+            Logger.Debug($"Calling MainActivity.MustSelectDirectoryClick on API {Build.VERSION.SdkInt}, " +
+                         $"while it requires API 21");
+            return;
+        }
+        
         var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
 
-        var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
+        var intent = storageManager.PrimaryStorageVolume!.CreateOpenDocumentTreeIntent();
         intent.AddFlags(ActivityFlags.GrantPersistableUriPermission
                         | ActivityFlags.GrantReadUriPermission
                         | ActivityFlags.GrantWriteUriPermission
                         | ActivityFlags.GrantPrefixUriPermission);
 
-        Android.Net.Uri res = null;
-        if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
-        {
-            res = Android.Net.Uri.Parse(DEFAULT_MUSIC_URI);
-        }
-        else
-        {
-            res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
-        }
+        var res = Android.Net.Uri.Parse(string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri) 
+            ? DEFAULT_MUSIC_URI 
+            : SeekerState.SaveDataDirectoryUri);
 
         intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
         try
         {
-            this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
+            StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+            if (exception.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
             {
                 FallbackFileSelectionEntry(true);
             }
             else
             {
-                throw ex;
+                throw;
             }
         }
     }
@@ -2039,8 +1960,7 @@ public class MainActivity : ThemeableActivity
         }
         else
         {
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles()
-                && !hasManageAllFilesManisfestPermission)
+            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
             {
                 this.ShowSimpleAlertDialog(
                     Resource.String.error_no_file_manager_dir_manage_storage,
@@ -2066,38 +1986,12 @@ public class MainActivity : ThemeableActivity
         }
     }
 
-    private void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
-    {
-        e.Handled = false; // make sure we still crash.. we just want to clean up..
-        try
-        {
-            // save transfers state !!!
-            TransfersFragment.SaveTransferItems(sharedPreferences);
-        }
-        catch
-        {
-            // Intentional no-op
-        }
-
-        try
-        {
-            // stop dl service..
-            Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-            Logger.Debug("Stop Service");
-            this.StopService(downloadServiceIntent);
-        }
-        catch
-        {
-            // Intentional no-op
-        }
-    }
-
     /// <summary>
-    /// This RETURNS the task for Continuewith
+    /// This RETURNS the task for ContinueWith
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-    public static Action<Task> DownloadContinuationActionUI(DownloadAddedEventArgs e)
+    public static Action<Task> DownloadContinuationActionUi(DownloadAddedEventArgs e)
     {
         Action<Task> continuationActionSaveFile = new Action<Task>(task =>
         {
@@ -2121,15 +2015,14 @@ public class MainActivity : ThemeableActivity
                         e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                         try
                         {
-                            //retry download.
+                            // retry download.
                             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                            Android.Net.Uri incompleteUri = null;
 
                             // else when you go to cancel you are cancelling an already cancelled useless token!!
                             TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference,
                                 cancellationTokenSource, out _);
 
-                            Task retryTask = TransfersUtil.DownloadFileAsync(
+                            var retryTask = TransfersUtil.DownloadFileAsync(
                                 e.dlInfo.username,
                                 e.dlInfo.fullFilename,
                                 e.dlInfo.TransferItemReference.Size,
@@ -2140,7 +2033,7 @@ public class MainActivity : ThemeableActivity
                                 e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1()
                             );
 
-                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(
+                            retryTask.ContinueWith(DownloadContinuationActionUi(
                                 new DownloadAddedEventArgs(
                                     new DownloadInfo(
                                         e.dlInfo.username,
@@ -2154,13 +2047,13 @@ public class MainActivity : ThemeableActivity
                                         e.dlInfo.Depth
                                     )
                                 )
-                            ));
+                            ), cancellationTokenSource.Token);
                         }
-                        catch (System.Exception e)
+                        catch (Exception exception)
                         {
                             // disconnected error
-                            if (e is System.InvalidOperationException
-                                && e.Message.ToLower()
+                            if (exception is System.InvalidOperationException
+                                && exception.Message.ToLower()
                                     .Contains("server connection must be connected and logged in"))
                             {
                                 action = () =>
@@ -2174,7 +2067,7 @@ public class MainActivity : ThemeableActivity
                             else
                             {
                                 Logger.FirebaseDebug("cancel and retry creation failed: "
-                                                         + e.Message + e.StackTrace);
+                                                         + exception.Message + exception.StackTrace);
                             }
 
                             if (action != null)
@@ -2548,8 +2441,7 @@ public class MainActivity : ThemeableActivity
                         try
                         {
                             // retry download.
-                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                            Android.Net.Uri incompleteUri = null;
+                            var cancellationTokenSource = new CancellationTokenSource();
 
                             // else when you go to cancel you are cancelling an already cancelled useless token!!
                             TransfersFragment.SetupCancellationToken(
@@ -2557,7 +2449,7 @@ public class MainActivity : ThemeableActivity
                                 cancellationTokenSource,
                                 out _);
 
-                            Task retryTask = TransfersUtil.DownloadFileAsync(
+                            var retryTask = TransfersUtil.DownloadFileAsync(
                                 e.dlInfo.username,
                                 e.dlInfo.fullFilename,
                                 e.dlInfo.Size,
@@ -2567,7 +2459,7 @@ public class MainActivity : ThemeableActivity
                                 e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(),
                                 e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
 
-                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(
+                            retryTask.ContinueWith(DownloadContinuationActionUi(
                                 new DownloadAddedEventArgs(
                                     new DownloadInfo(
                                         e.dlInfo.username,
@@ -2580,9 +2472,9 @@ public class MainActivity : ThemeableActivity
                                         e.dlInfo.Depth
                                     )
                                 )
-                            ));
+                            ), cancellationTokenSource.Token);
 
-                            return; // i.e. dont toast anything just retry.
+                            return; // i.e. don't toast anything just retry.
                         }
                         catch (System.Exception e)
                         {
@@ -2600,14 +2492,11 @@ public class MainActivity : ThemeableActivity
                                     + task.Exception?.InnerException?.Message?.ToString());
                     }
 
-                    if (action == null)
+                    action ??= () =>
                     {
-                        action = () =>
-                        {
-                            ToastUi.Long(SeekerState.ActiveActivityRef
-                                .GetString(Resource.String.error_unspecified));
-                        };
-                    }
+                        ToastUi.Long(SeekerState.ActiveActivityRef
+                            .GetString(Resource.String.error_unspecified));
+                    };
 
                     SeekerState.ActiveActivityRef.RunOnUiThread(action);
                     return;
@@ -2618,7 +2507,7 @@ public class MainActivity : ThemeableActivity
                 if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                 {
                     Logger.FirebaseDebug("auto retry succeeded: prev exception: "
-                                + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
+                                + e.dlInfo.PreviousFailureException.InnerException?.Message);
                 }
 
                 if (!SeekerState.DisableDownloadToastNotification)
@@ -2632,13 +2521,12 @@ public class MainActivity : ThemeableActivity
                     SeekerState.ActiveActivityRef.RunOnUiThread(action);
                 }
 
-                string finalUri = string.Empty;
+                var finalUri = string.Empty;
                 if (task is Task<byte[]> tbyte)
                 {
-                    bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
-                        .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                    var noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(TransferItemExtras.NoSubfolder);
 
-                    string path = StorageUtils.SaveToFile(
+                    var path = StorageUtils.SaveToFile(
                         e.dlInfo.fullFilename,
                         e.dlInfo.username,
                         tbyte.Result,
@@ -2654,10 +2542,9 @@ public class MainActivity : ThemeableActivity
                 else if (task is Task<Tuple<string, string>> tString)
                 {
                     // move file...
-                    bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra
-                        .HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                    var noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(TransferItemExtras.NoSubfolder);
 
-                    string path = StorageUtils.SaveToFile(
+                    var path = StorageUtils.SaveToFile(
                         e.dlInfo.fullFilename,
                         e.dlInfo.username,
                         null,
@@ -2699,16 +2586,16 @@ public class MainActivity : ThemeableActivity
     private static void ToastUiWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "",
         int seconds = 1)
     {
-        long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        var curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         
         // if it does not exist then updatedTime will be curTime.
         // If it does exist but is older than a second then updated time will also be curTime.
         // In those two cases, show the toast.
         Logger.Debug("curtime " + curTime);
         
-        bool stale = false;
-        long updatedTime = _toastUiDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime,
-            (key, oldValue) =>
+        var stale = false;
+        var updatedTime = _toastUiDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime,
+            (_, oldValue) =>
             {
                 Logger.Debug("key exists: " + (curTime - oldValue));
                 stale = (curTime - oldValue) < (seconds * 1000);
@@ -2723,7 +2610,6 @@ public class MainActivity : ThemeableActivity
         Logger.Debug("updatedTime " + updatedTime);
         if (!stale)
         {
-
             ToastUi.Long(msgToToast);
         }
     }
@@ -2735,21 +2621,21 @@ public class MainActivity : ThemeableActivity
     ///   if not there, which makes sense. </param>
     public static void AddLoggedInLayout(View rootView = null, bool force = false)
     {
-        View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-        View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-        var bttnIsAttached = false;
-        var bttnTwoIsAttached = false;
-        if (bttn != null && bttn.IsAttachedToWindow)
+        View button = StaticHacks.RootView?.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+        View buttonTryTwo = rootView?.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+        var buttonIsAttached = false;
+        var buttonTwoIsAttached = false;
+        if (button != null && button.IsAttachedToWindow)
         {
-            bttnIsAttached = true;
+            buttonIsAttached = true;
         }
 
-        if (bttnTryTwo != null && bttnTryTwo.IsAttachedToWindow)
+        if (buttonTryTwo != null && buttonTryTwo.IsAttachedToWindow)
         {
-            bttnTwoIsAttached = true;
+            buttonTwoIsAttached = true;
         }
 
-        if (bttnIsAttached || bttnTwoIsAttached || (SeekerState.currentlyLoggedIn && !force))
+        if (buttonIsAttached || buttonTwoIsAttached || (SeekerState.currentlyLoggedIn && !force))
         {
             return;
         }
@@ -2758,8 +2644,8 @@ public class MainActivity : ThemeableActivity
         var action1 = new Action(() =>
         {
             (rootView as ViewGroup)?.AddView(
-                SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin,
-                    rootView as ViewGroup, false));
+                SeekerState.MainActivityRef.LayoutInflater.Inflate(ResourceConstant.Layout.loggedin,
+                    (ViewGroup)rootView, false));
         });
         
         if (ThreadingUtils.OnUiThread())
@@ -2773,7 +2659,7 @@ public class MainActivity : ThemeableActivity
     }
 
     public static void UpdateUiForLoggedIn(View rootView = null, EventHandler btnClick = null,
-        View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler settingClick = null)
+        View cWelcome = null, View cBtn = null, ViewGroup cLoading = null, EventHandler settingClick = null)
     {
         var action = new Action(() =>
         {
@@ -2786,26 +2672,15 @@ public class MainActivity : ThemeableActivity
             Button settings = null;
             try
             {
-                if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
-                {
-                    btn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+                var localRootView = StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow
+                    ? StaticHacks.RootView
+                    : rootView!;
 
-                    logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                    settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                }
-                else
-                {
-                    btn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                    logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                    settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                }
+                btn = localRootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                welcome = localRootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                loggingInLayout = localRootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                logInLayout = localRootView.FindViewById<ViewGroup>(ResourceConstant.Id.logInLayout);
+                settings = localRootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
             }
             catch
             {
@@ -2825,7 +2700,7 @@ public class MainActivity : ThemeableActivity
 
                 settings.Click -= settingClick;
                 settings.Click += settingClick;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(btn, 90);
+                ViewCompat.SetTranslationZ(btn, 90);
                 btn.Click -= btnClick;
                 btn.Click += btnClick;
                 loggingInLayout.Visibility = ViewStates.Gone;
@@ -2835,21 +2710,23 @@ public class MainActivity : ThemeableActivity
             else if (cWelcome != null)
             {
                 cWelcome.Visibility = ViewStates.Visible;
-                cbttn.Visibility = ViewStates.Visible;
-                AndroidX.Core.View.ViewCompat.SetTranslationZ(cbttn, 90);
+                cBtn.Visibility = ViewStates.Visible;
+                ViewCompat.SetTranslationZ(cBtn, 90);
                 cLoading.Visibility = ViewStates.Gone;
             }
             else
             {
-                StaticHacks.UpdateUI = true; // if we arent ready rn then do it when we are...
+                StaticHacks.UpdateUI = true; // if we aren't ready rn then do it when we are...
             }
 
-            if (logInLayout != null)
+            if (logInLayout == null)
             {
-                var loginButton = logInLayout.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
-                ViewCompat.SetTranslationZ(loginButton, 0);
-                logInLayout.Visibility = ViewStates.Gone;
+                return;
             }
+            
+            var loginButton = logInLayout.FindViewById<Button>(ResourceConstant.Id.buttonLogin);
+            ViewCompat.SetTranslationZ(loginButton, 0);
+            logInLayout.Visibility = ViewStates.Gone;
 
         });
         
@@ -2942,46 +2819,47 @@ public class MainActivity : ThemeableActivity
             }
 
             Logger.Debug("logInLayout is here? " + (logInLayout != null));
-            if (logInLayout != null)
+            if (logInLayout == null)
             {
-                logInLayout.Visibility = ViewStates.Visible;
-                if (!clearUserPass && !string.IsNullOrEmpty(SeekerState.Username))
-                {
-                    logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SeekerState.Username;
-                    logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SeekerState.Password;
-                }
-
-                ViewCompat.SetTranslationZ(buttonLogin, 90);
-
-                if (loading == null)
-                {
-                    AddLoggedInLayout(rootView);
-                    if (rootView != null)
-                    {
-                        bttn = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
-                        settings = rootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
-                    }
-
-                    if (rootView == null && loading == null && StaticHacks.RootView != null)
-                    {
-                        bttn = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
-                        settings = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
-                    }
-                }
-
-                // can get nullref here!!! (at least before the .AddLoggedInLayout code..
-                loggingInLayout.Visibility = ViewStates.Gone;
-                welcome.Visibility = ViewStates.Gone;
-                settings.Visibility = ViewStates.Gone;
-                bttn.Visibility = ViewStates.Gone;
-                ViewCompat.SetTranslationZ(bttn, 0);
-
-
+                return;
             }
+            
+            logInLayout.Visibility = ViewStates.Visible;
+            if (!clearUserPass && !string.IsNullOrEmpty(SeekerState.Username))
+            {
+                logInLayout.FindViewById<EditText>(ResourceConstant.Id.etUsername).Text = SeekerState.Username;
+                logInLayout.FindViewById<EditText>(ResourceConstant.Id.etPassword).Text = SeekerState.Password;
+            }
+
+            ViewCompat.SetTranslationZ(buttonLogin, 90);
+
+            if (loading == null)
+            {
+                AddLoggedInLayout(rootView);
+                if (rootView != null)
+                {
+                    bttn = rootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    welcome = rootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInLayout = rootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                    settings = rootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
+                }
+
+                if (rootView == null && loading == null && StaticHacks.RootView != null)
+                {
+                    bttn = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.buttonLogout);
+                    welcome = StaticHacks.RootView.FindViewById<TextView>(ResourceConstant.Id.userNameView);
+                    loggingInLayout = 
+                        StaticHacks.RootView.FindViewById<ViewGroup>(ResourceConstant.Id.loggingInLayout);
+                    settings = StaticHacks.RootView.FindViewById<Button>(ResourceConstant.Id.settingsButton);
+                }
+            }
+
+            // can get null ref here!!! (at least before the .AddLoggedInLayout code..
+            loggingInLayout.Visibility = ViewStates.Gone;
+            welcome.Visibility = ViewStates.Gone;
+            settings.Visibility = ViewStates.Gone;
+            bttn.Visibility = ViewStates.Gone;
+            ViewCompat.SetTranslationZ(bttn, 0);
 
         });
         if (ThreadingUtils.OnUiThread())
@@ -3059,61 +2937,36 @@ public class MainActivity : ThemeableActivity
             SeekerState.MainActivityRef.RunOnUiThread(action);
         }
     }
-
-    private static void CreateNoMediaFileLegacy(string atDirectory)
-    {
-        Java.IO.File noMediaRootFile = new Java.IO.File(atDirectory + @"/.nomedia");
-        if (!noMediaRootFile.Exists())
-        {
-            noMediaRootFile.CreateNewFile();
-        }
-    }
     
     public static object lock_toplevel_ifexist_create = new();
     public static object lock_album_ifexist_create = new();
 
-    public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth,
+    public static System.IO.Stream GetIncompleteStream(string username, string fullFilename, int depth,
         out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
     {
-        string name = CommonHelpers.GetFileNameFromFile(fullfilename);
-        string filePath = string.Empty;
+        var name = CommonHelpers.GetFileNameFromFile(fullFilename);
+        var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder();
+        var useTempDir = SettingsActivity.UseTempDirectory();
+        var useCustomDir = SettingsActivity.UseIncompleteManualFolder();
 
-        bool useDownloadDir = false;
-        if (SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+        var fileExists = false;
+        if (SeekerState.UseLegacyStorage() && SeekerState.RootDocumentFile == null && useDownloadDir)
         {
-            useDownloadDir = true;
-        }
-
-        bool useTempDir = false;
-        if (SettingsActivity.UseTempDirectory())
-        {
-            useTempDir = true;
-        }
-
-        bool useCustomDir = false;
-        if (SettingsActivity.UseIncompleteManualFolder())
-        {
-            useCustomDir = true;
-        }
-
-        bool fileExists = false;
-        if (SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
-        {
-            System.IO.FileStream fs = null;
+            System.IO.FileStream fs;
             Java.IO.File incompleteDir = null;
             Java.IO.File musicDir = null;
+            
             try
             {
-                string rootdir = string.Empty;
-                rootdir = Android.OS.Environment
-                    .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                var rootDir = Android.OS.Environment
+                    .GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic)!.AbsolutePath;
 
-                if (!(new Java.IO.File(rootdir)).Exists())
+                if (!(new Java.IO.File(rootDir)).Exists())
                 {
-                    (new Java.IO.File(rootdir)).Mkdirs();
+                    (new Java.IO.File(rootDir)).Mkdirs();
                 }
 
-                string incompleteDirString = rootdir + @"/Soulseek Incomplete/";
+                var incompleteDirString = rootDir + @"/Soulseek Incomplete/";
                 lock (lock_toplevel_ifexist_create)
                 {
                     incompleteDir = new Java.IO.File(incompleteDirString);
@@ -3121,27 +2974,26 @@ public class MainActivity : ThemeableActivity
                     {
                         // make it and add nomedia...
                         incompleteDir.Mkdirs();
-                        CreateNoMediaFileLegacy(incompleteDirString);
+                        StorageUtils.CreateNoMediaFileLegacy(incompleteDirString);
                     }
                 }
 
-                string fullDir = rootdir + @"/Soulseek Incomplete/" +
-                                 CommonHelpers.GenerateIncompleteFolderName(username, fullfilename,
-                                     depth); //+ @"/" + name;
+                var fullDir = rootDir + "/Soulseek Incomplete/" +
+                              CommonHelpers.GenerateIncompleteFolderName(username, fullFilename,
+                                  depth);
                 musicDir = new Java.IO.File(fullDir);
                 lock (lock_album_ifexist_create)
                 {
                     if (!musicDir.Exists())
                     {
                         musicDir.Mkdirs();
-                        CreateNoMediaFileLegacy(fullDir);
+                        StorageUtils.CreateNoMediaFileLegacy(fullDir);
                     }
                 }
 
                 parentUri = Android.Net.Uri.Parse(new Java.IO.File(fullDir).ToURI().ToString());
-                filePath = fullDir + @"/" + name;
+                var filePath = fullDir + "/" + name;
                 Java.IO.File f = new Java.IO.File(filePath);
-                fs = null;
                 if (f.Exists())
                 {
                     fileExists = true;
@@ -3155,15 +3007,14 @@ public class MainActivity : ThemeableActivity
                     partialLength = 0;
                 }
 
-                incompleteUri =
-                    Android.Net.Uri.Parse(new Java.IO.File(filePath).ToURI()
-                        .ToString()); // using incompleteUri.Path gives you filePath :)
+                // using incompleteUri.Path gives you filePath :)
+                incompleteUri = Android.Net.Uri.Parse(new Java.IO.File(filePath).ToURI().ToString());
             }
             catch (Exception e)
             {
                 Logger.FirebaseDebug("Legacy Filesystem Issue: " + e.Message + e.StackTrace 
-                                     + System.Environment.NewLine + incompleteDir.Exists() 
-                                     + musicDir.Exists() + fileExists);
+                                     + System.Environment.NewLine + incompleteDir!.Exists() 
+                                     + musicDir!.Exists() + fileExists);
                 throw;
             }
 
@@ -3172,12 +3023,12 @@ public class MainActivity : ThemeableActivity
         else
         {
             DocumentFile folderDir1 = null; // this is the desired location.
-            DocumentFile rootdir = null;
+            DocumentFile rootDir = null;
 
-            bool diagRootDirExistsAndCanWrite = false;
-            bool diagDidWeCreateSoulSeekDir = false;
-            bool diagSlskDirExistsAfterCreation = false;
-            bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
+            var diagRootDirExistsAndCanWrite = false;
+            var diagDidWeCreateSoulSeekDir = false;
+            var diagSlskDirExistsAfterCreation = false;
+            var rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
 
             if (rootDocumentFileIsNull)
             {
@@ -3188,34 +3039,34 @@ public class MainActivity : ThemeableActivity
             {
                 if (useDownloadDir)
                 {
-                    rootdir = SeekerState.RootDocumentFile;
-                    Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
+                    rootDir = SeekerState.RootDocumentFile;
+                    Logger.Debug("using download dir" + rootDir.Uri.LastPathSegment);
                 }
                 else if (useTempDir)
                 {
                     Java.IO.File appPrivateExternal = SeekerState.ActiveActivityRef.GetExternalFilesDir(null);
-                    rootdir = DocumentFile.FromFile(appPrivateExternal);
+                    rootDir = DocumentFile.FromFile(appPrivateExternal);
                     Logger.Debug("using temp incomplete dir");
                 }
                 else if (useCustomDir)
                 {
-                    rootdir = SeekerState.RootIncompleteDocumentFile;
-                    Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                    rootDir = SeekerState.RootIncompleteDocumentFile;
+                    Logger.Debug("using custom incomplete dir" + rootDir.Uri.LastPathSegment);
                 }
                 else
                 {
                     Logger.FirebaseDebug("!! should not get here, no dirs");
                 }
 
-                if (!rootdir.Exists())
+                if (!rootDir.Exists())
                 {
-                    Logger.FirebaseDebug("rootdir (nonnull) does not exist: " + rootdir.Uri);
+                    Logger.FirebaseDebug("rootdir (nonnull) does not exist: " + rootDir.Uri);
                     diagRootDirExistsAndCanWrite = false;
                 }
-                else if (!rootdir.CanWrite())
+                else if (!rootDir.CanWrite())
                 {
                     diagRootDirExistsAndCanWrite = false;
-                    Logger.FirebaseDebug("rootdir (nonnull) exists but cant write: " + rootdir.Uri);
+                    Logger.FirebaseDebug("rootdir (nonnull) exists but cant write: " + rootDir.Uri);
                 }
                 else
                 {
@@ -3225,23 +3076,23 @@ public class MainActivity : ThemeableActivity
                 DocumentFile slskDir1 = null;
                 lock (lock_toplevel_ifexist_create)
                 {
-                    slskDir1 = rootdir.FindFile("Soulseek Incomplete"); //does Soulseek Complete folder exist
+                    slskDir1 = rootDir.FindFile("Soulseek Incomplete"); //does Soulseek Complete folder exist
                     if (slskDir1 == null || !slskDir1.Exists())
                     {
-                        slskDir1 = rootdir.CreateDirectory("Soulseek Incomplete");
+                        slskDir1 = rootDir.CreateDirectory("Soulseek Incomplete");
                         if (slskDir1 == null)
                         {
-                            string diagMessage = CheckPermissions(rootdir.Uri);
-                            Logger.FirebaseDebug("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
-                            Logger.FirebaseInfo("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
+                            string diagMessage = CheckPermissions(rootDir.Uri);
+                            Logger.FirebaseDebug("slskDir1 is null" + rootDir.Uri + "parent: " + diagMessage);
+                            Logger.FirebaseInfo("slskDir1 is null" + rootDir.Uri + "parent: " + diagMessage);
                         }
                         else if (!slskDir1.Exists())
                         {
-                            Logger.FirebaseDebug("slskDir1 does not exist" + rootdir.Uri);
+                            Logger.FirebaseDebug("slskDir1 does not exist" + rootDir.Uri);
                         }
                         else if (!slskDir1.CanWrite())
                         {
-                            Logger.FirebaseDebug("slskDir1 cannot write" + rootdir.Uri);
+                            Logger.FirebaseDebug("slskDir1 cannot write" + rootDir.Uri);
                         }
 
                         StorageUtils.CreateNoMediaFile(slskDir1);
@@ -3261,7 +3112,7 @@ public class MainActivity : ThemeableActivity
 
 
                 string album_folder_name =
-                    CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth);
+                    CommonHelpers.GenerateIncompleteFolderName(username, fullFilename, depth);
                 
                 lock (lock_album_ifexist_create)
                 {
@@ -3287,8 +3138,8 @@ public class MainActivity : ThemeableActivity
                                                 diagMessage);
                             
                             Logger.FirebaseDebug("folderDir1 is null:" + album_folder_name + "root: " + rootUri +
-                                        "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " +
-                                        diagMessage);
+                                                 "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " +
+                                                 diagMessage);
                         }
                         else if (!folderDir1.Exists())
                         {
@@ -3312,11 +3163,11 @@ public class MainActivity : ThemeableActivity
                     ? "null"
                     : SeekerState.RootDocumentFile.Uri.ToString();
                 Logger.FirebaseDebug("Filesystem Issue: " + rootDirUri + " " + e.Message +
-                                         diagSlskDirExistsAfterCreation + diagRootDirExistsAndCanWrite +
-                                         diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + e.StackTrace);
+                                     diagSlskDirExistsAfterCreation + diagRootDirExistsAndCanWrite +
+                                     diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + e.StackTrace);
             }
 
-            if (rootdir == null && !SeekerState.UseLegacyStorage())
+            if (rootDir == null && !SeekerState.UseLegacyStorage())
             {
                 SeekerState.MainActivityRef.RunOnUiThread(() =>
                 {
@@ -3325,7 +3176,7 @@ public class MainActivity : ThemeableActivity
             }
 
             // BACKUP IF FOLDER DIR IS NULL
-            folderDir1 ??= rootdir;
+            folderDir1 ??= rootDir;
 
             parentUri = folderDir1.Uri;
             System.IO.Stream stream;

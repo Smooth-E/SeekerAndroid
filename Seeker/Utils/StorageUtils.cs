@@ -1397,4 +1397,13 @@ public static class StorageUtils
     {
         atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
     }
+    
+    public static void CreateNoMediaFileLegacy(string atDirectory)
+    {
+        Java.IO.File noMediaRootFile = new Java.IO.File(atDirectory + "/.nomedia");
+        if (!noMediaRootFile.Exists())
+        {
+            noMediaRootFile.CreateNewFile();
+        }
+    }
 }

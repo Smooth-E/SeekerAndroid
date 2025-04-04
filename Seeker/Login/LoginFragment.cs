@@ -127,7 +127,7 @@ namespace Seeker
                     }
 
                     login?.ContinueWith(UpdateLoginUI);
-                    login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+                    login?.ContinueWith(MainActivity.GetPostNotificationsPermissionTask());
                     
                     // sets up a continue with if sharing is enabled, else noop
                     SeekerState.MainActivityRef.SetUpLoginContinueWith(login);
@@ -404,7 +404,7 @@ namespace Seeker
                 }
                 
                 login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
-                login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+                login?.ContinueWith(MainActivity.GetPostNotificationsPermissionTask());
 
                 try
                 {
