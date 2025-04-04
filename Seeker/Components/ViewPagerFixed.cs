@@ -14,6 +14,8 @@ namespace Seeker;
 /// at AndroidX.Core.View.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
 /// at AndroidX.Core.View.MotionEventCompat.getX(MotionEventCompat.java:184)
 /// at AndroidX.ViewPager.Widget.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
+
+// ReSharper disable once UnusedType.Global - used in layouts
 public class ViewPagerFixed : ViewPager
 {
     public ViewPagerFixed(Context context) : base(context)

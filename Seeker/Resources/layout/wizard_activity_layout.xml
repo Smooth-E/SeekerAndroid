@@ -37,7 +37,7 @@
             android:paddingRight="?android:attr/listPreferredItemPaddingRight"
             android:gravity="left"/>
 
-    <Seeker.SwipeDisabledViewPager
+    <Seeker.Components.SwipeDisabledViewPager
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"

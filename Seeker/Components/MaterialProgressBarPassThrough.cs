@@ -9,6 +9,7 @@ using Seeker.Utils;
 
 namespace Seeker.Components;
 
+// ReSharper disable once UnusedType.Global - used in layouts
 public class MaterialProgressBarPassThrough : LinearLayout
 {
     private bool disposed;

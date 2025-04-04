@@ -22,38 +22,6 @@ using Seeker.Utils;
 
 namespace Seeker
 {
-    public class SwipeDisabledViewPager : ViewPager
-    {
-
-        public bool SwipeEnabled = false;
-
-        public SwipeDisabledViewPager(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-        }
-
-        public override bool OnTouchEvent(MotionEvent motionEvent)
-        {
-            if (this.SwipeEnabled)
-            {
-                return base.OnTouchEvent(motionEvent);
-            }
-
-            return false;
-        }
-
-        public override bool OnInterceptTouchEvent(MotionEvent motionEvent)
-        {
-            if (this.SwipeEnabled)
-            {
-                return base.OnInterceptTouchEvent(motionEvent);
-            }
-
-            return false;
-        }
-    }
-
-
-
     [Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class ImportWizardActivity : ThemeableActivity
     {
