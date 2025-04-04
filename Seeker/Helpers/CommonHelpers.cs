@@ -710,8 +710,8 @@ namespace Seeker
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
-                ToastUi.Long(string.Format(SeekerState.ActiveActivityRef
-                    .GetString(ResourceConstant.String.removed_user), usernameInQuestion));
+                var rawString = SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.removed_user);
+                SeekerState.ActiveActivityRef.ShowLongToast(string.Format(rawString, usernameInQuestion));
                 
                 UserListManager.UserListRemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
@@ -1464,30 +1464,32 @@ namespace Seeker
         /// <param name="username"></param>
         /// <param name="numDays"></param>
         /// <returns>false if operation could not be attempted, true if successfully met prereqs and was attempted</returns>
+        // TODO: PAss context to this function
         public static bool GivePrilegesAPI(string username, string numDays)
         {
             int numDaysInt = int.MinValue;
             if (!int.TryParse(numDays, out numDaysInt))
             {
-                ToastUi.Long(Resource.String.error_days_entered_no_parse);
+                SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.error_days_entered_no_parse);
                 return false;
             }
             if (numDaysInt <= 0)
             {
-                ToastUi.Long(Resource.String.error_days_entered_not_positive);
+                SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.error_days_entered_not_positive);
                 return false;
             }
             if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
             {
-                ToastUi.Long(string.Format(
-                    SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.error_insufficient_days),
-                    numDaysInt));
+                // TODO: Move this variable into outer scope
+                var activityReference = SeekerState.ActiveActivityRef;
+                var rawString = activityReference.GetString(ResourceConstant.String.error_insufficient_days);
+                activityReference.ShowLongToast(string.Format(rawString, numDaysInt));
                 
                 return false;
             }
             if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
+                SeekerState.ActiveActivityRef.ShowShortToast(ResourceConstant.String.must_be_logged_in_to_give_privileges);
                 return false;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())

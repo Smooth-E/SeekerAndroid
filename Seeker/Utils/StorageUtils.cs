@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using _Microsoft.Android.Resource.Designer;
+using Android.App;
 using Android.Content;
 using Android.Provider;
 using Android.Widget;
@@ -967,25 +968,26 @@ public static class StorageUtils
     {
         var mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
         var f = new Java.IO.File(path);
-        var contentUri = Android.Net.Uri.FromFile(f);
+        var contentUri = Uri.FromFile(f);
         mediaScanIntent.SetData(contentUri);
         SeekerState.ActiveActivityRef.ApplicationContext?.SendBroadcast(mediaScanIntent);
     }
 #pragma warning restore CA1422
     
      public static string SaveToFile(
-        string fullfilename,
+        string fullFileName,
         string username,
         byte[] bytes,
-        Android.Net.Uri uriOfIncomplete,
-        Android.Net.Uri parentUriOfIncomplete,
+        Uri uriOfIncomplete,
+        Uri parentUriOfIncomplete,
         bool memoryMode,
         int depth,
         bool noSubFolder,
-        out string finalUri)
+        out string finalUri,
+        Activity activity = null)
     {
-        string name = CommonHelpers.GetFileNameFromFile(fullfilename);
-        string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
+        string name = CommonHelpers.GetFileNameFromFile(fullFileName);
+        string dir = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
         string filePath = string.Empty;
 
         if (memoryMode && (bytes == null || bytes.Length == 0))
@@ -1198,10 +1200,7 @@ public static class StorageUtils
 
             if (rootdir == null && !SeekerState.UseLegacyStorage())
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    ToastUi.Long(ResourceConstant.String.seeker_cannot_access_files);
-                });
+                activity?.ShowLongToast(ResourceConstant.String.seeker_cannot_access_files);
             }
 
             // BACKUP IF FOLDER DIR IS NULL

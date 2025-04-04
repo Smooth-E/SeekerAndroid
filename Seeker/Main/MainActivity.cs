@@ -183,9 +183,7 @@ public class MainActivity : ThemeableActivity
                 else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabId))
                 {
                     Logger.FirebaseDebug("doesnt contain key");
-
-                    Toast.MakeText(this, GetString(ResourceConstant.String.wishlist_tab_error), ToastLength.Long)
-                        ?.Show();
+                    this.ShowLongToast(ResourceConstant.String.wishlist_tab_error);
                 }
                 else
                 {
@@ -796,34 +794,35 @@ public class MainActivity : ThemeableActivity
         base.OnStart();
     }
 
+    // TODO: Move this to the top of the file
     public static bool fromNotificationMoveToUploads;
 
     protected override void OnNewIntent(Intent intent)
     {
         Logger.Debug("OnNewIntent");
         base.OnNewIntent(intent);
-        Intent = intent.PutExtra("ALREADY_HANDLED", true);
+        
+        Intent = intent!.PutExtra("ALREADY_HANDLED", true);
         if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
         {
             Logger.FirebaseInfo("is null: "
                                          + (SearchFragment.Instance?.Activity == null
-                                            || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
+                                            || (SearchFragment.Instance?.IsResumed ?? false)));
 
             Logger.FirebaseInfo("from wishlist clicked");
 
-            int currentPage = pager.CurrentItem;
-            int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
+            var currentPage = pager.CurrentItem;
+            var tabId = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
 
             if (currentPage == 1)
             {
-                if (tabID == int.MaxValue)
+                if (tabId == int.MaxValue)
                 {
                     Logger.FirebaseDebug("tabID == int.MaxValue");
                 }
-                else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
+                else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabId))
                 {
-                    Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long)
-                        ?.Show();
+                    this.ShowLongToast(ResourceConstant.String.wishlist_tab_error);
                 }
                 else
                 {
@@ -832,18 +831,18 @@ public class MainActivity : ThemeableActivity
                         Logger.Debug("we are on the search page but we need to wait " + 
                                      "for OnResume search frag");
 
-                        GoToSearchTab = tabID; // we read this we resume
+                        GoToSearchTab = tabId; // we read this we resume
                     }
                     else
                     {
-                        SearchFragment.Instance?.GoToTab(tabID, false, true);
+                        SearchFragment.Instance?.GoToTab(tabId, false, true);
                     }
                 }
             }
             else
             {
                 // when we move to the page, lets move to our tab, if its not the current one..
-                GoToSearchTab = tabID; // we read this when we move tab...
+                GoToSearchTab = tabId; // we read this when we move tab...
                 pager.SetCurrentItem(1, false);
             }
         }
@@ -944,6 +943,8 @@ public class MainActivity : ThemeableActivity
         }
     }
 
+    // TODO: Move this function out of this file
+    // TODO: Pass context for displaying toasts
     public static void GetDownloadPlaceInQueue(
         string username,
         string fullFileName,
@@ -961,18 +962,7 @@ public class MainActivity : ThemeableActivity
                 {
                     if (task.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            if (SeekerState.ActiveActivityRef != null)
-                            {
-                                Toast.MakeText(
-                                    SeekerState.ActiveActivityRef,
-                                    SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.failed_to_connect),
-                                    ToastLength.Short
-                                )?.Show();
-                            }
-                        });
-
+                        SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.failed_to_connect);
                         return;
                     }
 
@@ -1221,14 +1211,12 @@ public class MainActivity : ThemeableActivity
                     var a = () =>
                     {
                         // TODO: Logging errors through toasts isn't a good practice
-                        Toast.MakeText(
-                            SeekerState.ActiveActivityRef,
-                            SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message,
-                            ToastLength.Long
-                        );
+                        var activityReference = SeekerState.ActiveActivityRef;
+                        var prefix = activityReference.GetString(ResourceConstant.String.error_);
+                        activityReference.ShowLongToast(prefix + error.Message);
                     };
 
-                    if (error.Message == null || !error.Message.ToString().Contains("must be connected and logged"))
+                    if (!error.Message.Contains("must be connected and logged"))
                     {
                         Logger.FirebaseDebug(error.Message + " OnContextItemSelected");
                     }
@@ -1542,38 +1530,31 @@ public class MainActivity : ThemeableActivity
     }
 
     public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(
-        Action<Task> action, string msg = null, Context contextToUseForMessage = null)
+        Action<Task> action, 
+        string msg = null, 
+        Context contextToUseForMessage = null)
     {
         lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
         {
-            if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected)
-                || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(
-                    action,
-                    CancellationToken.None,
-                    TaskContinuationOptions.None,
-                    TaskScheduler.Default
-                );
-
-                if (msg != null)
-                {
-                    if (contextToUseForMessage == null)
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
-                    }
-                    else
-                    {
-                        Toast.MakeText(contextToUseForMessage, msg, ToastLength.Short).Show();
-                    }
-                }
-
-                return true;
-            }
-            else
+            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected)
+                && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 return false;
             }
+            
+            SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(
+                action,
+                CancellationToken.None,
+                TaskContinuationOptions.None,
+                TaskScheduler.Default
+            );
+
+            if (msg != null)
+            {
+                (contextToUseForMessage ?? SeekerState.ActiveActivityRef).ShowShortToast(msg);
+            }
+
+            return true;
         }
     }
 
@@ -1581,23 +1562,9 @@ public class MainActivity : ThemeableActivity
     {
         c ??= SeekerState.MainActivityRef;
 
-        if (Looper.MainLooper?.Thread == Java.Lang.Thread.CurrentThread()) // tested..
+        if (!silent)
         {
-            if (!silent)
-            {
-                Toast.MakeText(c, c.GetString(ResourceConstant.String.temporary_disconnected), ToastLength.Short)?.Show();
-            }
-        }
-        else
-        {
-            if (!silent)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(c, c.GetString(ResourceConstant.String.temporary_disconnected), ToastLength.Short)
-                        ?.Show();
-                });
-            }
+            c.ShowShortToast(ResourceConstant.String.temporary_disconnected);
         }
 
         // if we are still not connected then creating the task will throw. 
@@ -1612,7 +1579,7 @@ public class MainActivity : ThemeableActivity
         {
             if (!silent)
             {
-                Toast.MakeText(c, c.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                c.ShowShortToast(ResourceConstant.String.failed_to_connect);
             }
         }
 
@@ -1714,7 +1681,7 @@ public class MainActivity : ThemeableActivity
         {
             var showDirectoryButton = new Action(() =>
             {
-                ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_error);
+                this.ShowLongToast(ResourceConstant.String.seeker_needs_dl_dir_error);
                 AddLoggedInLayout(StaticHacks.LoginFragment.View); // TODO: null ref
                 if (!SeekerState.currentlyLoggedIn)
                 {
@@ -1728,7 +1695,7 @@ public class MainActivity : ThemeableActivity
                 {
                     // .View is a method so it can return null.
                     // I tested it on MainActivity.OnPause and it was in fact null.
-                    ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_choose_settings);
+                    this.ShowLongToast(ResourceConstant.String.seeker_needs_dl_dir_choose_settings);
                     Logger.FirebaseDebug("StaticHacks.LoginFragment.View is null");
                     return;
                 }
@@ -1808,7 +1775,7 @@ public class MainActivity : ThemeableActivity
 
             var reiterate = new Action(() =>
             {
-                ToastUi.Long(ResourceConstant.String.seeker_needs_dl_dir_error);
+                this.ShowLongToast(ResourceConstant.String.seeker_needs_dl_dir_error);
             });
 
             var hideButton = new Action(() =>
@@ -1821,25 +1788,14 @@ public class MainActivity : ThemeableActivity
             {
                 // the resultCode will always be Cancelled for this since you have to back out of it.
                 // so instead we check Android.OS.Environment.IsExternalStorageManager
-                if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
+                if (!SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                 {
-                    // phase 2 - actually pick a file.
-                    FallbackFileSelection(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY);
                     return;
                 }
-                else
-                {
-                    if (ThreadingUtils.OnUiThread())
-                    {
-                        reiterate();
-                    }
-                    else
-                    {
-                        RunOnUiThread(reiterate);
-                    }
-
-                    return;
-                }
+                
+                // phase 2 - actually pick a file.
+                FallbackFileSelection(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY);
+                return;
             }
 
             if (resultCode == Result.Ok)
@@ -1963,17 +1919,13 @@ public class MainActivity : ThemeableActivity
             if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
             {
                 this.ShowSimpleAlertDialog(
-                    Resource.String.error_no_file_manager_dir_manage_storage,
-                    Resource.String.okay
+                    ResourceConstant.String.error_no_file_manager_dir_manage_storage,
+                    ResourceConstant.String.okay
                 );
             }
             else
             {
-                Toast.MakeText(
-                    this,
-                    SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir),
-                    ToastLength.Long
-                ).Show();
+                this.ShowLongToast(ResourceConstant.String.error_no_file_manager_dir);
             }
 
             // Note:
@@ -1993,7 +1945,8 @@ public class MainActivity : ThemeableActivity
     /// <returns></returns>
     public static Action<Task> DownloadContinuationActionUi(DownloadAddedEventArgs e)
     {
-        Action<Task> continuationActionSaveFile = new Action<Task>(task =>
+        // TODO: Pass context to this action for displaying toasts
+        Action<Task> continuationActionSaveFile = task =>
         {
             try
             {
@@ -2016,7 +1969,7 @@ public class MainActivity : ThemeableActivity
                         try
                         {
                             // retry download.
-                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                            var cancellationTokenSource = new CancellationTokenSource();
 
                             // else when you go to cancel you are cancelling an already cancelled useless token!!
                             TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference,
@@ -2067,7 +2020,7 @@ public class MainActivity : ThemeableActivity
                             else
                             {
                                 Logger.FirebaseDebug("cancel and retry creation failed: "
-                                                         + exception.Message + exception.StackTrace);
+                                                     + exception.Message + exception.StackTrace);
                             }
 
                             if (action != null)
@@ -2102,11 +2055,12 @@ public class MainActivity : ThemeableActivity
                     bool resetRetryCount = false;
                     var transferItem = e.dlInfo.TransferItemReference;
 
-                    if (task.Exception.InnerException is System.TimeoutException)
+                    if (task.Exception.InnerException is TimeoutException)
                     {
                         action = () =>
                         {
-                            ToastUi.Long(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer));
+                            // TODO: Do not use static Context references
+                            SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.timeout_peer);
                         };
                     }
                     else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
@@ -2131,9 +2085,8 @@ public class MainActivity : ThemeableActivity
                             }
                             catch (Exception ex)
                             {
-                                string exceptionString =
-                                    "Failed to delete incomplete file on TransferSizeMismatchException: "
-                                    + ex.ToString();
+                                var exceptionString = 
+                                    "Failed to delete incomplete file on TransferSizeMismatchException: " + ex;
 
                                 Logger.Debug(exceptionString);
                                 Logger.FirebaseDebug(exceptionString);
@@ -2249,8 +2202,7 @@ public class MainActivity : ThemeableActivity
                         Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () =>
                         {
-                            ToastUi.Long(
-                                SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed));
+                            SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.remote_conn_closed);
                         };
 
                         if (NetworkHandoffDetector.HasHandoffOccuredRecently())
@@ -2269,8 +2221,7 @@ public class MainActivity : ThemeableActivity
                             Logger.Debug("we do have internet");
                             action = () =>
                             {
-                                ToastUi.Long(SeekerState.ActiveActivityRef
-                                    .GetString(Resource.String.remote_conn_closed));
+                                SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.remote_conn_closed);
                             };
 
                             retriable = true;
@@ -2283,8 +2234,7 @@ public class MainActivity : ThemeableActivity
                         {
                             action = () =>
                             {
-                                ToastUi.Long(
-                                    SeekerState.ActiveActivityRef.GetString(Resource.String.network_down));
+                                SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.network_down);
                             };
                         }
 
@@ -2306,8 +2256,7 @@ public class MainActivity : ThemeableActivity
                         Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () =>
                         {
-                            ToastUi.Long(
-                                SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed));
+                            SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.reported_as_failed);
                         };
                     }
                     else if (task.Exception.InnerException.Message != null
@@ -2344,8 +2293,7 @@ public class MainActivity : ThemeableActivity
                             {
                                 action = () =>
                                 {
-                                    ToastUi.Long(SeekerState.ActiveActivityRef
-                                        .GetString(Resource.String.error_no_space));
+                                    SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.error_no_space);
                                 };
                                 unknownException = false;
                             }
@@ -2359,15 +2307,16 @@ public class MainActivity : ThemeableActivity
                                 {
                                     action = () =>
                                     {
-                                        ToastUi.Long(SeekerState.ActiveActivityRef
-                                            .GetString(Resource.String.error_no_space));
+                                        SeekerState.ActiveActivityRef
+                                            .ShowLongToast(ResourceConstant.String.error_no_space);
                                     };
                                     unknownException = false;
                                 }
 
                                 // 1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                if (task.Exception.InnerException.InnerException.Message.ToLower()
-                                    .Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                                if (task.Exception.InnerException.InnerException.Message
+                                    .Contains(SoulseekClient.FailedToEstablishDirectOrIndirectStringLower, 
+                                        StringComparison.CurrentCultureIgnoreCase))
                                 {
                                     unknownException = false;
                                 }
@@ -2375,9 +2324,9 @@ public class MainActivity : ThemeableActivity
                                 if (unknownException)
                                 {
                                     Logger.FirebaseDebug("InnerInnerException: "
-                                                             + task.Exception.InnerException.InnerException.Message
-                                                             + task.Exception.InnerException
-                                                                 .InnerException.StackTrace);
+                                                         + task.Exception.InnerException.InnerException.Message
+                                                         + task.Exception.InnerException
+                                                             .InnerException.StackTrace);
                                 }
 
                                 // this is to help with the collection was modified
@@ -2385,16 +2334,16 @@ public class MainActivity : ThemeableActivity
                                     && unknownException)
                                 {
                                     Logger.FirebaseInfo("InnerInnerException: "
-                                                                 + task.Exception.InnerException
-                                                                     .InnerException.Message
-                                                                 + task.Exception.InnerException
-                                                                     .InnerException.StackTrace);
+                                                        + task.Exception.InnerException
+                                                            .InnerException.Message
+                                                        + task.Exception.InnerException
+                                                            .InnerException.StackTrace);
 
                                     var innerInner = task.Exception.InnerException.InnerException.InnerException;
 
                                     //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
                                     Logger.FirebaseDebug("Innerx3_Exception: " + innerInner.Message
-                                        + innerInner.StackTrace);
+                                                                               + innerInner.StackTrace);
                                 }
                             }
 
@@ -2406,26 +2355,26 @@ public class MainActivity : ThemeableActivity
                                     if (task.Exception.InnerException.StackTrace.Length > 1201)
                                     {
                                         Logger.FirebaseDebug("xml Unhandled task exception 2nd part: "
-                                                                 + task.Exception.InnerException.StackTrace
-                                                                     .Skip(1000).ToString());
+                                                             + task.Exception.InnerException.StackTrace
+                                                                 .Skip(1000).ToString());
                                     }
 
                                     Logger.FirebaseDebug("xml Unhandled task exception: "
-                                                             + task.Exception.InnerException.Message
-                                                             + task.Exception.InnerException.StackTrace);
+                                                         + task.Exception.InnerException.Message
+                                                         + task.Exception.InnerException.StackTrace);
                                 }
                                 else
                                 {
                                     Logger.FirebaseDebug("dlcontaction Unhandled task exception: "
-                                                             + task.Exception.InnerException.Message
-                                                             + task.Exception.InnerException.StackTrace);
+                                                         + task.Exception.InnerException.Message
+                                                         + task.Exception.InnerException.StackTrace);
                                 }
                             }
                         }
                         else if (task.Exception != null && unknownException)
                         {
                             Logger.FirebaseDebug("Unhandled task exception (little info): "
-                                                     + task.Exception.Message);
+                                                 + task.Exception.Message);
 
                             Logger.Debug("Unhandled task exception (little info):" + task.Exception.Message);
                         }
@@ -2487,15 +2436,14 @@ public class MainActivity : ThemeableActivity
                     if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                     {
                         Logger.FirebaseDebug("auto retry failed: prev exception: "
-                                    + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString()
-                                    + "new exception: "
-                                    + task.Exception?.InnerException?.Message?.ToString());
+                                             + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString()
+                                             + "new exception: "
+                                             + task.Exception?.InnerException?.Message?.ToString());
                     }
 
                     action ??= () =>
                     {
-                        ToastUi.Long(SeekerState.ActiveActivityRef
-                            .GetString(Resource.String.error_unspecified));
+                        SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.error_unspecified);
                     };
 
                     SeekerState.ActiveActivityRef.RunOnUiThread(action);
@@ -2507,15 +2455,16 @@ public class MainActivity : ThemeableActivity
                 if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                 {
                     Logger.FirebaseDebug("auto retry succeeded: prev exception: "
-                                + e.dlInfo.PreviousFailureException.InnerException?.Message);
+                                         + e.dlInfo.PreviousFailureException.InnerException?.Message);
                 }
 
                 if (!SeekerState.DisableDownloadToastNotification)
                 {
                     action = () =>
                     {
-                        ToastUi.Long(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) +
-                                     " " + SeekerApplication.GetString(Resource.String.FinishedDownloading));
+                        var message = SeekerApplication.GetString(ResourceConstant.String.FinishedDownloading);
+                        var filename = CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename);
+                        SeekerState.ActiveActivityRef.ShowLongToast($"{filename} {message}");
                     };
 
                     SeekerState.ActiveActivityRef.RunOnUiThread(action);
@@ -2535,7 +2484,9 @@ public class MainActivity : ThemeableActivity
                         true,
                         e.dlInfo.Depth,
                         noSubfolder,
-                        out finalUri);
+                        out finalUri,
+                        // TODO: Do not use static references of Android Context entities
+                        SeekerState.ActiveActivityRef);
 
                     StorageUtils.SaveFileToMediaStore(path);
                 }
@@ -2568,7 +2519,7 @@ public class MainActivity : ThemeableActivity
             {
                 e.dlInfo.TransferItemReference.InProcessing = false;
             }
-        });
+        };
 
         return continuationActionSaveFile;
     }
@@ -2610,7 +2561,7 @@ public class MainActivity : ThemeableActivity
         Logger.Debug("updatedTime " + updatedTime);
         if (!stale)
         {
-            ToastUi.Long(msgToToast);
+            SeekerState.ActiveActivityRef.ShowLongToast(msgToToast);
         }
     }
 
@@ -3171,7 +3122,7 @@ public class MainActivity : ThemeableActivity
             {
                 SeekerState.MainActivityRef.RunOnUiThread(() =>
                 {
-                    ToastUi.Long(ResourceConstant.String.seeker_cannot_access_files);
+                    SeekerState.ActiveActivityRef.ShowLongToast(ResourceConstant.String.seeker_cannot_access_files);
                 });
             }
 
