@@ -147,7 +147,7 @@ namespace Seeker
                     userInfoResponseResolver: UserInfoResponseHandler
                 );
                 SeekerState.SoulseekClient = new SoulseekClient(options);
-                SetDiagnosticState(DiagnosticFile.Enabled);
+                DiagnosticFile.UpdateDiagnosticState();
                 
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
@@ -290,28 +290,6 @@ namespace Seeker
                 Logger.FirebaseDebug("SetNetworkState" + e.Message + e.StackTrace);
                 return false;
             }
-        }
-
-        public static void SetDiagnosticState(bool logDiagnostics)
-        {
-            if (logDiagnostics)
-            {
-                SeekerState.SoulseekClient.DiagnosticGenerated += DiagnosticFile.OnDiagnosticFileGenerated;
-                AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
-            }
-            else
-            {
-                SeekerState.SoulseekClient.DiagnosticGenerated -= DiagnosticFile.OnDiagnosticFileGenerated;
-                AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
-            }
-        }
-
-        private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
-        {
-            // by default e.Handled == false. and this does go on to crash the process (which is good imo,
-            // I only want this for logging purposes).
-            Logger.Debug(e.Exception.Message);
-            Logger.Debug(e.Exception.StackTrace);
         }
 
         /// <summary>

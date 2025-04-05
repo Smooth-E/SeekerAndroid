@@ -1,4 +1,5 @@
 ﻿using System;
+using Android.Runtime;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Utils;
 
@@ -118,5 +119,28 @@ public static class DiagnosticFile
         Soulseek.Diagnostics.DiagnosticEventArgs e)
     {
         AppendLineToDiagFile(CreateMessage(e));
+    }
+    
+    // TODO: Should this be tied to setting the Enabled variable?
+    public static void UpdateDiagnosticState()
+    {
+        if (Enabled)
+        {
+            SeekerState.SoulseekClient.DiagnosticGenerated += OnDiagnosticFileGenerated;
+            AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+        }
+        else
+        {
+            SeekerState.SoulseekClient.DiagnosticGenerated -= OnDiagnosticFileGenerated;
+            AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+        }
+    }
+
+    private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+    {
+        // by default e.Handled == false. and this does go on to crash the process (which is good imo,
+        // I only want this for logging purposes).
+        Logger.Debug(e.Exception.Message);
+        Logger.Debug(e.Exception.StackTrace);
     }
 }

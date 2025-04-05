@@ -1204,7 +1204,7 @@ namespace Seeker
             {
                 DiagnosticFile.Enabled = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
-                SeekerApplication.SetDiagnosticState(DiagnosticFile.Enabled);
+                DiagnosticFile.UpdateDiagnosticState();
                 lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
