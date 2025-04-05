@@ -28,7 +28,7 @@ namespace Seeker.UPnP
 
         public static void SaveUpnpState()
         {
-            lock (SeekerApplication.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutLong(KeyConsts.M_LastSetUpnpRuleTicks, LastSetTime.Ticks);
@@ -41,7 +41,7 @@ namespace Seeker.UPnP
 
         public static void RestoreUpnpState()
         {
-            lock (SeekerApplication.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SharedPrefLock)
             {
                 LastSetTime = new DateTime(SeekerState.SharedPreferences.GetLong(KeyConsts.M_LastSetUpnpRuleTicks, 0));
                 LastSetLifeTime = SeekerState.SharedPreferences.GetInt(KeyConsts.M_LifetimeSeconds, -1);

@@ -417,7 +417,7 @@ namespace Seeker
                     {
                         f.currentTickerView.Visibility = ViewStates.Gone;
                     }
-                    lock (SeekerApplication.SHARED_PREF_LOCK)
+                    lock (SeekerApplication.SharedPrefLock)
                     {
                         var editor = SeekerState.SharedPreferences.Edit();
                         editor.PutBoolean(KeyConsts.M_ShowTickerView, ChatroomActivity.ShowTickerView);
@@ -428,7 +428,7 @@ namespace Seeker
                     ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
                     var f1 = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
                     f1.SetStatusesView();
-                    lock (SeekerApplication.SHARED_PREF_LOCK)
+                    lock (SeekerApplication.SharedPrefLock)
                     {
                         var editor = SeekerState.SharedPreferences.Edit();
                         editor.PutBoolean(KeyConsts.M_ShowStatusesView, ChatroomActivity.ShowStatusesView);

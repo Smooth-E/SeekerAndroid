@@ -477,7 +477,7 @@ namespace Seeker.Chatroom
 
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
@@ -528,7 +528,7 @@ namespace Seeker.Chatroom
 
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);

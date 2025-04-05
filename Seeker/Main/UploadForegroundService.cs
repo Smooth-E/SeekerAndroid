@@ -60,9 +60,9 @@ namespace Seeker
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            if (SeekerApplication.IsShuttingDown(intent))
+            if (intent.IsShuttingDown())
             {
-                this.StopSelf();
+                StopSelf();
                 return StartCommandResult.NotSticky;
             }
 

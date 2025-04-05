@@ -754,7 +754,7 @@ public class MainActivity : ThemeableActivity
         {
             void setAlreadyShown()
             {
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, true);
@@ -3200,7 +3200,7 @@ public class MainActivity : ThemeableActivity
         base.OnPause();
 
         TransfersFragment.SaveTransferItems(sharedPreferences);
-        lock (SeekerApplication.SHARED_PREF_LOCK)
+        lock (SeekerApplication.SharedPrefLock)
         {
             var editor = sharedPreferences.Edit()!
                 .PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn)!

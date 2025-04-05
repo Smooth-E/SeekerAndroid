@@ -593,7 +593,7 @@ new(b_BrowseResponse_hiddenPortion))
     {
         try
         {
-            lock (SeekerApplication.SHARED_PREF_LOCK)
+            lock (SeekerApplication.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.Remove(KeyConsts.M_CACHE_stringUriPairs);
@@ -648,7 +648,7 @@ new(b_BrowseResponse_hiddenPortion))
         data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
         CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_FriendlyDirNameToUri_Filename);
 
-        lock (SeekerApplication.SHARED_PREF_LOCK)
+        lock (SeekerApplication.SharedPrefLock)
         {
             var editor = SeekerState.SharedPreferences.Edit();
             editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, cachedParseResults.nonHiddenFileCount);

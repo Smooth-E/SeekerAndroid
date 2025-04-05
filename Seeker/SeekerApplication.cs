@@ -43,64 +43,70 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
+using AndroidX.Annotations;
+using AndroidX.Core.Net;
 using Seeker.Main;
+using Seeker.Models;
 using Seeker.Utils;
 using SlskHelp;
+using static Android.Net.ConnectivityManager;
 
 namespace Seeker
 {
     [Application]
-    public class SeekerApplication : Application
+    // ReSharper disable once ClassNeverInstantiated.Global - used in manifest
+    public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer)
+        : Application(javaReference, transfer)
     {
-        public static object SHARED_PREF_LOCK = new();
-        public static Context ApplicationContext;
+        public static readonly object SharedPrefLock = new();
+        public new static Application ApplicationContext;
+        public static bool LOG_DIAGNOSTICS;
+        public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
         
-        public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
-        {
-        }
-
-        public const bool AUTO_CONNECT_ON = true;
-        public static bool LOG_DIAGNOSTICS = false;
+        private const bool AUTO_CONNECT_ON = true;
 
         public override void OnCreate()
         {
             base.OnCreate();
             ApplicationContext = this;
+            
 #if !IzzySoft
-            Firebase.FirebaseApp app = Firebase.FirebaseApp.InitializeApp(this);
+            var app = Firebase.FirebaseApp.InitializeApp(this);
             if (app == null)
             {
                 Logger.CrashlyticsEnabled = false;
             }
 #endif
-            //Logger.FirebaseDebug("testing release");
 
-            this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
-            this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
-            var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
-            SeekerState.SharedPreferences = sharedPrefs;
-
-            //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
-
-            RestoreSeekerState(sharedPrefs, this);
+            RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
+            
+            // TODO: This call is only reachable on Android 21
+            RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityAction));
+            
+            SeekerState.SharedPreferences = GetSharedPreferences("SoulSeekPrefs", 0);;
+            
+            RestoreSeekerState(SeekerState.SharedPreferences, this);
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
             SeekerState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            
+            // TODO: This call is only reachable on Android 21
+            SeekerState.SystemLanguage = Resources!.Configuration!.Locale!.ToVariantAwareString();
 
-            SeekerState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
-
-            if (HasProperPerAppLanguageSupport())
+            if (AndroidPlatform.HasProperPerAppLanguageSupport())
             {
                 if (!SeekerState.LegacyLanguageMigrated)
                 {
                     SeekerState.LegacyLanguageMigrated = true;
-                    lock (SHARED_PREF_LOCK)
+                    lock (SharedPrefLock)
                     {
-                        var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                        editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
-                        editor.Commit();
+                        SeekerState.SharedPreferences!.Edit()!
+                            .PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated)!
+                            .Commit();
                     }
+                    
                     SetLanguage(SeekerState.Language);
                 }
             }
@@ -109,35 +115,44 @@ namespace Seeker
                 SetLanguageLegacy(SeekerState.Language, false);
             }
 
-            // though setting it to -1 does not seem to recreate the activity or have any negative side effects..
-            // this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
+            // though setting it to -1 does not seem to recreate the activity or have any negative side effects...
+            // this does not restart Android.App.Application. so putting it here is a much better place...
+            // in MainActivity.OnCreate it would restart the activity every time.
             if (AppCompatDelegate.DefaultNightMode != SeekerState.DayNightMode)
             {
                 AppCompatDelegate.DefaultNightMode = SeekerState.DayNightMode;
             }
             
-            if (SeekerKeepAliveService.CpuKeepAlive_FullService == null)
-            {
-                SeekerKeepAliveService.CpuKeepAlive_FullService = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Keep Alive Service Cpu");
-            }
+            SeekerKeepAliveService.CpuKeepAlive_FullService ??=
+                ((PowerManager)GetSystemService(PowerService))!.NewWakeLock(WakeLockFlags.Partial,
+                    "Seeker Keep Alive Service Cpu");
 
-            if (SeekerKeepAliveService.WifiKeepAlive_FullService == null)
-            {
-                SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
-            }
+            SeekerKeepAliveService.WifiKeepAlive_FullService ??= 
+                ((Android.Net.Wifi.WifiManager)GetSystemService(WifiService))!
+                .CreateWifiLock(WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
 
             SetNetworkState(this);
 
             if (SeekerState.SoulseekClient == null)
             {
-                //need search response and enqueue download action...
-                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SeekerState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SeekerState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SeekerState.AllowPrivateRoomInvitations, listenPort: SeekerState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                // need search response and enqueue download action...
+                var options = new SoulseekClientOptions(
+                    minimumDiagnosticLevel: LOG_DIAGNOSTICS
+                        ? Soulseek.Diagnostics.DiagnosticLevel.Debug
+                        : Soulseek.Diagnostics.DiagnosticLevel.Info,
+                    messageTimeout: 30000,
+                    enableListener: SeekerState.ListenerEnabled,
+                    autoAcknowledgePrivateMessages: false,
+                    acceptPrivateRoomInvitations: SeekerState.AllowPrivateRoomInvitations,
+                    listenPort: SeekerState.ListenerPort,
+                    userInfoResponseResolver: UserInfoResponseHandler
+                );
+                SeekerState.SoulseekClient = new SoulseekClient(options);
                 SetDiagnosticState(LOG_DIAGNOSTICS);
+                
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
-                SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
-                //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
+                UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
                 SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
                 SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
@@ -151,11 +166,11 @@ namespace Seeker
                 SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
 
                 SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
-                SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
+                SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += 
+                    SoulseekClient_ExcludedSearchPhrasesReceived;
 
                 MessageController.Initialize();
                 ChatroomController.Initialize();
-
 
                 SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
                 SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
@@ -168,100 +183,50 @@ namespace Seeker
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
-            SlskHelp.CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
-            SlskHelp.CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
+            SlskHelp.CommonHelpers.STRINGS_KBS = Resources.GetString(ResourceConstant.String.kilobytes_per_second);
+            SlskHelp.CommonHelpers.STRINGS_KHZ = Resources.GetString(ResourceConstant.String.kilohertz);
 
             SlskHelp.CommonHelpers.UserListChecker = new UserListManager.UserListChecker();
-
-            //shouldnt we also connect??? TODO TODO
-
-
         }
 
-        private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
+        private static void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, 
+            IReadOnlyCollection<string> excludedPhrasesList)
         {
-            SearchUtil.ExcludedSearchPhrases = exludedPhrasesList;
+            SearchUtil.ExcludedSearchPhrases = excludedPhrasesList;
         }
 
         public static string GetLegacyLanguageString()
         {
-            if (SeekerApplication.HasProperPerAppLanguageSupport())
-            {
-                var lm = (LocaleManager)Context.GetSystemService(Context.LocaleService);
-                LocaleList appLocales = lm.ApplicationLocales;
-                if (appLocales.IsEmpty)
-                {
-                    return SeekerState.FieldLangAuto;
-                }
-                else
-                {
-                    Java.Util.Locale locale = appLocales.Get(0);
-                    string lang = locale.Language; // ex. fr, uk
-                    if (lang == "pt")
-                    {
-                        return SeekerState.FieldLangPtBr;
-                    }
-                    return lang;
-                }
-            }
-            else
+            if (!AndroidPlatform.HasProperPerAppLanguageSupport())
             {
                 return SeekerState.Language;
             }
-        }
+            
+#pragma warning disable CA1416
+            var lm = (LocaleManager)Context.GetSystemService(LocaleService)!;
+            var appLocales = lm.ApplicationLocales!;
+            if (appLocales.IsEmpty)
+            {
+                return SeekerState.FieldLangAuto;
+            }
 
-        /// <summary>
-        /// converts say "pt-rBR" to "pt-BR"
-        /// </summary>
-        /// <param name="locale"></param>
-        /// <returns></returns>
-        public static string FormatLocaleFromResourcesToStandard(string locale)
-        {
-            if (locale.Length == 6 && locale.Contains("-r"))
-            {
-                return locale.Replace("-r", "-");
-            }
-            else
-            {
-                return locale;
-            }
-        }
-
-        public static bool HasProperPerAppLanguageSupport()
-        {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 33;
-        }
-
-        public static Java.Util.Locale LocaleFromString(string localeString)
-        {
-            Java.Util.Locale locale = null;
-            if (localeString.Contains("-r"))
-            {
-                var parts = localeString.Replace("-r", "-").Split('-');
-                locale = new Java.Util.Locale(parts[0], parts[1]);
-            }
-            else
-            {
-                locale = new Java.Util.Locale(localeString);
-            }
-            return locale;
+            var locale = appLocales.Get(0);
+            var lang = locale?.Language; // ex. fr, uk
+            return lang == "pt" ? SeekerState.FieldLangPtBr : lang;
+#pragma warning restore CA1416
         }
 
 
         public void SetLanguage(string language)
         {
-            if (HasProperPerAppLanguageSupport())
+            if (AndroidPlatform.HasProperPerAppLanguageSupport())
             {
-                var lm = (LocaleManager)ApplicationContext.GetSystemService(Context.LocaleService);
-
-                if (language == SeekerState.FieldLangAuto)
-                {
-                    lm.ApplicationLocales = LocaleList.EmptyLocaleList;
-                }
-                else
-                {
-                    lm.ApplicationLocales = LocaleList.ForLanguageTags(FormatLocaleFromResourcesToStandard(language));
-                }
+#pragma warning disable CA1416
+                var lm = (LocaleManager)ApplicationContext.GetSystemService(LocaleService)!;
+                lm.ApplicationLocales = language == SeekerState.FieldLangAuto 
+                    ? LocaleList.EmptyLocaleList
+                    : LocaleList.ForLanguageTags(LocaleUtils.FormatLocaleFromResourcesToStandard(language));
+#pragma warning restore CA1416
             }
             else
             {
@@ -269,82 +234,57 @@ namespace Seeker
             }
         }
 
-        public void SetLanguageLegacy(string language, bool changed)
+        private void SetLanguageLegacy(string language, bool changed)
         {
-            string localeString = language;
-            var res = this.Resources;
-            var config = res.Configuration;
+            var res = Resources;
+            var config = res!.Configuration;
             var displayMetrics = res.DisplayMetrics;
 
-            var currentLocale = config.Locale;
+            var currentLocale = config!.Locale;
 
-            if (LocaleToString(currentLocale) == language)
+            if (currentLocale.ToVariantAwareString() == language)
             {
                 return;
             }
 
-            if (language == SeekerState.FieldLangAuto && SeekerState.SystemLanguage == LocaleToString(currentLocale))
+            if (language == SeekerState.FieldLangAuto && 
+                SeekerState.SystemLanguage == currentLocale.ToVariantAwareString())
             {
                 return;
             }
 
 
-            Java.Util.Locale locale = language != SeekerState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SeekerState.SystemLanguage);
-
+            var locale = LocaleUtils
+                .LocaleFromString(language != SeekerState.FieldLangAuto ? language : SeekerState.SystemLanguage);
             Java.Util.Locale.Default = locale;
             config.SetLocale(locale);
 
-            this.BaseContext.Resources.UpdateConfiguration(config, displayMetrics);
+            // TODO: This call is reachable on Android 25, though the method is called 'legacy'
+            BaseContext?.Resources?.UpdateConfiguration(config, displayMetrics);
 
             if (changed)
             {
                 RecreateActivies();
             }
         }
-
-        public static string LocaleToString(Java.Util.Locale locale)
-        {
-            //"en" ""
-            //"pt" "br"
-            if (string.IsNullOrEmpty(locale.Variant))
-            {
-                return locale.Language;
-            }
-            else
-            {
-                return locale.Language + "-r" + locale.Variant.ToUpper();
-            }
-        }
-
-        public static bool AreLocalesSame(Java.Util.Locale locale1, Java.Util.Locale locale2)
-        {
-            return LocaleToString(locale1) == LocaleToString(locale2);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
+        
         /// <returns>true if changed</returns>
         public static bool SetNetworkState(Context context)
         {
             try
             {
-                ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+                var cm = (ConnectivityManager)context.GetSystemService(ConnectivityService);
 
-                if (cm == null) //null if class is not a supported system service.
+                if (cm?.ActiveNetworkInfo is not { IsConnected: true })
                 {
                     return false;
                 }
-
-                if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
-                {
-                    bool oldState = SeekerState.CurrentConnectionIsUnmetered;
-                    SeekerState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
-                    Logger.Debug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
-                    return oldState != SeekerState.CurrentConnectionIsUnmetered;
-                }
-                return false;
+                
+                var oldState = SeekerState.CurrentConnectionIsUnmetered;
+                SeekerState.CurrentConnectionIsUnmetered = !ConnectivityManagerCompat.IsActiveNetworkMetered(cm);
+                Logger.Debug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
+                    
+                return oldState != SeekerState.CurrentConnectionIsUnmetered;
             }
             catch (Exception e)
             {
@@ -353,29 +293,9 @@ namespace Seeker
             }
         }
 
-        private static bool IsUnmetered(Context context, ConnectivityManager cm)
+        public static void SetDiagnosticState(bool logDiagnostics)
         {
-
-            if (!AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm)) //api 16
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-            //the below can fail if on VPN
-            //var capabilities = cm.GetNetworkCapabilities(cm.ActiveNetwork);
-            //cm.GetNetworkCapabilities(cm.ActiveNetwork).HasCapability(NetCapability.NotMetered);
-            //AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm);
-            //bool isUnmetered = (capabilities != null && capabilities.HasCapability(NetCapability.NotMetered)) ||
-
-        }
-
-        public static void SetDiagnosticState(bool log_diagnostics)
-        {
-            if (log_diagnostics)
+            if (logDiagnostics)
             {
                 SeekerState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
                 AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
@@ -397,29 +317,25 @@ namespace Seeker
 
         private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
         {
-            string timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
-            string body = null;
+            var timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
+            string body;
             if (e.IncludesException)
             {
-                body = e.Message + System.Environment.NewLine + e.Exception.Message + System.Environment.NewLine + e.Exception.StackTrace;
+                body = e.Message + System.Environment.NewLine + e.Exception.Message 
+                       + System.Environment.NewLine + e.Exception.StackTrace;
             }
             else
             {
                 body = e.Message;
             }
+            
             return timestamp + body;
         }
 
         public static void AppendMessageToDiagFile(string msg)
         {
-            //add the timestamp..
-            AppendLineToDiagFile(CreateMessage(msg));
-        }
-
-        private static string CreateMessage(string line)
-        {
-            string timestamp = DateTime.UtcNow.ToString("[MM_dd-hh:mm:ss] ");
-            return timestamp + line;
+            var timestamp = DateTime.UtcNow.ToString("[MM_dd-hh:mm:ss] ");
+            AppendLineToDiagFile(timestamp + msg);
         }
 
 
@@ -432,56 +348,39 @@ namespace Seeker
                 {
                     if (SeekerState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
                     {
-                        SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                        SeekerState.DiagnosticTextFile =
+                            SeekerState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                        
                         if (SeekerState.DiagnosticTextFile == null)
                         {
-                            SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
+                            SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile
+                                .CreateFile("text/plain", "seeker_diagnostics");
                             if (SeekerState.DiagnosticTextFile == null)
                             {
                                 return;
                             }
                         }
                     }
-                    else if (SeekerState.UseLegacyStorage() || !SeekerState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                    // if api < 30 and they did not set it. OR api <= 21, and they did set it.
+                    else if (SeekerState.UseLegacyStorage() || !SeekerState.SaveDataDirectoryUriIsFromTree)
                     {
-                        //when the directory is unset.
-                        string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        if (!string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
-                        {
-                            fullPath = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri).Path;
-                        }
+                        var musicFolderPath = Android.OS.Environment.DirectoryMusic;
+                        var fullPath = string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri) 
+                            ? Android.OS.Environment.GetExternalStoragePublicDirectory(musicFolderPath)!.AbsolutePath
+                            : Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri)!.Path!;
 
                         var containingDir = new Java.IO.File(fullPath);
 
-                        var javaDiagFile = new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt");
-                        DocumentFile rootDir = DocumentFile.FromFile(new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt"));
-                        //DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(new Java.IO.File(fullPath).ToURI().ToString()));
-                        //SeekerState.DiagnosticTextFile = rootDir;//.FindFile("seeker_diagnostics.txt");
-                        if (!javaDiagFile.Exists())
-                        {
-                            if (containingDir.CanWrite())
-                            {
-                                bool success = javaDiagFile.CreateNewFile();
-                                if (success)
-                                {
-                                    SeekerState.DiagnosticTextFile = rootDir;
-                                }
-                                else
-                                {
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
-                        else
+                        var javaDiagFile = new Java.IO.File(fullPath + "/seeker_diagnostics.txt");
+                        var rootDir = 
+                            DocumentFile.FromFile(new Java.IO.File(fullPath + "/seeker_diagnostics.txt"));
+
+                        if (javaDiagFile.Exists() || (containingDir.CanWrite() && javaDiagFile.CreateNewFile()))
                         {
                             SeekerState.DiagnosticTextFile = rootDir;
                         }
                     }
-                    else //if api >29 and they did not set it. nothing we can do.
+                    else // if api >29 and they did not set it. nothing we can do.
                     {
                         return;
                     }
@@ -489,11 +388,13 @@ namespace Seeker
 
                 if (SeekerState.DiagnosticStreamWriter == null)
                 {
-                    System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(SeekerState.DiagnosticTextFile.Uri, "wa");
+                    var outputStream = ApplicationContext.ContentResolver!
+                        .OpenOutputStream(SeekerState.DiagnosticTextFile!.Uri, "wa");
                     if (outputStream == null)
                     {
                         return;
                     }
+
                     SeekerState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
                     if (SeekerState.DiagnosticStreamWriter == null)
                     {
@@ -508,14 +409,16 @@ namespace Seeker
             {
                 if (!diagnosticFilesystemErrorShown)
                 {
-                    Logger.FirebaseDebug("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
-                    Toast.MakeText(SeekerApplication.ApplicationContext, "Failed to write to diagnostic file.", ToastLength.Long);
+                    var message = $"failed to write to diagnostic file {ex.Message} {line} {ex.StackTrace}";
+                    Logger.FirebaseDebug(message);
+                    ApplicationContext.ShowLongToast("Failed to write to diagnostic file.");
                     diagnosticFilesystemErrorShown = true;
                 }
             }
         }
 
-        public static void SoulseekClient_DiagnosticGenerated(object sender, Soulseek.Diagnostics.DiagnosticEventArgs e)
+        private static void SoulseekClient_DiagnosticGenerated(object sender, 
+            Soulseek.Diagnostics.DiagnosticEventArgs e)
         {
             AppendLineToDiagFile(CreateMessage(e));
         }
@@ -536,21 +439,6 @@ namespace Seeker
             }
         }
 
-        public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
-
-        public static bool IsShuttingDown(Intent intent)
-        {
-            if (intent?.Action == null)
-            {
-                return false;
-            }
-            if (intent.Action == ACTION_SHUTDOWN)
-            {
-                return true;
-            }
-            return false;
-        }
-
         public static bool TransfersDownloadsCompleteStale = false; //whether a dl completes since we have last saved transfers to disk.
         public static DateTime TransfersLastSavedTime = DateTime.MinValue; //whether a dl completes since we have last saved transfers to disk.
 
@@ -559,64 +447,55 @@ namespace Seeker
 
         private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
-            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
+            var abortAll = 
+                DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer < 750;
+            
             if (e.Count == 0 || abortAll)
             {
                 UPLOAD_COUNT = -1;
-                Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
+                var uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 Logger.Debug("Stop Service");
                 StopService(uploadServiceIntent);
                 SeekerState.UploadKeepAliveServiceRunning = false;
             }
-            else if (!SeekerState.UploadKeepAliveServiceRunning)
+            else switch (SeekerState.UploadKeepAliveServiceRunning)
             {
-                UPLOAD_COUNT = e.Count;
-                Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                case false:
                 {
-                    bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
-                    if (isForeground ?? false)
+                    UPLOAD_COUNT = e.Count;
+                    var uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
+                    if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
                     {
-                        this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                        var isForeground = SeekerState.ActiveActivityRef?.IsResumed();
+                        if (isForeground ?? false)
+                        {
+                            StartService(uploadServiceIntent); // this will throw if the app is in background.
+                        }
                     }
                     else
                     {
-                        //only do this if we absolutely must
-                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
-                        //this.StartForegroundService(uploadServiceIntent);
+                        // even when targetting and compiling for api 31, old devices can still do this just fine.
+                        // this will throw if the app is in background.
+                        StartService(uploadServiceIntent);
                     }
+                    SeekerState.UploadKeepAliveServiceRunning = true;
+                    break;
                 }
-                else
+                case true when e.Count != 0:
                 {
-                    //even when targetting and compiling for api 31, old devices can still do this just fine.
-                    this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                    UPLOAD_COUNT = e.Count;
+                    
+                    //for two downloads, this notification will go up before the service is started...
+                    var rawMessageString = e.Count == 1
+                        ? UploadForegroundService.SingularUploadRemaining
+                        : UploadForegroundService.PluralUploadsRemaining;
+                    var message = string.Format(rawMessageString, e.Count);
+                    var notification = UploadForegroundService.CreateNotification(this, message);
+                    var manager = GetSystemService(NotificationService) as NotificationManager;
+                    manager?.Notify(UploadForegroundService.NOTIF_ID, notification);
+                    break;
                 }
-                SeekerState.UploadKeepAliveServiceRunning = true;
             }
-            else if (SeekerState.UploadKeepAliveServiceRunning && e.Count != 0)
-            {
-                UPLOAD_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if (e.Count == 1)
-                {
-                    msg = string.Format(UploadForegroundService.SingularUploadRemaining, e.Count);
-                }
-                else
-                {
-                    msg = string.Format(UploadForegroundService.PluralUploadsRemaining, e.Count);
-                }
-                var notif = UploadForegroundService.CreateNotification(this, msg);
-                NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
-                manager.Notify(UploadForegroundService.NOTIF_ID, notif);
-            }
-            //});
-
-
         }
 
 
@@ -626,19 +505,17 @@ namespace Seeker
         private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
             //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
-            //SeekerState.MainActivityRef.RunOnUiThread(()=>
-            //{
             Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
-            Logger.Debug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            Logger.Debug("the thread is: " + Thread.CurrentThread.ManagedThreadId);
 
-            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
+            var cancelAndClear = DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer < 750;
             Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
             if (e.Count == 0 || cancelAndClear)
             {
                 DL_COUNT = -1;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 Logger.Debug("Stop Service");
-                this.StopService(downloadServiceIntent);
+                StopService(downloadServiceIntent);
                 SeekerState.DownloadKeepAliveServiceRunning = false;
             }
             else if (!SeekerState.DownloadKeepAliveServiceRunning)
@@ -649,7 +526,6 @@ namespace Seeker
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
 
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
                     if (isForeground ?? false)
                     {
                         this.StartService(downloadServiceIntent); //this will throw if the app is in background.
@@ -687,203 +563,6 @@ namespace Seeker
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
             }
-            //});
-        }
-
-
-        // TODOORG move to Utils\SpeedLimitHelper
-        public static class SpeedLimitHelper
-        {
-
-            public static void RemoveDownloadUser(string username)
-            {
-                DownloadUserDelays.TryRemove(username, out _);
-                DownloadLastAvgSpeed.TryRemove(username, out _);
-            }
-
-            public static void RemoveUploadUser(string username)
-            {
-                UploadUserDelays.TryRemove(username, out _);
-                UploadLastAvgSpeed.TryRemove(username, out _);
-            }
-
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-            public static Task OurDownloadGoverner(double currentSpeed, string username, CancellationToken cts)
-            {
-                try
-                {
-                    if (SeekerState.SpeedLimitDownloadOn)
-                    {
-
-                        if (DownloadUserDelays.TryGetValue(username, out double msDelay))
-                        {
-                            bool exists = DownloadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                            if (exists && currentSpeed == lastAvgSpeed)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("dont update");
-#endif
-                                //do not adjust as we have not yet recalculated the average speed
-                                return Task.Delay((int)msDelay, cts);
-                            }
-
-                            DownloadLastAvgSpeed[username] = currentSpeed;
-
-                            double avgSpeed = currentSpeed;
-                            if (!SeekerState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
-                            {
-
-                                //its threadsafe when using linq on concurrent dict itself.
-                                avgSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
-#if DEBUG
-                                //System.Console.WriteLine("multiple total speed " + avgSpeed);
-#endif
-                            }
-
-                            if (avgSpeed > SeekerState.SpeedLimitDownloadBytesSec)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
-#endif
-                                DownloadUserDelays[username] = msDelay = msDelay * 1.04;
-
-                            }
-                            else
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("speed too low " + currentSpeed + "   " + msDelay);
-#endif
-                                DownloadUserDelays[username] = msDelay = msDelay * 0.96;
-                            }
-
-                            return Task.Delay((int)msDelay, cts);
-                        }
-                        else
-                        {
-#if DEBUG
-                            //System.Console.WriteLine("first time guess");
-#endif
-                            //first time we need to guess a decent value
-                            //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitDownloadBytesSec;
-                            DownloadUserDelays[username] = msDelaySeed;
-                            DownloadLastAvgSpeed[username] = currentSpeed;
-                            return Task.Delay((int)msDelaySeed, cts);
-                        }
-
-                    }
-                    else
-                    {
-                        return Task.CompletedTask;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.FirebaseDebug("DL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
-                    return Task.CompletedTask;
-                }
-            }
-
-            //this is duplicated for speed.
-            public static Task OurUploadGoverner(double currentSpeed, string username, CancellationToken cts)
-            {
-                try
-                {
-                    if (SeekerState.SpeedLimitUploadOn)
-                    {
-
-                        if (UploadUserDelays.TryGetValue(username, out double msDelay))
-                        {
-                            bool exists = UploadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                            if (exists && currentSpeed == lastAvgSpeed)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL dont update");
-#endif
-                                //do not adjust as we have not yet recalculated the average speed
-                                return Task.Delay((int)msDelay, cts);
-                            }
-
-                            UploadLastAvgSpeed[username] = currentSpeed;
-
-                            double avgSpeed = currentSpeed;
-                            if (!SeekerState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
-                            {
-
-                                //its threadsafe when using linq on concurrent dict itself.
-                                avgSpeed = UploadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
-#if DEBUG
-                                //System.Console.WriteLine("UL multiple total speed " + avgSpeed);
-#endif
-                            }
-
-                            if (avgSpeed > SeekerState.SpeedLimitUploadBytesSec)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
-#endif
-                                UploadUserDelays[username] = msDelay = msDelay * 1.04;
-
-                            }
-                            else
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL speed too low " + currentSpeed + "   " + msDelay);
-#endif
-                                UploadUserDelays[username] = msDelay = msDelay * 0.96;
-                            }
-
-                            return Task.Delay((int)msDelay, cts);
-                        }
-                        else
-                        {
-#if DEBUG
-                            //System.Console.WriteLine("UL first time guess");
-#endif
-                            //first time we need to guess a decent value
-                            //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitUploadBytesSec;
-                            UploadUserDelays[username] = msDelaySeed;
-                            UploadLastAvgSpeed[username] = currentSpeed;
-                            return Task.Delay((int)msDelaySeed, cts);
-                        }
-
-                    }
-                    else
-                    {
-                        return Task.CompletedTask;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.FirebaseDebug("UL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
-                    return Task.CompletedTask;
-                }
-            }
-
-        }
-
-
-        // TODOORG move to EventArgs?
-        public class ProgressUpdatedUIEventArgs : EventArgs
-        {
-            public ProgressUpdatedUIEventArgs(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
-            {
-                ti = _ti;
-                wasFailed = _wasFailed;
-                fullRefresh = _fullRefresh;
-                percentComplete = _percentComplete;
-                avgspeedBytes = _avgspeedBytes;
-            }
-            public TransferItem ti;
-            public bool wasFailed;
-            public bool fullRefresh;
-            public double percentComplete;
-            public double avgspeedBytes;
         }
 
         public static EventHandler<TransferItem> StateChangedForItem;
@@ -893,28 +572,32 @@ namespace Seeker
         private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
         {
             KeepAlive.RestartInactivityKillTimer();
-
-            bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
-
+            
+            var isUpload = e.Transfer.Direction == TransferDirection.Upload;
             if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
             {
-                //user offline.
+                // user offline.
                 TransfersFragment.AddToUserOffline(e.Transfer.Username);
             }
 
-            TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
+            var relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(
+                e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
+            
             if (relevantItem == null)
             {
-                Logger.FirebaseInfo("relevantItem==null. state: " + e.Transfer.State.ToString());
+                Logger.FirebaseInfo("relevantItem==null. state: " + e.Transfer?.State);
             }
-            //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
+            
             if (relevantItem != null)
             {
-                //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
+                // if the incoming transfer is not cancelled,
+                // i.e. requested, then we replace the state (the user retried).
                 if (e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
                 {
                     Logger.Debug("fallen from queue");
-                    //the state is good as is.  do not add cancelled to it, since we used cancelled to mean "user cancelled" i.e. paused.
+                    
+                    // the state is good as is.  do not add cancelled to it,
+                    // since we used cancelled to mean "user cancelled" i.e. paused.
                     relevantItem.Failed = true;
                     relevantItem.Progress = 100;
                 }
@@ -922,30 +605,31 @@ namespace Seeker
                 {
                     relevantItem.State = e.Transfer.State;
                 }
+                
                 relevantItem.IncompleteParentUri = e.IncompleteParentUri;
                 if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
                     relevantItem.InProcessing = true;
                 }
+                
                 if (relevantItem.State.HasFlag(TransferStates.Succeeded))
                 {
-                    relevantItem.IncompleteParentUri = null; //not needed anymore.
+                    relevantItem.IncompleteParentUri = null; // not needed anymore.
                 }
-                //if(relevantItem.Size==-1)
-                //{
-                //    if(e.Transfer.Size!=0)
-                //    {
-                //        relevantItem.Size = e.Transfer.Size;
-                //    }
-                //}
             }
-            if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
+            
+            // TODO: Continue formatting from around here
+            
+            if (e.Transfer!.State.HasFlag(TransferStates.Errored) 
+                || e.Transfer.State.HasFlag(TransferStates.TimedOut)
+                || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
-                SeekerApplication.SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
+                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;
                 }
+                
                 relevantItem.Failed = true;
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
@@ -955,18 +639,25 @@ namespace Seeker
                 {
                     return;
                 }
+                
                 if (!relevantItem.IsUpload())
                 {
-                    // TODO why is queue length max value
-                    if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
+                    // TODO: why is queue length max value
+                    if (relevantItem.QueueLength != 0)
                     {
+                        // this means that it probably came from a search response where we know the users queuelength
+                        // ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                         MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
-                    else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
+                    else
                     {
+                        // this means that it came from a browse response
+                        // where we may not know the users initial queue length...
+                        // or if its unexpectedly queued.
                         MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                 }
+                
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Initializing))
@@ -975,21 +666,22 @@ namespace Seeker
                 {
                     return;
                 }
-                //clear queued flag...
+                
+                // clear queued flag...
                 relevantItem.QueueLength = int.MaxValue;
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
             {
-                SeekerApplication.SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
+                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;
                 }
                 if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
                 {
-                    //clear queued flag...
-                    SeekerApplication.TransfersDownloadsCompleteStale = true;
+                    // clear queued flag...
+                    TransfersDownloadsCompleteStale = true;
                     TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 120);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
@@ -1662,7 +1354,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());
@@ -1701,7 +1393,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());
@@ -2043,7 +1735,7 @@ namespace Seeker
 
         public static void RestoreListeningState()
         {
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 SeekerState.ListenerEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerEnabled, true);
                 SeekerState.ListenerPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
@@ -2053,7 +1745,7 @@ namespace Seeker
 
         public static void SaveListeningState()
         {
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ListenerEnabled, SeekerState.ListenerEnabled);
@@ -2065,7 +1757,7 @@ namespace Seeker
 
         public static void SaveSpeedLimitState()
         {
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, SeekerState.SpeedLimitDownloadOn);
@@ -2119,7 +1811,7 @@ namespace Seeker
 
         public static void SaveSmartFilterState()
         {
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
@@ -2169,7 +1861,7 @@ namespace Seeker
                 serializer.Serialize(writer, recentUsers);
                 recentUsersStr = writer.ToString();
             }
-            lock (SHARED_PREF_LOCK)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);

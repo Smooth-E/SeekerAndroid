@@ -41,4 +41,9 @@ public static class AndroidPlatform
     {
         return (int)Build.VERSION.SdkInt >= 30;
     }
+    
+    public static bool HasProperPerAppLanguageSupport()
+    {
+        return (int)Build.VERSION.SdkInt >= 33;
+    }
 }

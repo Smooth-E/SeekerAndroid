@@ -37,10 +37,10 @@ namespace Seeker
 
         protected override void AttachBaseContext(Context @base)
         {
-            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SeekerState.Language != SeekerState.FieldLangAuto)
+            if (!AndroidPlatform.HasProperPerAppLanguageSupport() && SeekerState.Language != SeekerState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
-                config.Locale = SeekerApplication.LocaleFromString(SeekerState.Language);
+                config.Locale = LocaleUtils.LocaleFromString(SeekerState.Language);
                 var baseContext = @base.CreateConfigurationContext(config);
                 base.AttachBaseContext(baseContext);
             }

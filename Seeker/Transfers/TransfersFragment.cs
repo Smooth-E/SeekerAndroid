@@ -1010,7 +1010,7 @@ namespace Seeker
                     serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
                     listOfUploadItems = writer.ToString();
                 }
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                     lock (TransferStateSaveLock)
                     {
                         var editor = sharedPreferences.Edit();
@@ -2689,16 +2689,16 @@ namespace Seeker
 
         }
 
-        private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
+        private void TransferProgressUpdated(object sender, ProgressUpdatedUIEventArgs e)
         {
-            bool needsRefresh = (e.ti.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.ti.IsUpload()) && !(TransfersFragment.InUploadsMode));
+            bool needsRefresh = (e.TransferItem.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.TransferItem.IsUpload()) && !(TransfersFragment.InUploadsMode));
             if (!needsRefresh)
             {
                 return;
             }
-            if (e.percentComplete != 0)
+            if (e.PercentComplete != 0)
             {
-                if (e.fullRefresh)
+                if (e.FullRefresh)
                 {
 
                     Action action = refreshListViewSafe; //notify data set changed...
@@ -2731,15 +2731,15 @@ namespace Seeker
                 {
                     try
                     {
-                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename + e.ti.Username);
+                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.TransferItem.FullFilename + e.TransferItem.Username);
 
                         DateTime now = DateTime.UtcNow;
-                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename + e.ti.Username, now); //this returns now if the key is not in the dictionary!
+                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.TransferItem.FullFilename + e.TransferItem.Username, now); //this returns now if the key is not in the dictionary!
                         if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
                         {
-                            ProgressUpdatedThrottler[e.ti.FullFilename + e.ti.Username] = now;
+                            ProgressUpdatedThrottler[e.TransferItem.FullFilename + e.TransferItem.Username] = now;
                         }
-                        else if (e.wasFailed)
+                        else if (e.WasFailed)
                         {
                             //still update..
                         }
@@ -2762,14 +2762,14 @@ namespace Seeker
                         Activity?.RunOnUiThread(() =>
                         {
                             int index = -1;
-                            index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
+                            index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.TransferItem);
                             if (index == -1)
                             {
                                 Logger.Debug("Index is -1 TransferProgressUpdated");
                                 return;
                             }
                             Logger.Debug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
-                            refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed, e.avgspeedBytes);
+                            refreshItemProgress(index, e.TransferItem.Progress, e.TransferItem, e.WasFailed, e.AverageSpeedBytes);
 
                         });
 

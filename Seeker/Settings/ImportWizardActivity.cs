@@ -261,7 +261,7 @@ namespace Seeker
             CommonHelpers.SaveUserNotes();
             if (SeekerState.SharedPreferences != null && UserListManager.UserList != null)
             {
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_UserList, UserListManager.AsString());
@@ -270,7 +270,7 @@ namespace Seeker
             }
             if (SeekerState.SharedPreferences != null && SeekerState.IgnoreUserList != null)
             {
-                lock (SeekerApplication.SHARED_PREF_LOCK)
+                lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_IgnoreUserList, UserListManager.AsString());

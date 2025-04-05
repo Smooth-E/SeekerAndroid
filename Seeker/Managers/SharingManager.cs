@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Exceptions;
+using Seeker.Helpers;
 using Seeker.Utils;
 using Soulseek;
 
@@ -575,7 +576,7 @@ public static class SharingManager
                     filename,
                     transferItem.Size,
                     stream,
-                    options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurUploadGoverner),
+                    options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGoverner),
                     cancellationToken: cts.Token
                 );
             }
