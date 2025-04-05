@@ -1,4 +1,5 @@
 ﻿using System;
+using Seeker.Managers;
 
 namespace Seeker.Utils;
 
@@ -9,11 +10,7 @@ public static class Logger
     
     public static void Debug(string msg)
     {
-        if (SeekerApplication.LOG_DIAGNOSTICS)
-        {
-            // write to file
-            SeekerApplication.AppendMessageToDiagFile(msg);
-        }
+        DiagnosticFile.AppendMessageToDiagFile(msg);
 #if ADB_LOGCAT
             log.Debug(logCatTag, msg);
 #endif
@@ -26,11 +23,7 @@ public static class Logger
 
     public static void FirebaseDebug(string msg)
     {
-        if (SeekerApplication.LOG_DIAGNOSTICS)
-        {
-            //write to file
-            SeekerApplication.AppendMessageToDiagFile(msg);
-        }
+        DiagnosticFile.AppendMessageToDiagFile(msg);
 #if !IzzySoft
         if (CrashlyticsEnabled)
         {
@@ -44,11 +37,7 @@ public static class Logger
 
     public static void FirebaseInfo(string msg)
     {
-        if (SeekerApplication.LOG_DIAGNOSTICS)
-        {
-            // write to file
-            SeekerApplication.AppendMessageToDiagFile(msg);
-        }
+        DiagnosticFile.AppendMessageToDiagFile(msg);
 #if !IzzySoft
         if (CrashlyticsEnabled)
         {

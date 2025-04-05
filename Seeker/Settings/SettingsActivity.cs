@@ -520,7 +520,7 @@ namespace Seeker
 
 
             CheckBox enableDiagnostics = FindViewById<CheckBox>(Resource.Id.enableDiagnostics);
-            enableDiagnostics.Checked = SeekerApplication.LOG_DIAGNOSTICS;
+            enableDiagnostics.Checked = DiagnosticFile.Enabled;
             enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
 
 
@@ -1200,15 +1200,15 @@ namespace Seeker
 
         private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
+            if (DiagnosticFile.Enabled != e.IsChecked)
             {
-                SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
+                DiagnosticFile.Enabled = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
-                SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
+                SeekerApplication.SetDiagnosticState(DiagnosticFile.Enabled);
                 lock (SeekerApplication.SharedPrefLock)
                 {
                     var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                    editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, SeekerApplication.LOG_DIAGNOSTICS);
+                    editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, DiagnosticFile.Enabled);
                     bool success = editor.Commit();
                 }
             }

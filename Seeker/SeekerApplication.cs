@@ -61,7 +61,6 @@ namespace Seeker
     {
         public static readonly object SharedPrefLock = new();
         public new static Application ApplicationContext;
-        public static bool LOG_DIAGNOSTICS;
         public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
         
         private const bool AUTO_CONNECT_ON = true;
@@ -137,7 +136,7 @@ namespace Seeker
             {
                 // need search response and enqueue download action...
                 var options = new SoulseekClientOptions(
-                    minimumDiagnosticLevel: LOG_DIAGNOSTICS
+                    minimumDiagnosticLevel: DiagnosticFile.Enabled
                         ? Soulseek.Diagnostics.DiagnosticLevel.Debug
                         : Soulseek.Diagnostics.DiagnosticLevel.Info,
                     messageTimeout: 30000,
@@ -148,7 +147,7 @@ namespace Seeker
                     userInfoResponseResolver: UserInfoResponseHandler
                 );
                 SeekerState.SoulseekClient = new SoulseekClient(options);
-                SetDiagnosticState(LOG_DIAGNOSTICS);
+                SetDiagnosticState(DiagnosticFile.Enabled);
                 
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
@@ -297,12 +296,12 @@ namespace Seeker
         {
             if (logDiagnostics)
             {
-                SeekerState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
+                SeekerState.SoulseekClient.DiagnosticGenerated += DiagnosticFile.OnDiagnosticFileGenerated;
                 AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
             }
             else
             {
-                SeekerState.SoulseekClient.DiagnosticGenerated -= SoulseekClient_DiagnosticGenerated;
+                SeekerState.SoulseekClient.DiagnosticGenerated -= DiagnosticFile.OnDiagnosticFileGenerated;
                 AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
             }
         }
@@ -313,114 +312,6 @@ namespace Seeker
             // I only want this for logging purposes).
             Logger.Debug(e.Exception.Message);
             Logger.Debug(e.Exception.StackTrace);
-        }
-
-        private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
-        {
-            var timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
-            string body;
-            if (e.IncludesException)
-            {
-                body = e.Message + System.Environment.NewLine + e.Exception.Message 
-                       + System.Environment.NewLine + e.Exception.StackTrace;
-            }
-            else
-            {
-                body = e.Message;
-            }
-            
-            return timestamp + body;
-        }
-
-        public static void AppendMessageToDiagFile(string msg)
-        {
-            var timestamp = DateTime.UtcNow.ToString("[MM_dd-hh:mm:ss] ");
-            AppendLineToDiagFile(timestamp + msg);
-        }
-
-
-        private static bool diagnosticFilesystemErrorShown = false; //so that we only show it once.
-        private static void AppendLineToDiagFile(string line)
-        {
-            try
-            {
-                if (SeekerState.DiagnosticTextFile == null)
-                {
-                    if (SeekerState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
-                    {
-                        SeekerState.DiagnosticTextFile =
-                            SeekerState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
-                        
-                        if (SeekerState.DiagnosticTextFile == null)
-                        {
-                            SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile
-                                .CreateFile("text/plain", "seeker_diagnostics");
-                            if (SeekerState.DiagnosticTextFile == null)
-                            {
-                                return;
-                            }
-                        }
-                    }
-                    // if api < 30 and they did not set it. OR api <= 21, and they did set it.
-                    else if (SeekerState.UseLegacyStorage() || !SeekerState.SaveDataDirectoryUriIsFromTree)
-                    {
-                        var musicFolderPath = Android.OS.Environment.DirectoryMusic;
-                        var fullPath = string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri) 
-                            ? Android.OS.Environment.GetExternalStoragePublicDirectory(musicFolderPath)!.AbsolutePath
-                            : Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri)!.Path!;
-
-                        var containingDir = new Java.IO.File(fullPath);
-
-                        var javaDiagFile = new Java.IO.File(fullPath + "/seeker_diagnostics.txt");
-                        var rootDir = 
-                            DocumentFile.FromFile(new Java.IO.File(fullPath + "/seeker_diagnostics.txt"));
-
-                        if (javaDiagFile.Exists() || (containingDir.CanWrite() && javaDiagFile.CreateNewFile()))
-                        {
-                            SeekerState.DiagnosticTextFile = rootDir;
-                        }
-                    }
-                    else // if api >29 and they did not set it. nothing we can do.
-                    {
-                        return;
-                    }
-                }
-
-                if (SeekerState.DiagnosticStreamWriter == null)
-                {
-                    var outputStream = ApplicationContext.ContentResolver!
-                        .OpenOutputStream(SeekerState.DiagnosticTextFile!.Uri, "wa");
-                    if (outputStream == null)
-                    {
-                        return;
-                    }
-
-                    SeekerState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
-                    if (SeekerState.DiagnosticStreamWriter == null)
-                    {
-                        return;
-                    }
-                }
-
-                SeekerState.DiagnosticStreamWriter.WriteLine(line);
-                SeekerState.DiagnosticStreamWriter.Flush();
-            }
-            catch (Exception ex)
-            {
-                if (!diagnosticFilesystemErrorShown)
-                {
-                    var message = $"failed to write to diagnostic file {ex.Message} {line} {ex.StackTrace}";
-                    Logger.FirebaseDebug(message);
-                    ApplicationContext.ShowLongToast("Failed to write to diagnostic file.");
-                    diagnosticFilesystemErrorShown = true;
-                }
-            }
-        }
-
-        private static void SoulseekClient_DiagnosticGenerated(object sender, 
-            Soulseek.Diagnostics.DiagnosticEventArgs e)
-        {
-            AppendLineToDiagFile(CreateMessage(e));
         }
 
         /// <summary>
@@ -1578,7 +1469,7 @@ namespace Seeker
                 ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(KeyConsts.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
                 ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, false);
 
-                SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
+                DiagnosticFile.Enabled = sharedPreferences.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
 
 
                 if (TransfersFragment.TransferItemManagerDL == null)
