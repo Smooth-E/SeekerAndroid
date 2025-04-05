@@ -1064,7 +1064,7 @@ namespace Seeker
             }
             SeekerState.SpeedLimitDownloadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            SharedPreferencesUtils.SaveSpeedLimitState();
         }
 
         private void EnableUlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -1075,7 +1075,7 @@ namespace Seeker
             }
             SeekerState.SpeedLimitUploadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            SharedPreferencesUtils.SaveSpeedLimitState();
         }
 
         private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -1474,7 +1474,7 @@ namespace Seeker
                 return;
             }
             SeekerState.ListenerUPnpEnabled = e.IsChecked;
-            SeekerApplication.SaveListeningState();
+            SharedPreferencesUtils.SaveListeningState();
 
             if (e.IsChecked)
             {
@@ -1505,7 +1505,7 @@ namespace Seeker
             }
             SeekerState.ListenerEnabled = e.IsChecked;
             UpdateListeningViewState();
-            SeekerApplication.SaveListeningState();
+            SharedPreferencesUtils.SaveListeningState();
             ReconfigureOptionsAPI(null, e.IsChecked, null);
             if (e.IsChecked)
             {
@@ -1755,7 +1755,7 @@ namespace Seeker
                     SeekerState.ListenerPort = portNum;
                     UPnpManager.Instance.Feedback = true;
                     UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                    SeekerApplication.SaveListeningState();
+                    SharedPreferencesUtils.SaveListeningState();
                     SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
                     changeDialog.Dismiss();
                 }
@@ -1783,7 +1783,7 @@ namespace Seeker
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.uploadSpeed), true);
                     }
 
-                    SeekerApplication.SaveSpeedLimitState();
+                    SharedPreferencesUtils.SaveSpeedLimitState();
                     changeDialog.Dismiss();
                 }
                 else if (changeDialogType == ChangeDialogType.ConcurrentDL)
