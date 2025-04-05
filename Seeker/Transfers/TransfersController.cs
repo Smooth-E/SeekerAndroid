@@ -1,4 +1,5 @@
 ﻿using Seeker.Main;
+using Seeker.Managers;
 using Soulseek;
 using Seeker.Utils;
 
@@ -29,7 +30,7 @@ namespace Seeker.Transfers
                 if (queuedTransfers.Count > 0)
                 {
                     Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
-                    MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
+                    DownloadQueue.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
                 }
             }
 
@@ -52,7 +53,7 @@ namespace Seeker.Transfers
             if (queuedTransfers.Count > 0)
             {
                 Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");
-                MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
+                DownloadQueue.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
             }
 
         }

@@ -1309,7 +1309,7 @@ namespace Seeker
         {
             setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.AdapterPosition);
             string roomName = localDataSet[position].Name;
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //allow user to leave even if offline.
                 //just remove it from list so that they do not rejoin when logging back in.

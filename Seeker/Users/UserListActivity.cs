@@ -510,17 +510,17 @@ namespace Seeker
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
             });
 
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Logger.Debug("CurrentlyLoggedInButDisconnectedState");
                 
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(c, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(c, false, out t))
                 {
                     return;
                 }
                 
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+                SoulseekConnection.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "User will be added once login is complete."))
             {

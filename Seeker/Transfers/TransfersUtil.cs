@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
 
@@ -85,7 +86,7 @@ namespace Seeker.Transfers
                 var file = files[i];
                 var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
                 var e = new DownloadAddedEventArgs(dlInfo);
-                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUi(e);
+                Action<Task> continuationActionSaveFile = DownloadQueue.DownloadContinuationActionUi(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
                 // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next 
                 await waitForNext;

@@ -7,6 +7,7 @@ using AndroidX.AppCompat.App;
 using AndroidX.Fragment.App;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker;
@@ -151,7 +152,7 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
                 System.Threading.ThreadPool.QueueUserWorkItem(_ =>
                 {
 
-                    Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(
+                    Task t = SoulseekConnection.ConnectAndPerformPostConnectTasks(
                         SeekerState.Username, 
                         SeekerState.Password
                     );

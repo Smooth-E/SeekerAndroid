@@ -200,10 +200,10 @@ namespace Seeker.Managers
                 Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

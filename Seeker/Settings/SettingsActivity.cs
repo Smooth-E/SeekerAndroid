@@ -2136,12 +2136,12 @@ namespace Seeker
                 Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

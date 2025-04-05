@@ -1022,12 +1022,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1109,12 +1109,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1171,12 +1171,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1334,12 +1334,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1427,12 +1427,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1507,12 +1507,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

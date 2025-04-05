@@ -39,6 +39,7 @@ using _Microsoft.Android.Resource.Designer;
 using log = Android.Util.Log;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Transfers;
 using Seeker.Utils;
 
@@ -451,16 +452,16 @@ namespace Seeker
             });
 
 
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task conTask;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out conTask))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out conTask))
                 {
                     return;
                 }
-                SeekerApplication.OurCurrentLoginTask = conTask.ContinueWith(actualActionToPerform);
+                SoulseekConnection.OurCurrentLoginTask = conTask.ContinueWith(actualActionToPerform);
             }
             else
             {
@@ -493,12 +494,12 @@ namespace Seeker
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -733,12 +734,12 @@ namespace Seeker
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
         {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }

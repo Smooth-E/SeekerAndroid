@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker.Chatroom
@@ -774,18 +775,18 @@ namespace Seeker.Chatroom
                 });
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Logger.Debug("CurrentlyLoggedInButDisconnectedState: TRUE");
                 
                 // we disconnected. login then do the rest.
                 // this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+                SoulseekConnection.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else
             {

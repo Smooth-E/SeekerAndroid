@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Utils;
 
 namespace Seeker.Messages
@@ -215,18 +216,18 @@ namespace Seeker.Messages
                 });
             };
 
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Logger.Debug("currently logged in but disconnected...");
 
                 // we disconnected. login then do the rest.
                 // this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
                 {
                     return;
                 }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+                SoulseekConnection.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else
             {

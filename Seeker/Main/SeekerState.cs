@@ -400,6 +400,13 @@ namespace Seeker
                 }
             }
         }
+        
+        // TODO: Move this into ConnectionManager
+        public static bool CurrentlyLoggedInButDisconnectedState()
+        {
+            return currentlyLoggedIn && 
+                   (SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) 
+                    || SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting));
+        }
     }
-
 }

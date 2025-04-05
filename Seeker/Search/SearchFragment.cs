@@ -3239,7 +3239,7 @@ namespace Seeker
                 SearchTabHelper.CurrentlySearching = false;
                 return;
             }
-            else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            else if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //re-connect if from wishlist as well. just do it quietly.
                 //if (fromWishlist)
@@ -3247,7 +3247,7 @@ namespace Seeker
                 //    return;
                 //}
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
                 {
                     return;
                 }

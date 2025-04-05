@@ -7,6 +7,7 @@ using Android.Views;
 using Android.Widget;
 using Google.Android.Material.Snackbar;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Utils;
 using Soulseek;
 
@@ -72,11 +73,11 @@ public static class RequestedUserInfoHelper
             return;
         }
 
-        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+        if (SeekerState.CurrentlyLoggedInButDisconnectedState())
         {
             // we disconnected. login then do the rest.
             // this is due to temp lost connection
-            if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out var t))
+            if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out var t))
             {
                 return;
             }

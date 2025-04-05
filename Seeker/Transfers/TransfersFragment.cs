@@ -345,10 +345,10 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_resume_all:
                     Logger.FirebaseInfo("resume all Pressed");
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                    if (SeekerState.CurrentlyLoggedInButDisconnectedState())
                     {
                         Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                        if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                         {
                             return base.OnContextItemSelected(item);
                         }
@@ -415,10 +415,10 @@ namespace Seeker
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
             var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
             Logger.FirebaseInfo("retry all failed Pressed batch? " + batchSelectedOnly);
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
@@ -1116,7 +1116,7 @@ namespace Seeker
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item, cancellationTokenSource, out _);
                     Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
-                    task.ContinueWith(MainActivity.DownloadContinuationActionUi(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
+                    task.ContinueWith(DownloadQueue.DownloadContinuationActionUi(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -1270,7 +1270,7 @@ namespace Seeker
                 //filename: item1.FullFilename,
                 //size: item1.Size,
                 //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUi(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
+                task.ContinueWith(DownloadQueue.DownloadContinuationActionUi(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
             {
@@ -1364,10 +1364,10 @@ namespace Seeker
                             return true;
                         }
 
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SeekerState.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1592,10 +1592,10 @@ namespace Seeker
                             return true;
                         }
                         Logger.FirebaseInfo("resume folder Pressed");
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SeekerState.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1636,10 +1636,10 @@ namespace Seeker
                             return true;
                         }
                         Logger.FirebaseInfo("retry folder Pressed");
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SeekerState.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -2005,7 +2005,7 @@ namespace Seeker
                 return null;
             });
 
-            MainActivity.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
+            DownloadQueue.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
         }
 
         public void UpdateQueueState(string fullFilename) //Add this to the event handlers so that when downloads are added they have their queue position.
@@ -2818,7 +2818,7 @@ namespace Seeker
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
             SharingManager.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
-            MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
+            DownloadQueue.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
             {
@@ -2860,7 +2860,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
-            MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            DownloadQueue.TransferItemQueueUpdated -= TranferQueueStateChanged;
             SharingManager.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }

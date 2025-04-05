@@ -37,6 +37,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
 
@@ -1196,12 +1197,12 @@ namespace Seeker
                         }
                     }
                 }
-                if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                if (SeekerState.CurrentlyLoggedInButDisconnectedState())
                 {
                     //we disconnected. login then do the rest.
                     //this is due to temp lost connection
                     Task t;
-                    if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                    if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                     {
                         return;
                     }
@@ -1491,12 +1492,12 @@ namespace Seeker
         /// <param name="_username"></param>
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

@@ -1393,10 +1393,10 @@ namespace Seeker
                 Toast.MakeText(SeekerState.ActiveActivityRef, notLoggedInToast, ToastLength.Short).Show();
                 return false;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }
@@ -1492,10 +1492,10 @@ namespace Seeker
                 SeekerState.ActiveActivityRef.ShowShortToast(ResourceConstant.String.must_be_logged_in_to_give_privileges);
                 return false;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SeekerState.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }

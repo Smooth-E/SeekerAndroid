@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using Seeker.Utils;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Managers;
 
 namespace Seeker
 {
@@ -116,7 +117,7 @@ namespace Seeker
                     try
                     {
                         // there is a bug where we reach here with an empty Username and Password...
-                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                        login = SoulseekConnection.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
                     }
                     catch (InvalidOperationException)
                     {
@@ -403,7 +404,7 @@ namespace Seeker
                     return;
                 }
                 
-                login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
+                login = SoulseekConnection.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
                 login?.ContinueWith(MainActivity.GetPostNotificationsPermissionTask());
 
                 try
