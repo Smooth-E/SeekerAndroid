@@ -2512,7 +2512,7 @@ namespace Seeker
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
                 {
-                    SeekerApplication.RecreateActivies();
+                    SeekerApplication.RecreateActivities();
                 }
             }
         }
@@ -2544,7 +2544,7 @@ namespace Seeker
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
                 {
-                    SeekerApplication.RecreateActivies();
+                    SeekerApplication.RecreateActivities();
                 }
             }
         }

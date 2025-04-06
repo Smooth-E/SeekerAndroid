@@ -59,7 +59,7 @@ public static class LanguageUtils
 
         if (changed)
         {
-            SeekerApplication.RecreateActivies();
+            SeekerApplication.RecreateActivities();
         }
     }
 
