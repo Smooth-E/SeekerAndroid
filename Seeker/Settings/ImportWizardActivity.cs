@@ -61,7 +61,7 @@ namespace Seeker
             strip1.setCurrentPage(pager.CurrentItem);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.setting_toolbar);
-            myToolbar.Title = SeekerApplication.GetString(Resource.String.ImportWizard);
+            myToolbar.Title = SeekerApplication.ApplicationContext.GetString(Resource.String.ImportWizard);
             SetButtonText(pager.CurrentItem);
         }
 
@@ -135,7 +135,7 @@ namespace Seeker
                                         SetButtonText(this.pager.CurrentItem);
                                         if (t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
                                         {
-                                            Toast.MakeText(this, String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long).Show();
+                                            Toast.MakeText(this, String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long).Show();
                                         }
                                         else
                                         {
@@ -319,16 +319,16 @@ namespace Seeker
             switch (position)
             {
                 case 0:
-                    prevButton.Text = SeekerApplication.GetString(Resource.String.cancel);
-                    nextButton.Text = SeekerApplication.GetString(Resource.String.next);
+                    prevButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.cancel);
+                    nextButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.next);
                     break;
                 case 4:
-                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
-                    nextButton.Text = SeekerApplication.GetString(Resource.String.finish);
+                    prevButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.prev);
+                    nextButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.finish);
                     break;
                 default:
-                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
-                    nextButton.Text = SeekerApplication.GetString(Resource.String.next);
+                    prevButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.prev);
+                    nextButton.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.next);
                     break;
             }
         }
@@ -792,7 +792,7 @@ namespace Seeker
                     }
                     break;
                 case ImportListType.UserNotes:
-                    selectTheFollowing.Text = SeekerApplication.GetString(Resource.String.SelectUserNotes);
+                    selectTheFollowing.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.SelectUserNotes);
                     if (data.UserNotes == null || data.UserNotes.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;

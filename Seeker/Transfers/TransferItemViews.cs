@@ -319,7 +319,7 @@ namespace Seeker
                     }
                 }
 
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.X_of_Y_Remaining), numRemaining, total);
+                filesLongStatus.Text = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.X_of_Y_Remaining), numRemaining, total);
                 currentFile.Visibility = ViewStates.Visible;
                 currentFile.Text = string.Format("Current: {0}", currentFilename);
             }
@@ -327,7 +327,7 @@ namespace Seeker
             {
                 int numSucceeded = fi.TransferItems.Count;
 
-                filesLongStatus.Text = string.Format("{0} {1} {2}", SeekerApplication.GetString(Resource.String.all), numSucceeded, SeekerApplication.GetString(Resource.String.Succeeded).ToLower());
+                filesLongStatus.Text = string.Format("{0} {1} {2}", SeekerApplication.ApplicationContext.GetString(Resource.String.all), numSucceeded, SeekerApplication.ApplicationContext.GetString(Resource.String.Succeeded).ToLower());
                 currentFile.Visibility = ViewStates.Gone;
             }
             else if (folderState.HasFlag(TransferStates.Errored) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
@@ -398,17 +398,17 @@ namespace Seeker
                 //i.e. None, can be due to uploading 0 byte files. or for transfers that never got initialized.
                 //     dont leave this as is bc it will display "3 files remaining and Current: filename..." always.
                 currentFile.Visibility = ViewStates.Gone;
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.Num_FilesRemaining), fi.TransferItems.Count);
+                filesLongStatus.Text = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_FilesRemaining), fi.TransferItems.Count);
             }
 
         }
 
         private static void SetFilesLongStatusIfNotInProgress(TextView filesLongStatus, FolderItem fi, int numFailed, int numSucceeded, int numPaused)
         {
-            string failedString = SeekerApplication.GetString(Resource.String.failed).ToLower();
-            string succeededString = SeekerApplication.GetString(Resource.String.Succeeded).ToLower();
-            string AllString = SeekerApplication.GetString(Resource.String.all);
-            string cancelledString = fi.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted).ToLower() : SeekerApplication.GetString(Resource.String.paused).ToLower();
+            string failedString = SeekerApplication.ApplicationContext.GetString(Resource.String.failed).ToLower();
+            string succeededString = SeekerApplication.ApplicationContext.GetString(Resource.String.Succeeded).ToLower();
+            string AllString = SeekerApplication.ApplicationContext.GetString(Resource.String.all);
+            string cancelledString = fi.IsUpload() ? SeekerApplication.ApplicationContext.GetString(Resource.String.Aborted).ToLower() : SeekerApplication.ApplicationContext.GetString(Resource.String.paused).ToLower();
             // 0 0 0 isnt one.
             if (numSucceeded == 0 && numFailed == 0 && numPaused != 0) //all paused
             {
@@ -488,7 +488,7 @@ namespace Seeker
             {
                 if (isUpload)
                 {
-                    viewStatus.Text = SeekerApplication.GetString(Resource.String.Aborted);
+                    viewStatus.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.Aborted);
                 }
                 else
                 {
@@ -499,7 +499,7 @@ namespace Seeker
             {
                 if (isUpload)
                 {
-                    viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.Cancelled));//if the user on the other end cancelled / paused / removed it.
+                    viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.ApplicationContext.GetString(Resource.String.failed), SeekerApplication.ApplicationContext.GetString(Resource.String.Cancelled));//if the user on the other end cancelled / paused / removed it.
                 }
                 else
                 {
@@ -512,7 +512,7 @@ namespace Seeker
             }
             else if (isFolder && state.HasFlag(TransferStates.CannotConnect))
             {
-                viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.CannotConnect));
+                viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.ApplicationContext.GetString(Resource.String.failed), SeekerApplication.ApplicationContext.GetString(Resource.String.CannotConnect));
                 //"cannot connect" is too long for average screen. but the root problem needs to be fixed (for folder combine two TextView into one with padding???? TODO)
             }
             else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
@@ -623,24 +623,24 @@ namespace Seeker
             {
                 if (item.IsUpload())
                 {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.Cancelled);
+                    viewStatusAdditionalInfo.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.Cancelled);
                 }
                 else
                 {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.denied);
+                    viewStatusAdditionalInfo.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.denied);
                 }
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.TimedOut))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.TimedOut);
+                viewStatusAdditionalInfo.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.TimedOut);
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.UserIsOffline);
+                viewStatusAdditionalInfo.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.UserIsOffline);
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.CannotConnect);
+                viewStatusAdditionalInfo.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.CannotConnect);
             }
             else
             {

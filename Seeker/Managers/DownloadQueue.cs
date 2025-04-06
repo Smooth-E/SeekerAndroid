@@ -95,7 +95,7 @@ public static class DownloadQueue
 
                         if (!silent)
                         {
-                            var userIsOfflineString = SeekerApplication.GetString(Resource.String.UserXIsOffline);
+                            var userIsOfflineString = SeekerApplication.ApplicationContext.GetString(Resource.String.UserXIsOffline);
                             var formattedString = string.Format(userIsOfflineString, username);
                             MainActivity.ToastUiWithDebouncer(formattedString, "_6_", username);
                         }
@@ -120,7 +120,7 @@ public static class DownloadQueue
                         if (!silent)
                         {
                             var cannotConnectString =
-                                SeekerApplication.GetString(Resource.String.CannotConnectUserX);
+                                SeekerApplication.ApplicationContext.GetString(Resource.String.CannotConnectUserX);
 
                             MainActivity.ToastUiWithDebouncer(string.Format(cannotConnectString, username), "_7_", username);
                         }
@@ -132,7 +132,7 @@ public static class DownloadQueue
                         // that is okay, we can still connect to them just fine for download time.
                         if (!silent)
                         {
-                            var messageString = SeekerApplication.GetString(ResourceConstant.String.TimeoutQueueUserX);
+                            var messageString = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.TimeoutQueueUserX);
                             MainActivity.ToastUiWithDebouncer(string.Format(messageString, username), "_8_", username, 6);
                         }
                     }
@@ -445,7 +445,7 @@ public static class DownloadQueue
                                 action = () =>
                                 {
                                     MainActivity.ToastUiWithDebouncer(
-                                        SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL),
+                                        SeekerApplication.ApplicationContext.GetString(Resource.String.MustBeLoggedInToRetryDL),
                                         "_16_"
                                     );
                                 };
@@ -895,7 +895,7 @@ public static class DownloadQueue
                 {
                     action = () =>
                     {
-                        var message = SeekerApplication.GetString(ResourceConstant.String.FinishedDownloading);
+                        var message = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.FinishedDownloading);
                         var filename = CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename);
                         SeekerState.ActiveActivityRef.ShowLongToast($"{filename} {message}");
                     };

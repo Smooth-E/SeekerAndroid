@@ -1432,18 +1432,18 @@ namespace Seeker
                         {
                             if (t.Exception.InnerException is TimeoutException)
                             {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.ApplicationContext.GetString(Resource.String.timeout), ToastLength.Long);
                             }
                             else
                             {
                                 Logger.FirebaseDebug("Failed to change password" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
+                                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
                             }
                             return;
                         }
                         else
                         {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
+                            SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
                             SeekerState.Password = newPassword;
                             lock (SeekerApplication.SharedPrefLock)
                             {
@@ -1533,7 +1533,7 @@ namespace Seeker
                     {
                         if (t.Exception.InnerException is TimeoutException)
                         {
-                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.ApplicationContext.GetString(Resource.String.timeout), ToastLength.Long);
                         }
                         else
                         {

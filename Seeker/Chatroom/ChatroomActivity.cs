@@ -811,16 +811,16 @@ namespace Seeker
             switch (data.StatusType)
             {
                 case ChatroomController.StatusMessageType.Joined:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserJoined);
+                    statusMessage = "{0} {1} " + SeekerApplication.ApplicationContext.GetString(Resource.String.theUserJoined);
                     break;
                 case ChatroomController.StatusMessageType.Left:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserLeft);
+                    statusMessage = "{0} {1} " + SeekerApplication.ApplicationContext.GetString(Resource.String.theUserLeft);
                     break;
                 case ChatroomController.StatusMessageType.WentAway:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserWentAway);
+                    statusMessage = "{0} {1} " + SeekerApplication.ApplicationContext.GetString(Resource.String.theUserWentAway);
                     break;
                 case ChatroomController.StatusMessageType.CameBack:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserCameBack);
+                    statusMessage = "{0} {1} " + SeekerApplication.ApplicationContext.GetString(Resource.String.theUserCameBack);
                     break;
             }
             userStatus.Text = string.Format(statusMessage, timePrefix, data.Username);

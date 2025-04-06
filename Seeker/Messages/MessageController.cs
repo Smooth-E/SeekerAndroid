@@ -228,7 +228,7 @@ namespace Seeker.Messages
 
             if (messageNotifExtended.IsSpecialMessage)
             {
-                string title = String.Format(SeekerApplication.GetString(Resource.String.MessagesWithUser), messageNotifExtended.Username);
+                string title = String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.MessagesWithUser), messageNotifExtended.Username);
                 var titleSpan = new Android.Text.SpannableString(title + " \n");
                 titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
                 titleSpan.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
@@ -241,7 +241,7 @@ namespace Seeker.Messages
                 return ssb;
             }
 
-            string uname = messageNotifExtended.IsOurMessage ? SeekerApplication.GetString(Resource.String.You) : messageNotifExtended.Username;
+            string uname = messageNotifExtended.IsOurMessage ? SeekerApplication.ApplicationContext.GetString(Resource.String.You) : messageNotifExtended.Username;
             var spannableString = new Android.Text.SpannableString(uname + " ");
 
             Android.Text.Style.ForegroundColorSpan fcs = null;
@@ -300,7 +300,7 @@ namespace Seeker.Messages
                         continue;
                     }
                 }
-                string uname = msg.IsOurMessage ? SeekerApplication.GetString(Resource.String.You) : msg.Username;
+                string uname = msg.IsOurMessage ? SeekerApplication.ApplicationContext.GetString(Resource.String.You) : msg.Username;
                 if (lastUsername != uname)
                 {
                     //add header
@@ -406,7 +406,7 @@ namespace Seeker.Messages
                     bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
 
 
-                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel(SeekerApplication.GetString(Resource.String.sendmessage_)).Build();
+                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel(SeekerApplication.ApplicationContext.GetString(Resource.String.sendmessage_)).Build();
                     Intent replayIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     replayIntent.PutExtra("direct_reply_extra", true);
                     replayIntent.SetAction("seeker_direct_reply");

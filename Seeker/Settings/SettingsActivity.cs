@@ -120,7 +120,7 @@ namespace Seeker
             // ("onItemSelected method is also invoked when the view is being build")
             Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
             languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
+            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.ApplicationContext.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
             ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
             SetSpinnerPositionLangauge(languageSpinner);
@@ -672,13 +672,13 @@ namespace Seeker
 
             concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
-            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+            concurrentDlLabel.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
 
 
             UpdateConcurrentDownloadLimitsState();
 
-            String[] dlOptions = new String[] { SeekerApplication.GetString(Resource.String.PerTransfer), SeekerApplication.GetString(Resource.String.Global) };
+            String[] dlOptions = new String[] { SeekerApplication.ApplicationContext.GetString(Resource.String.PerTransfer), SeekerApplication.ApplicationContext.GetString(Resource.String.Global) };
             ArrayAdapter<String> dlOptionsStrings = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dlOptions);
             dlLimitPerTransfer.Adapter = dlOptionsStrings;
             SetSpinnerPositionSpeed(dlLimitPerTransfer, false);
@@ -906,7 +906,7 @@ namespace Seeker
             if (UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
             {
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-                var diag = builder.SetMessage(String.Format(SeekerApplication.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
+                var diag = builder.SetMessage(String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
                     .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) =>
                     {
                         this.ClearAllFolders();
@@ -1245,7 +1245,7 @@ namespace Seeker
                 else
                 {
                     //if not set and not legacy storage, then that is bad.  user must set it.
-                    return SeekerApplication.GetString(Resource.String.NotSet);
+                    return SeekerApplication.ApplicationContext.GetString(Resource.String.NotSet);
                 }
             }
             else
@@ -1263,7 +1263,7 @@ namespace Seeker
         {
             if (SeekerState.MemoryBackedDownload)
             {
-                return SeekerApplication.GetString(Resource.String.NotInUse);
+                return SeekerApplication.ApplicationContext.GetString(Resource.String.NotInUse);
             }
             if (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
             {
@@ -1273,7 +1273,7 @@ namespace Seeker
             {
                 if (!SeekerState.CreateCompleteAndIncompleteFolders)
                 {
-                    return SeekerApplication.GetString(Resource.String.AppLocalStorage);
+                    return SeekerApplication.ApplicationContext.GetString(Resource.String.AppLocalStorage);
                 }
                 //if not override then its whatever the download directory is...
                 if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
@@ -1287,7 +1287,7 @@ namespace Seeker
                     else
                     {
                         //if not set and not legacy storage, then that is bad.  user must set it.
-                        return SeekerApplication.GetString(Resource.String.NotSet);
+                        return SeekerApplication.ApplicationContext.GetString(Resource.String.NotSet);
                     }
                 }
                 else
@@ -1405,7 +1405,7 @@ namespace Seeker
 
         private void CheckPriv_Click(object sender, EventArgs e)
         {
-            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
+            SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.checking_priv_), ToastLength.Short);
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
         }
 
@@ -1413,7 +1413,7 @@ namespace Seeker
         {
             if (MainActivity.IsNotLoggedIn())
             {
-                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
+                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
@@ -1431,7 +1431,7 @@ namespace Seeker
         {
             if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.ApplicationContext.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short).Show();
                 return;
             }
 
@@ -1440,7 +1440,7 @@ namespace Seeker
 
             void OkayAction(object sender, string textInput)
             {
-                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput), SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password));
+                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput), SeekerApplication.ApplicationContext.GetString(Resource.String.must_be_logged_in_to_change_password));
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -1602,7 +1602,7 @@ namespace Seeker
             }
             else if (folderExists && folderCount == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.ApplicationContext.GetString(Resource.String.NoEligibleToClear), ToastLength.Long).Show();
             }
             else
             {
@@ -1722,15 +1722,15 @@ namespace Seeker
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosePortEditText);
             if (changeDialogType == ChangeDialogType.ChangeDL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
+                input.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ChangeUL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
+                input.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ConcurrentDL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterMaxDownloadSimultaneously);
+                input.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.EnterMaxDownloadSimultaneously);
             }
             builder.SetView(viewInflated);
 
@@ -1800,7 +1800,7 @@ namespace Seeker
 
                     Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
                     // always add space as the resource string will always trim trailing spaces.
-                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.ApplicationContext.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
                     SaveMaxConcurrentDownloadsSettings();
                     changeDialog.Dismiss();
@@ -1908,7 +1908,7 @@ namespace Seeker
 
         private static void SetPrivStatusView(TextView tv)
         {
-            string privileges = SeekerApplication.GetString(Resource.String.privileges) + ": ";
+            string privileges = SeekerApplication.ApplicationContext.GetString(Resource.String.privileges) + ": ";
             tv.Text = privileges + PrivilegesManager.Instance.GetPrivilegeStatus();
         }
 
@@ -2274,11 +2274,11 @@ namespace Seeker
             {
                 if (numParsed == int.MaxValue) //our signal we are finishing up (i.e. creating token index)
                 {
-                    toolTip = toolTip + $" ({SeekerApplication.GetString(Resource.String.finishingUp)})";
+                    toolTip = toolTip + $" ({SeekerApplication.ApplicationContext.GetString(Resource.String.finishingUp)})";
                 }
                 else
                 {
-                    toolTip = toolTip + String.Format($" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
+                    toolTip = toolTip + String.Format($" ({SeekerApplication.ApplicationContext.GetString(Resource.String.XFilesParsed)})", numParsed);
                 }
             }
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
@@ -3123,7 +3123,7 @@ namespace Seeker
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(Resource.String.FolderError);
-            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
+            string diagMessage = SeekerApplication.ApplicationContext.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
                 .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) =>
                 { //puts it slightly right
@@ -3417,11 +3417,11 @@ namespace Seeker
                         {
                             if (diff > 1)
                             {
-                                msg = msg + String.Format(" " + SeekerApplication.GetString(Resource.String.AdditionalFiles), diff);
+                                msg = msg + String.Format(" " + SeekerApplication.ApplicationContext.GetString(Resource.String.AdditionalFiles), diff);
                             }
                             else
                             {
-                                msg = msg + " " + SeekerApplication.GetString(Resource.String.OneAdditionalFile);
+                                msg = msg + " " + SeekerApplication.ApplicationContext.GetString(Resource.String.OneAdditionalFile);
                             }
                         }
                     }

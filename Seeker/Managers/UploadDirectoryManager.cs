@@ -40,13 +40,13 @@ public static class UploadDirectoryManager
         switch (errorCode)
         {
             case UploadDirectoryError.CannotWrite:
-                return SeekerApplication.GetString(Resource.String.PermissionErrorShared);
+                return SeekerApplication.ApplicationContext.GetString(Resource.String.PermissionErrorShared);
             case UploadDirectoryError.DoesNotExist:
                 // this is a permission error the overwhelming majority of the time.
                 // hence "not accessible" rather than "does not exist"
-                return SeekerApplication.GetString(Resource.String.FolderNotAccessible);
+                return SeekerApplication.ApplicationContext.GetString(Resource.String.FolderNotAccessible);
             case UploadDirectoryError.Unknown:
-                return SeekerApplication.GetString(Resource.String.UnknownErrorShared);
+                return SeekerApplication.ApplicationContext.GetString(Resource.String.UnknownErrorShared);
             case UploadDirectoryError.NoError:
             default:
                 return "No Error.";

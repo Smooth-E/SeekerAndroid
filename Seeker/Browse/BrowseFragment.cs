@@ -1326,29 +1326,29 @@ namespace Seeker
                 string topLevelStr = string.Empty;
                 if (toplevelItems == 1)
                 {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), toplevelItems);
+                    topLevelStr = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.item_total_singular), toplevelItems);
                 }
                 else
                 {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), toplevelItems);
+                    topLevelStr = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.item_total_plural), toplevelItems);
                 }
                 string recursiveStr = string.Empty;
                 if (totalItems == 1)
                 {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), totalItems);
+                    recursiveStr = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.item_total_singular), totalItems);
                 }
                 else
                 {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), totalItems);
+                    recursiveStr = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.item_total_plural), totalItems);
                 }
 
                 if (queuePaused)
                 {
-                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning_queue_paused), recursiveStr, topLevelStr));
+                    builder.SetMessage(string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.subfolders_warning_queue_paused), recursiveStr, topLevelStr));
                 }
                 else
                 {
-                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning), recursiveStr, topLevelStr));
+                    builder.SetMessage(string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.subfolders_warning), recursiveStr, topLevelStr));
                 }
                 EventHandler<DialogClickEventArgs> eventHandlerCurrentFolder = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
@@ -1914,12 +1914,12 @@ namespace Seeker
         public void ShowFolderSummaryDialog(FolderSummary folderSummary)
         {
             string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", CommonHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
-            string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
+            string lengthTime = SeekerApplication.ApplicationContext.GetString(Resource.String.Length) + lengthTimePt2;
 
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", CommonHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
+            string sizeString = SeekerApplication.ApplicationContext.GetString(Resource.String.size_column) + string.Format(" {0}", CommonHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
 
-            string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
-            string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
+            string numFilesString = SeekerApplication.ApplicationContext.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
+            string numSubFoldersString = SeekerApplication.ApplicationContext.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
 
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
 

@@ -217,8 +217,8 @@ namespace Seeker
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
-            userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            userHeader.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.user_) + " " + searchResponse.Username;
+            subHeader.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
             log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
@@ -246,7 +246,7 @@ namespace Seeker
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -325,13 +325,13 @@ namespace Seeker
                 }
                 else if (br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
                     return;
                 }
                 else if (br.IsFaulted)
                 {
                     //shouldnt get here
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
                     Logger.FirebaseDebug("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
@@ -577,19 +577,19 @@ namespace Seeker
             //and it looks strange. if 2+ empty dirs the same problem does not occur.
             if (hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
             {
-                errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
+                errorMsgToToast = String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                 return null;
             }
             else if (!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
             {
                 if (b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
                 {
-                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
+                    errorMsgToToast = String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
                 }
                 else if (b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
                 {
-                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
+                    errorMsgToToast = String.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
                 }
             }
@@ -924,7 +924,7 @@ namespace Seeker
                 }
                 if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.ApplicationContext.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
                     stopRefreshing();
                     return;
                 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Main;
 using Seeker.Utils;
 
@@ -12,22 +13,34 @@ namespace Seeker.Managers
     public class PrivilegesManager
     {
         public static object PrivilegedUsersLock = new object();
+        private static PrivilegesManager _instance;
+        
         public IReadOnlyCollection<string> PrivilegedUsers = null;
         public bool IsPrivileged = false; //are we privileged
 
-        public static Context Context = null;
-        private static PrivilegesManager instance = null;
+        private Context _context;
+        
         public static PrivilegesManager Instance
         {
             get
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new PrivilegesManager();
+                    throw new NullReferenceException("PrivilegesManager was not initialized.");
                 }
-                return instance;
+
+                return _instance;
             }
         }
+
+        public static void Initialize(Context context)
+        {
+            _instance = new PrivilegesManager
+            {
+                _context = context
+            };
+        }
+        
         /// <summary>
         /// Set Privileged Users List, this will also check if we have privileges and if so, get our remaining time..
         /// </summary>
@@ -87,65 +100,41 @@ namespace Seeker.Managers
         {
             if (SecondsRemainingAtLastCheck == 0 || SecondsRemainingAtLastCheck == int.MinValue || GetRemainingSeconds() <= 0)
             {
-                if (IsPrivileged)
-                {
-                    return SeekerApplication.GetString(Resource.String.yes); //this is if we are in the privileged list but our actual amount has not yet been returned.
-                }
-                else
-                {
-                    return SeekerApplication.GetString(Resource.String.no_image_chosen); //"None"
-                }
+                // this is if we are in the privileged list but our actual amount has not yet been returned.
+                var stringId = IsPrivileged ? ResourceConstant.String.yes : ResourceConstant.String.no_image_chosen;
+                return _context.GetString(stringId);
             }
-            else
+
+            var seconds = GetRemainingSeconds();
+            switch (seconds)
             {
-                int seconds = GetRemainingSeconds();
-                if (seconds > 3600 * 24)
+                case > 3600 * 24:
                 {
-                    int days = seconds / (3600 * 24);
-                    if (days == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.day_left), days);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.days_left), days);
-                    }
+                    var days = seconds / (3600 * 24);
+                    var stringId =  days == 1 
+                        ? ResourceConstant.String.day_left
+                        : ResourceConstant.String.days_left;
+                    var rawString = _context.GetString(stringId);
+                    return string.Format(rawString, days);
                 }
-                else if (seconds > 3600)
+                case > 3600:
                 {
-                    int hours = seconds / 3600;
-                    if (hours == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.hour_left), hours);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.hours_left), hours);
-                    }
+                    var hours = seconds / 3600;
+                    return string.Format(hours == 1 
+                        ? _context.GetString(ResourceConstant.String.hour_left) 
+                        : _context.GetString(ResourceConstant.String.hours_left), hours);
                 }
-                else if (seconds > 60)
+                case > 60:
                 {
-                    int mins = seconds / 60;
-                    if (mins == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.minute_left), mins);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.minutes_left), mins);
-                    }
+                    var mins = seconds / 60;
+                    return string.Format(mins == 1 
+                        ? _context.GetString(ResourceConstant.String.minute_left) 
+                        : _context.GetString(ResourceConstant.String.minutes_left), mins);
                 }
-                else
-                {
-                    if (seconds == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.second_left), seconds);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.seconds_left), seconds);
-                    }
-                }
+                case 1:
+                    return string.Format(_context.GetString(ResourceConstant.String.second_left), seconds);
+                default:
+                    return string.Format(_context.GetString(ResourceConstant.String.seconds_left), seconds);
             }
         }
 
@@ -162,34 +151,36 @@ namespace Seeker.Managers
                         {
                             if (t.Exception.InnerException is TimeoutException)
                             {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                                _context.ShowLongToast(
+                                    _context.GetString(ResourceConstant.String.priv_failed) + ": " 
+                                    + _context.GetString(ResourceConstant.String.timeout));
                             }
                             else
                             {
-                                Logger.FirebaseDebug("Failed to get privileges" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
+                                Logger.FirebaseDebug("Failed to get privileges" + t.Exception.InnerException?.Message);
+                                _context.ShowLongToast(_context.GetString(ResourceConstant.String.priv_failed));
                             }
                         }
+                        
                         return;
                     }
-                    else
+
+                    SecondsRemainingAtLastCheck = t.Result;
+                    IsPrivileged = t.Result switch
                     {
-                        SecondsRemainingAtLastCheck = t.Result;
-                        if (t.Result > 0)
-                        {
-                            IsPrivileged = true;
-                        }
-                        else if (t.Result == 0)
-                        {
-                            IsPrivileged = false;
-                        }
-                        LastCheckTime = DateTime.UtcNow;
-                        if (feedback)
-                        {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
-                        }
-                        PrivilegesChecked?.Invoke(null, new EventArgs());
+                        > 0 => true,
+                        0 => false,
+                        _ => IsPrivileged
+                    };
+                    
+                    LastCheckTime = DateTime.UtcNow;
+                    if (feedback)
+                    {
+                        _context.ShowLongToast(_context.GetString(ResourceConstant.String.priv_success)
+                                              + ". " + _context.GetString(ResourceConstant.String.status) + ": "
+                                              + GetPrivilegeStatus());
                     }
+                    PrivilegesChecked?.Invoke(null, EventArgs.Empty);
                 }));
         }
 

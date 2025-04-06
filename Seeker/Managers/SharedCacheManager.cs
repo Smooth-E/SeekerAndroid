@@ -538,7 +538,7 @@ new(b_BrowseResponse_hiddenPortion))
 
             if (e.GetType().FullName == "Java.Lang.SecurityException" || e is Java.Lang.SecurityException)
             {
-                errorMsg = SeekerApplication.GetString(Resource.String.PermissionsIssueShared);
+                errorMsg = SeekerApplication.ApplicationContext.GetString(Resource.String.PermissionsIssueShared);
             }
 
             success = false;

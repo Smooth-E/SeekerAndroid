@@ -341,7 +341,7 @@ namespace Seeker.Chatroom
             toolbar.Title = OurRoomName;
             var searchRoomMenuItem = toolbar.Menu.FindItem(Resource.Id.search_room_action);
             var searchView = searchRoomMenuItem.ActionView as AndroidX.AppCompat.Widget.SearchView;
-            searchView.QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
+            searchView.QueryHint = SeekerApplication.ApplicationContext.GetString(Resource.String.FilterUsers);
             searchView.QueryTextChange += RoomUserListDialog_QueryTextChange;
             searchView.QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
 

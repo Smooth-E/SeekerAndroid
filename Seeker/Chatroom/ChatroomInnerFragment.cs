@@ -790,7 +790,7 @@ namespace Seeker.Chatroom
             }
             else
             {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.ApplicationContext.GetString(Resource.String.messageWillSendOnReConnect)))
                 {
                     return;
                 }

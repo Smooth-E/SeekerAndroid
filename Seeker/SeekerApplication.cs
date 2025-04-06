@@ -76,7 +76,8 @@ namespace Seeker
                 Logger.CrashlyticsEnabled = false;
             }
 #endif
-
+            PrivilegesManager.Initialize(this);
+            
             RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             
             // TODO: This call is only reachable on Android 21
@@ -630,8 +631,8 @@ namespace Seeker
         {
             try
             {
-                PackageInfo pInfo = SeekerState.ActiveActivityRef.PackageManager.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName, 0);
-                return pInfo.VersionName;
+                var pInfo = SeekerState.ActiveActivityRef.PackageManager!.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName!, 0);
+                return pInfo!.VersionName;
             }
             catch (Exception e)
             {
@@ -639,10 +640,7 @@ namespace Seeker
                 return string.Empty;
             }
         }
-
-
-
-
+        
         public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
         {
             if (IsUserInIgnoreList(uname))
@@ -709,18 +707,18 @@ namespace Seeker
             }
         }
 
-        //I only care about the Connected, LoggedIn to Disconnecting case.  
-        //the next case is Disconnecting to Disconnected.
+        // I only care about the Connected, LoggedIn to Disconnecting case.  
+        // the next case is Disconnecting to Disconnected.
 
-        //then for failed retries you get
-        //disconnected to connecting
-        //connecting to disconnecting
-        //disconnecting to disconnected.
-        //so be wary of the disconnected event...
+        // then for failed retries you get
+        // disconnected to connecting
+        // connecting to disconnecting
+        // disconnecting to disconnected.
+        // so be wary of the disconnected event...
 
         private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
         {
-            Logger.Debug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
+            Logger.Debug("Prev: " + e.PreviousState + " Next: " + e.State);
             if (e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
             {
                 Logger.Debug("!! changing from connected to disconnecting");
@@ -739,9 +737,7 @@ namespace Seeker
                 {
                     return; //DO NOT RETRY!!! we are shutting down
                 }
-
-
-
+                
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
                 Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
@@ -798,18 +794,6 @@ namespace Seeker
 
         }
 
-        //private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
-        //{
-        //    ChatroomController.ConnectionLapse.Add(new Tuple<bool,DateTime>(false,DateTime.UtcNow));
-        //    Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
-        //    bool AUTO_CONNECT = true;
-        //    if(AUTO_CONNECT && SeekerState.currentlyLoggedIn)
-        //    {
-        //        Thread reconnectRetrier = new Thread(ReconnectExponentialBackOffThreadTask);
-        //        reconnectRetrier.Start();
-        //    }
-        //}
-
         public static void ShowToast(string msg, ToastLength toastLength)
         {
             if (SeekerState.ActiveActivityRef == null)
@@ -822,31 +806,22 @@ namespace Seeker
             }
         }
 
-        public static string GetString(int resId)
-        {
-            return SeekerApplication.ApplicationContext.GetString(resId);
-        }
-
         public static bool ShouldWeTryToConnect()
         {
             if (!SeekerState.currentlyLoggedIn)
             {
-                //we logged out on purpose
+                // we logged out on purpose
                 return false;
             }
 
             if (SeekerState.SoulseekClient == null)
             {
-                //too early
+                // too early
                 return false;
             }
 
-            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                //already connected
-                return false;
-            }
-            return true;
+            return !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) 
+                   || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn);
         }
 
         /// <summary>
@@ -1041,33 +1016,12 @@ namespace Seeker
             }
         }
 
-
-        // TODOORG
-        public class NotifInfo
-        {
-            public NotifInfo(string firstDir)
-            {
-                NOTIF_ID_FOR_USER = NotifIdCounter;
-                NotifIdCounter++;
-                FilesUploadedToUser = 1;
-                DirNames = new List<string>
-                {
-                    firstDir
-                };
-            }
-            public int NOTIF_ID_FOR_USER;
-            public int FilesUploadedToUser;
-            public List<string> DirNames = new List<string>();
-        }
-
-        public static Dictionary<string, NotifInfo> NotificationUploadTracker = new Dictionary<string, NotifInfo>();
-        public static int NotifIdCounter = 400;
+        public static Dictionary<string, NotificationInfo> NotificationUploadTracker = new();
 
         /// <summary>
-        /// this is for global uploading event handling only.  the tabpageadapter is the one for downloading... and for upload tranferpage specific events
+        /// this is for global uploading event handling only.
+        /// the tabpageadapter is the one for downloading... and for upload tranferpage specific events
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private static void Upload_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
         {
             if (e.Transfer == null || e.Transfer.Direction == TransferDirection.Download)
@@ -1076,15 +1030,14 @@ namespace Seeker
             }
             if (e.Transfer.State == TransferStates.InProgress)
             {
+                // uploading file to user...
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
-                //uploading file to user...
             }
-            //if(e.Transfer.State == TransferStates.Completed) //this condition will NEVER be hit.  it is always completed | succeeded
+
             if (e.Transfer.State.HasFlag(TransferStates.Succeeded)) //todo rethink upload notifications....
             {
                 Logger.Debug("transfer state changed to completed" + e.Transfer.Filename);
-                //send notif successfully uploading file to user..
-                //e.Transfer.AverageSpeed - speed in bytes/second
+                
                 if (e.Transfer.AverageSpeed <= 0 || ((int)(e.Transfer.AverageSpeed)) == 0)
                 {
                     Logger.Debug("avg speed <= 0" + e.Transfer.Filename);
@@ -1095,24 +1048,24 @@ namespace Seeker
                 try
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
-                    NotifInfo notifInfo = null;
+                    NotificationInfo notificationInfo = null;
                     string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
                     {
-                        notifInfo = NotificationUploadTracker[e.Transfer.Username];
-                        if (!notifInfo.DirNames.Contains(directory))
+                        notificationInfo = NotificationUploadTracker[e.Transfer.Username];
+                        if (!notificationInfo.DirNames.Contains(directory))
                         {
-                            notifInfo.DirNames.Add(directory);
+                            notificationInfo.DirNames.Add(directory);
                         }
-                        notifInfo.FilesUploadedToUser++;
+                        notificationInfo.FilesUploadedToUser++;
                     }
                     else
                     {
-                        notifInfo = new NotifInfo(directory);
-                        NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
+                        notificationInfo = new NotificationInfo(directory);
+                        NotificationUploadTracker.Add(e.Transfer.Username, notificationInfo);
                     }
 
-                    Notification n = MainActivity.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
+                    Notification n = MainActivity.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notificationInfo.DirNames, notificationInfo.FilesUploadedToUser);
                     NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.MainActivityRef);
                     nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }
@@ -1122,9 +1075,7 @@ namespace Seeker
                 }
             }
         }
-
-
-
+        
         /// <summary>
         /// this is for getting additional information (status updates) from already added users 
         /// </summary>
@@ -1244,7 +1195,7 @@ namespace Seeker
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =
                         PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, ApplicationContext.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify((foldername + username).GetHashCode(), n);

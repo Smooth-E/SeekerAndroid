@@ -1674,7 +1674,7 @@ public class MainActivity : ThemeableActivity
                 btn.Click += btnClick;
                 loggingInLayout.Visibility = ViewStates.Gone;
                 welcome.Text = string
-                    .Format(SeekerApplication.GetString(ResourceConstant.String.welcome), SeekerState.Username);
+                    .Format(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.welcome), SeekerState.Username);
             }
             else if (cWelcome != null)
             {

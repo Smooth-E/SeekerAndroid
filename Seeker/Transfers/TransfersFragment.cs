@@ -402,7 +402,7 @@ namespace Seeker
                     //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                     TransfersActionMode = SeekerState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
-                    TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
+                    TransfersActionMode.Title = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_Selected), 0);
                     TransfersActionMode.Invalidate();
                     return true;
             }
@@ -1745,7 +1745,7 @@ namespace Seeker
             }
             else
             {
-                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                TransfersActionMode.Title = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_Selected), cnt.ToString());
                 TransfersActionMode.Invalidate();
             }
         }
@@ -1789,7 +1789,7 @@ namespace Seeker
             }
             else if (BatchSelectedItems.Count != cnt) //if we have 1 less now.
             {
-                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
+                TransfersActionMode.Title = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
                 TransfersActionMode.Invalidate();
             }
         }
@@ -1926,7 +1926,7 @@ namespace Seeker
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                        TransfersActionMode.Title = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_Selected), cnt.ToString());
                         TransfersActionMode.Invalidate();
                         return true;
                     case Resource.Id.invert_selection:
@@ -1943,7 +1943,7 @@ namespace Seeker
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
+                        TransfersActionMode.Title = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
                         TransfersActionMode.Invalidate();
                         return true;
                 }
