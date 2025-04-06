@@ -435,7 +435,6 @@ namespace Seeker
         }
 
         public static EventHandler<TransferItem> StateChangedForItem;
-        public static EventHandler<int> StateChangedAtIndex;
         public static EventHandler<ProgressUpdatedUIEventArgs> ProgressUpdated;
 
         private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)

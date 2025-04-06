@@ -2446,7 +2446,6 @@ namespace Seeker
 
             public TransferViewHolder(View view) : base(view)
             {
-                //super(view);
                 // Define click listener for the ViewHolder's View
 
                 transferItemView = (ITransferItemView)view;
@@ -2461,14 +2460,13 @@ namespace Seeker
 
             public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
             {
-                //base.OnCreateContextMenu(menu, v, menuInfo);
                 ITransferItemView tvh = v as ITransferItemView;
                 TransferItem ti = null;
                 FolderItem fi = null;
                 TransferStates folderItemState = TransferStates.None;
                 bool isTransferItem = false;
                 bool anyFailed = false;
-                //bool anyOffline = false;
+                // bool anyOffline = false;
                 bool isUpload = false;
                 if (tvh?.InnerTransferItem is TransferItem tvhi)
                 {
@@ -2482,15 +2480,13 @@ namespace Seeker
                     folderItemState = fi.GetState(out anyFailed, out _);
                     isUpload = fi.IsUpload();
                 }
-                //else
-                //{
-                //shouldnt happen....
+                
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-                int pos1 = info?.Position ?? -1;
-                //}
 
 
-                //if somehow we got here without setting the transfer item. then set it now...  you have menuInfo.Position, AND tvh.InnerTransferItem. and recyclerTransfer.GetSelectedItem() to check for null.
+                // if somehow we got here without setting the transfer item. then set it now...
+                // you have menuInfo.Position, AND tvh.InnerTransferItem.
+                // and recyclerTransfer.GetSelectedItem() to check for null.
 
                 if (!isUpload)
                 {
@@ -2616,8 +2612,8 @@ namespace Seeker
                         {
                             if (fi.GetQueueLength() > 0)
                             {
-                                //the queue length of a succeeded download can be 183......
-                                //bc queue length AND free upload slots!!
+                                // the queue length of a succeeded download can be 183......
+                                // bc queue length AND free upload slots!!
                                 if (folderItemState.HasFlag(TransferStates.Succeeded) ||
                                     folderItemState.HasFlag(TransferStates.Completed))
                                 {
@@ -2664,100 +2660,52 @@ namespace Seeker
                 {
                     menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, Resource.String.IgnoreUnshareUser);
                 }
-                //finally batch selection mode
+                
+                // finally batch selection mode
                 menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, Resource.String.BatchSelect);
-
-                //if (!isUpload)
-                //{
-                //    if (isTransferItem)
-                //    {
-                //        if(ti.State.HasFlag(TransferStates.UserOffline))
-                //        {
-
-                //        }
-                //    }
-                //    else
-                //    {
-                //        if(anyOffline)
-                //        {
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Do Not Auto-Retry When User Goes Back Online");
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Auto-Retry When User Goes Back Online");
-                //        }
-                //    }
-                //}
             }
 
         }
 
         private void TransferProgressUpdated(object sender, ProgressUpdatedUIEventArgs e)
         {
-            bool needsRefresh = (e.TransferItem.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.TransferItem.IsUpload()) && !(TransfersFragment.InUploadsMode));
+            var needsRefresh = (e.TransferItem.IsUpload() && InUploadsMode) 
+                               || (!e.TransferItem.IsUpload() && !InUploadsMode);
             if (!needsRefresh)
             {
                 return;
             }
+            
             if (e.PercentComplete != 0)
             {
                 if (e.FullRefresh)
                 {
 
-                    Action action = refreshListViewSafe; //notify data set changed...
-                                                         //if (indexRemoved!=-1)
-                                                         //{
-
-                    //    var refreshOnlySelected = new Action(() => {
-
-                    //        Logger.Debug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
-                    //        if(indexRemoved == recyclerTransferAdapter.ItemCount)
-                    //        {
-
-                    //        }
-                    //        recyclerTransferAdapter?.NotifyItemRemoved(indexRemoved);
-
-
-                    //    });
-
-                    //    var refresh1 = new Action(()  => refreshListView(refreshOnlySelected) );
-
-                    //    action = refreshOnlySelected;
-                    //}
-                    //else
-                    //{
-                    //    action = refreshListViewSafe;
-                    //}
-                    Activity?.RunOnUiThread(action); //in case of rotation it is the ACTIVITY which will be null!!!!
+                    Action action = refreshListViewSafe; // notify data set changed...
+                    Activity?.RunOnUiThread(action); // in case of rotation it is the ACTIVITY which will be null!!!!
                 }
                 else
                 {
                     try
                     {
-                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.TransferItem.FullFilename + e.TransferItem.Username);
+                        var isNew = !ProgressUpdatedThrottler.ContainsKey(e.TransferItem.FullFilename + e.TransferItem.Username);
 
-                        DateTime now = DateTime.UtcNow;
-                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.TransferItem.FullFilename + e.TransferItem.Username, now); //this returns now if the key is not in the dictionary!
+                        var now = DateTime.UtcNow;
+                        // this returns now if the key is not in the dictionary!
+                        var lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.TransferItem.FullFilename + e.TransferItem.Username, now);
                         if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
                         {
                             ProgressUpdatedThrottler[e.TransferItem.FullFilename + e.TransferItem.Username] = now;
                         }
-                        else if (e.WasFailed)
+                        else if (!e.WasFailed)
                         {
-                            //still update..
-                        }
-                        else
-                        {
-                            //there was a bug where there were multiple instances of tabspageradapter and one would always get their event handler before the other
-                            //basically updating a recyclerview that wasnt even visible, while the other was never getting to update due to the throttler.
-                            //this is fixed by attaching and dettaching the event handlers on start / stop.
+                            // there was a bug where there were multiple instances of tabspageradapter
+                            // and one would always get their event handler before the other
+                            // basically updating a recyclerview that wasnt even visible,
+                            // while the other was never getting to update due to the throttler.
+                            // this is fixed by attaching and dettaching the event handlers on start / stop.
                             return;
                         }
-
-
-                        //partial refresh just update progress..
-                        //TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
-
-                        //Logger.Debug("Index is "+index+" TransferProgressUpdated"); //tested!
-
-                        //int indexToUpdate = transferItems.IndexOf(relevantItem);
 
                         Activity?.RunOnUiThread(() =>
                         {
@@ -2776,7 +2724,7 @@ namespace Seeker
 
 
                     }
-                    catch (System.Exception error)
+                    catch (Exception error)
                     {
                         Logger.FirebaseDebug(error.Message + " partial update");
                     }
@@ -2786,35 +2734,23 @@ namespace Seeker
 
         private void TransferStateChangedItem(object sender, TransferItem ti)
         {
-            Action action = new Action(() =>
+            var action = () =>
             {
 
-                int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
+                var index = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
                 if (index == -1)
                 {
                     return; //this is likely an upload when we are on downloads page or vice versa.
                 }
                 refreshListViewSpecificItem(index);
 
-            });
-            SeekerState.MainActivityRef.RunOnUiThread(action);
-        }
-
-        private void TransferStateChanged(object sender, int index)
-        {
-            Action action = new Action(() =>
-            {
-
-                refreshListViewSpecificItem(index);
-
-            });
+            };
             SeekerState.MainActivityRef.RunOnUiThread(action);
         }
 
 
         public override void OnStart()
         {
-            SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
             SharingManager.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
@@ -2851,13 +2787,15 @@ namespace Seeker
             }
             else
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { MainActivity_TransferAddedUINotify(null, e); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    MainActivity_TransferAddedUINotify(null, e);
+                });
             }
         }
 
         public override void OnStop()
         {
-            SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             DownloadQueue.TransferItemQueueUpdated -= TranferQueueStateChanged;
