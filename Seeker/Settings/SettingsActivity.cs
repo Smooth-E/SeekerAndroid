@@ -818,9 +818,7 @@ namespace Seeker
 
             UpdateLayoutParametersForScreenSize();
         }
-
-
-
+        
         private void MoreInfoExport_Click(object sender, EventArgs e)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -846,7 +844,7 @@ namespace Seeker
         private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
             string selection = GetLanguageStringFromPosition(e.Position);
-            if (SeekerApplication.GetLegacyLanguageString() == selection)
+            if (LanguageUtils.GetLegacyLanguageString(this) == selection)
             {
                 return;
             }
@@ -859,7 +857,7 @@ namespace Seeker
                 editor.Commit();
             }
 
-            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SeekerState.Language);
+            LanguageUtils.SetLanguage(ApplicationContext as Application, SeekerState.Language);
         }
 
         private void UpdateLayoutParametersForScreenSize()
@@ -2660,7 +2658,7 @@ namespace Seeker
 
         private void SetSpinnerPositionLangauge(Spinner s)
         {
-            switch (SeekerApplication.GetLegacyLanguageString())
+            switch (LanguageUtils.GetLegacyLanguageString(this))
             {
                 case SeekerState.FieldLangAuto:
                     s.SetSelection(0);

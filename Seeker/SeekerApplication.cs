@@ -22,7 +22,6 @@ using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Messages;
 using Seeker.Search;
-using Seeker.Transfers;
 using Seeker.UPnP;
 using Android.App;
 using Android.Content;
@@ -44,7 +43,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
-using AndroidX.Annotations;
 using AndroidX.Core.Net;
 using Seeker.Main;
 using Seeker.Models;
@@ -60,8 +58,9 @@ namespace Seeker
         : Application(javaReference, transfer)
     {
         public static readonly object SharedPrefLock = new();
-        public new static Application ApplicationContext;
         public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
+        public new static Application ApplicationContext;
+        public static readonly List<WeakReference<ThemeableActivity>> Activities = [];
         
         private const bool AUTO_CONNECT_ON = true;
 
@@ -93,26 +92,8 @@ namespace Seeker
             
             // TODO: This call is only reachable on Android 21
             SeekerState.SystemLanguage = Resources!.Configuration!.Locale!.ToVariantAwareString();
-
-            if (AndroidPlatform.HasProperPerAppLanguageSupport())
-            {
-                if (!SeekerState.LegacyLanguageMigrated)
-                {
-                    SeekerState.LegacyLanguageMigrated = true;
-                    lock (SharedPrefLock)
-                    {
-                        SeekerState.SharedPreferences!.Edit()!
-                            .PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated)!
-                            .Commit();
-                    }
-                    
-                    SetLanguage(SeekerState.Language);
-                }
-            }
-            else
-            {
-                SetLanguageLegacy(SeekerState.Language, false);
-            }
+            
+            LanguageUtils.SetLanguageBasedOnPlatformSupport(this);
 
             // though setting it to -1 does not seem to recreate the activity or have any negative side effects...
             // this does not restart Android.App.Application. so putting it here is a much better place...
@@ -192,79 +173,6 @@ namespace Seeker
             IReadOnlyCollection<string> excludedPhrasesList)
         {
             SearchUtil.ExcludedSearchPhrases = excludedPhrasesList;
-        }
-
-        public static string GetLegacyLanguageString()
-        {
-            if (!AndroidPlatform.HasProperPerAppLanguageSupport())
-            {
-                return SeekerState.Language;
-            }
-            
-#pragma warning disable CA1416
-            var lm = (LocaleManager)Context.GetSystemService(LocaleService)!;
-            var appLocales = lm.ApplicationLocales!;
-            if (appLocales.IsEmpty)
-            {
-                return SeekerState.FieldLangAuto;
-            }
-
-            var locale = appLocales.Get(0);
-            var lang = locale?.Language; // ex. fr, uk
-            return lang == "pt" ? SeekerState.FieldLangPtBr : lang;
-#pragma warning restore CA1416
-        }
-
-
-        public void SetLanguage(string language)
-        {
-            if (AndroidPlatform.HasProperPerAppLanguageSupport())
-            {
-#pragma warning disable CA1416
-                var lm = (LocaleManager)ApplicationContext.GetSystemService(LocaleService)!;
-                lm.ApplicationLocales = language == SeekerState.FieldLangAuto 
-                    ? LocaleList.EmptyLocaleList
-                    : LocaleList.ForLanguageTags(LocaleUtils.FormatLocaleFromResourcesToStandard(language));
-#pragma warning restore CA1416
-            }
-            else
-            {
-                SetLanguageLegacy(SeekerState.Language, true);
-            }
-        }
-
-        private void SetLanguageLegacy(string language, bool changed)
-        {
-            var res = Resources;
-            var config = res!.Configuration;
-            var displayMetrics = res.DisplayMetrics;
-
-            var currentLocale = config!.Locale;
-
-            if (currentLocale.ToVariantAwareString() == language)
-            {
-                return;
-            }
-
-            if (language == SeekerState.FieldLangAuto && 
-                SeekerState.SystemLanguage == currentLocale.ToVariantAwareString())
-            {
-                return;
-            }
-
-
-            var locale = LocaleUtils
-                .LocaleFromString(language != SeekerState.FieldLangAuto ? language : SeekerState.SystemLanguage);
-            Java.Util.Locale.Default = locale;
-            config.SetLocale(locale);
-
-            // TODO: This call is reachable on Android 25, though the method is called 'legacy'
-            BaseContext?.Resources?.UpdateConfiguration(config, displayMetrics);
-
-            if (changed)
-            {
-                RecreateActivies();
-            }
         }
         
         /// <returns>true if changed</returns>
@@ -1024,8 +932,6 @@ namespace Seeker
                 return c.Resources.GetDrawable(drawableRes);
             }
         }
-
-        public static List<WeakReference<ThemeableActivity>> Activities = new List<WeakReference<ThemeableActivity>>();
 
         public static void RecreateActivies()
         {
