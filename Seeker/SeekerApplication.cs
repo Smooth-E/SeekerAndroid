@@ -1258,51 +1258,6 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             editor.Commit();
         }
     }
-
-    public static void RestoreRecentUsersManagerFromString(string xmlRecentUsersList)
-    {
-        //if empty then this is the first time creating it.  initialize it with our list of added users.
-        SeekerState.RecentUsersManager = new RecentUserManager();
-        if (xmlRecentUsersList == string.Empty)
-        {
-            int count = UserListManager.UserList?.Count ?? 0;
-            if (count > 0)
-            {
-                SeekerState.RecentUsersManager.SetRecentUserList(UserListManager.UserList.Select(uli => uli.Username).ToList());
-            }
-            else
-            {
-                SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
-            }
-        }
-        else
-        {
-            List<string> recentUsers = new List<string>();
-            using (var stream = new System.IO.StringReader(xmlRecentUsersList))
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType()); //this happens too often not allowing new things to be properly stored..
-                SeekerState.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
-            }
-        }
-    }
-
-    public static void SaveRecentUsers()
-    {
-        string recentUsersStr;
-        List<string> recentUsers = SeekerState.RecentUsersManager.GetRecentUserList();
-        using (var writer = new System.IO.StringWriter())
-        {
-            var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType());
-            serializer.Serialize(writer, recentUsers);
-            recentUsersStr = writer.ToString();
-        }
-        lock (SharedPrefLock)
-        {
-            var editor = SeekerState.SharedPreferences.Edit();
-            editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);
-            editor.Commit();
-        }
-    }
         
     /// <summary>
     /// This is from the server after sending it a UserData request.

@@ -65,7 +65,7 @@ public static class SharedPreferencesUtils
         SeekerState.SharingOn = prefs.GetBoolean(KeyConsts.M_SharingOn, false);
         UserListManager.UserList = UserListManager.FromString(prefs.GetString(KeyConsts.M_UserList, string.Empty));
 
-        SeekerApplication.RestoreRecentUsersManagerFromString(prefs.GetString(KeyConsts.M_RecentUsersList, string.Empty));
+        SeekerState.RecentUsersManager = RecentUserManager.FromXmlString(prefs.GetString(KeyConsts.M_RecentUsersList, string.Empty));
         SeekerState.IgnoreUserList = UserListManager.FromString(prefs.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
         SeekerState.AllowPrivateRoomInvitations = prefs.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
         SeekerState.StartServiceOnStartup = prefs.GetBoolean(KeyConsts.M_ServiceOnStartup, true);

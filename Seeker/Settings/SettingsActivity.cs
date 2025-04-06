@@ -1193,7 +1193,7 @@ namespace Seeker
             {
                 SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
             }
-            SeekerApplication.SaveRecentUsers();
+            SeekerState.RecentUsersManager.SaveRecentUsers();
         }
 
         private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
