@@ -311,8 +311,7 @@ namespace Seeker.UPnP
                     return;
                 }
                 
-                LocalIP = Mono.Nat.NatUtility.LocalIpAddress = 
-                    Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress);
+                LocalIP = Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress);
                 
                 Logger.Debug(LocalIP);
 
@@ -357,7 +356,8 @@ namespace Seeker.UPnP
                     Logger.FirebaseDebug("more than 1 device found");
                 }
                 
-                bool ipOurs = (e.Device as Mono.Nat.Upnp.UpnpNatDevice).LocalAddress.ToString() == Mono.Nat.NatUtility.LocalIpAddress; //I think this will always be true
+                // TODO: Since we changed this from using external entities, it requires additional debugging now
+                bool ipOurs = e.Device.DeviceEndpoint.Address.ToString() == LocalIP; // I think this will always be true
                 if (ipOurs)
                 {
                     int oneWeek = 60 * 60 * 24 * 7; // == 604800.  on my home router I request 1 week, I get back 604800 in the mapping. but then on getting it again its 22 hours (which is probably the real time)

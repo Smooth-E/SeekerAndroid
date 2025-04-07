@@ -10,7 +10,7 @@ using Seeker.Utils;
 namespace Seeker
 {
     // Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
-    [Service(Name = "com.companyname.andriodapp1.DownloadService", ForegroundServiceType = Android.Content.PM.ForegroundService.TypeDataSync)]
+    [Service(Name="com.companyname.andriodapp1.DownloadService", ForegroundServiceType=Android.Content.PM.ForegroundService.TypeDataSync)]
     public class DownloadForegroundService : Service
     {
         public const int NOTIF_ID = 111;
