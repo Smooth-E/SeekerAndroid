@@ -4,6 +4,7 @@ using Seeker.Chatroom;
 using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
+using Seeker.Settings;
 using Soulseek;
 
 namespace Seeker.Utils;

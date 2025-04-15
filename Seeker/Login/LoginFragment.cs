@@ -31,6 +31,7 @@ using Seeker.Utils;
 using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
+using Seeker.Settings;
 
 namespace Seeker
 {

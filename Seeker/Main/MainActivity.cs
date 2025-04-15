@@ -51,6 +51,7 @@ using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Search;
+using Seeker.Settings;
 using Seeker.Transfers;
 using Seeker.Utils;
 using Soulseek;

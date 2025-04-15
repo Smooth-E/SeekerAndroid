@@ -45,6 +45,7 @@ using _Microsoft.Android.Resource.Designer;
 using AndroidX.Core.Net;
 using Seeker.Main;
 using Seeker.Models;
+using Seeker.Settings;
 using Seeker.Utils;
 using SlskHelp;
 using static Android.Net.ConnectivityManager;

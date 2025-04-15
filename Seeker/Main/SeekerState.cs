@@ -11,6 +11,7 @@ using System.Threading;
 using Seeker.Main;
 using Seeker.Managers;
 using Seeker.Models;
+using Seeker.Settings;
 
 namespace Seeker
 {

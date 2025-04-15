@@ -21,6 +21,7 @@ using Seeker.Models;
 using Seeker.Utils;
 using Seeker.Helpers;
 using Seeker.Main;
+using Seeker.Settings;
 
 namespace Seeker
 {

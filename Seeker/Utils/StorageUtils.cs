@@ -9,6 +9,7 @@ using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Java.IO;
 using Seeker.Managers;
+using Seeker.Settings;
 using SlskHelp;
 using Soulseek;
 using Uri = Android.Net.Uri;
