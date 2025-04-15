@@ -1405,7 +1405,7 @@ namespace Seeker
 
         private void CheckPriv_Click(object sender, EventArgs e)
         {
-            SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.checking_priv_), ToastLength.Short);
+            SeekerApplication.ApplicationContext.ShowShortToast(ResourceConstant.String.checking_priv_);
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
         }
 
@@ -1413,7 +1413,8 @@ namespace Seeker
         {
             if (MainActivity.IsNotLoggedIn())
             {
-                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
+                SeekerApplication.ApplicationContext
+                    .ShowLongToast(ResourceConstant.String.must_be_logged_in_to_get_privileges);
                 return;
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...

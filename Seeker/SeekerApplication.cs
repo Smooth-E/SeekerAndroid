@@ -274,23 +274,26 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             }
         }
     }
-
-
+    
     public static volatile int DL_COUNT = -1; // a hack see below
 
-    //it works in the case of successfully finished, cancellation token used, etc.
-    private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+    // it works in the case of successfully finished, cancellation token used, etc.
+    private void SoulseekClient_DownloadAddedRemovedInternal(object sender, 
+        SoulseekClient.TransferAddedRemovedInternalEventArgs e)
     {
-        //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
+        // even with them all going onto same thread here you will still have (ex)
+        // a 16 count coming in after a 0 count sometimes.
         Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
         Logger.Debug("the thread is: " + Thread.CurrentThread.ManagedThreadId);
 
-        var cancelAndClear = DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer < 750;
+        var cancelAndClear =
+            DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer < 750;
+        
         Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
         if (e.Count == 0 || cancelAndClear)
         {
             DL_COUNT = -1;
-            Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
+            var downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
             Logger.Debug("Stop Service");
             StopService(downloadServiceIntent);
             SeekerState.DownloadKeepAliveServiceRunning = false;
@@ -317,22 +320,22 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         }
         else if (SeekerState.DownloadKeepAliveServiceRunning && e.Count != 0)
         {
+            // for two downloads, this notification will go up before the service is started...
             DL_COUNT = e.Count;
-            //for two downloads, this notification will go up before the service is started...
 
-            //requires run on ui thread? NOPE
-            string msg = string.Empty;
+            // requires run on ui thread? NOPE
+            string message;
             if (e.Count == 1)
             {
-                msg = string.Format(DownloadForegroundService.SingularDownloadRemaining, e.Count);
+                message = string.Format(DownloadForegroundService.SingularDownloadRemaining, e.Count);
             }
             else
             {
-                msg = string.Format(DownloadForegroundService.PluralDownloadsRemaining, e.Count);
+                message = string.Format(DownloadForegroundService.PluralDownloadsRemaining, e.Count);
             }
-            var notif = DownloadForegroundService.CreateNotification(this, msg);
+            var notification = DownloadForegroundService.CreateNotification(this, message);
             var manager = GetSystemService(NotificationService) as NotificationManager;
-            manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
+            manager?.Notify(DownloadForegroundService.NOTIF_ID, notification);
         }
     }
 
@@ -362,7 +365,8 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         {
             // if the incoming transfer is not cancelled,
             // i.e. requested, then we replace the state (the user retried).
-            if (e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
+            var transferFailed = e.Transfer!.State.HasFlag(TransferStates.Cancelled);
+            if (transferFailed && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
             {
                 Logger.Debug("fallen from queue");
                     
@@ -387,9 +391,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
                 relevantItem.IncompleteParentUri = null; // not needed anymore.
             }
         }
-            
-        // TODO: Continue formatting from around here
-            
+
         if (e.Transfer!.State.HasFlag(TransferStates.Errored) 
             || e.Transfer.State.HasFlag(TransferStates.TimedOut)
             || e.Transfer.State.HasFlag(TransferStates.Rejected))
@@ -412,20 +414,13 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
                 
             if (!relevantItem.IsUpload())
             {
-                // TODO: why is queue length max value
-                if (relevantItem.QueueLength != 0)
-                {
-                    // this means that it probably came from a search response where we know the users queuelength
-                    // ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
-                    DownloadQueue.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                }
-                else
-                {
-                    // this means that it came from a browse response
-                    // where we may not know the users initial queue length...
-                    // or if its unexpectedly queued.
-                    DownloadQueue.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                }
+                DownloadQueue.GetDownloadPlaceInQueue(
+                    e.Transfer.Username, 
+                    e.Transfer.Filename, 
+                    true, 
+                    true, 
+                    relevantItem, 
+                    null);
             }
                 
             StateChangedForItem?.Invoke(null, relevantItem);
@@ -464,83 +459,91 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
                 }
             }
 
-            if (e.Transfer.State.HasFlag(TransferStates.Succeeded))
+   
+            if (e.Transfer.State.HasFlag(TransferStates.Succeeded) 
+                && SeekerState.NotifyOnFolderCompleted 
+                && !isUpload 
+                && TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
             {
-                if (SeekerState.NotifyOnFolderCompleted && !isUpload)
-                {
-                    if (TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
-                    {
-                        //relevantItem.TransferItemExtra // if single then change the notif text.
-                        // RetryDL is on completed Succeeded dl?
-                        ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
-                    }
-                }
+                //relevantItem.TransferItemExtra // if single then change the notif text.
+                // RetryDL is on completed Succeeded dl?
+                ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
             }
         }
         else
         {
-            if (relevantItem == null && (e.Transfer.State == TransferStates.Requested || e.Transfer.State == TransferStates.Aborted))
+            switch (relevantItem)
             {
-                return; //TODO sometimes this can happen too fast.  this is okay thouugh bc it will soon go to another state.
+                case null when e.Transfer.State is TransferStates.Requested or TransferStates.Aborted:
+                    // TODO sometimes this can happen too fast.
+                    //      this is okay, though because it will soon go to another state.
+                    return;
+                case null when e.Transfer.State == TransferStates.InProgress:
+                    // THIS SHOULD NOT HAPPEN now that the race condition is resolved....
+                    Logger.FirebaseDebug("relevantItem==null. state: " + e.Transfer.State);
+                    return;
+                default:
+                    StateChangedForItem?.Invoke(null, relevantItem);
+                    break;
             }
-            if (relevantItem == null && e.Transfer.State == TransferStates.InProgress)
-            {
-                //THIS SHOULD NOT HAPPEN now that the race condition is resolved....
-                Logger.FirebaseDebug("relevantItem==null. state: " + e.Transfer.State.ToString());
-                return;
-            }
-            StateChangedForItem?.Invoke(null, relevantItem);
         }
     }
 
-    public static bool OnTransferSizeMismatchFunc(System.IO.Stream fileStream, string fullFilename, string username, long startOffset, long oldSize, long newSize, string incompleteUriString, out System.IO.Stream newStream)
+    public static bool OnTransferSizeMismatchFunc(
+        System.IO.Stream fileStream, 
+        string fullFilename,
+        string username,
+        long startOffset, 
+        long oldSize, 
+        long newSize, 
+        string incompleteUriString, 
+        out System.IO.Stream newStream)
     {
         newStream = null;
         try
         {
-            var relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
+            var relevantItem = TransfersFragment.TransferItemManagerWrapped
+                .GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
+            relevantItem.Size = newSize;
             if (startOffset == 0)
             {
                 // all we need to do is update the size.
-                relevantItem.Size = newSize;
                 Logger.Debug("updated the size");
+                return true;
+            }
+            
+            // we need to truncate the incomplete file and set our progress back to 0.
+
+            fileStream.Close();
+            var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders 
+                                 && !SettingsActivity.UseIncompleteManualFolder();
+
+            var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
+
+            // this is the only time we do legacy.
+            var isLegacyCase = SeekerState.UseLegacyStorage() 
+                               && (SeekerState.RootDocumentFile == null && useDownloadDir);
+            if (isLegacyCase)
+            {
+                newStream = new System.IO.FileStream(incompleteUri!.Path!, 
+                    System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);
             }
             else
             {
-                // we need to truncate the incomplete file and set our progress back to 0.
-                relevantItem.Size = newSize;
 
-                fileStream.Close();
-                var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders 
-                                     && !SettingsActivity.UseIncompleteManualFolder();
-
-                var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
-
-                // this is the only time we do legacy.
-                var isLegacyCase = SeekerState.UseLegacyStorage() 
-                                   && (SeekerState.RootDocumentFile == null && useDownloadDir);
-                if (isLegacyCase)
-                {
-                    newStream = new System.IO.FileStream(incompleteUri!.Path!, 
-                        System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);
-                }
-                else
-                {
-
-                    newStream = SeekerState.MainActivityRef.ContentResolver!
-                        .OpenOutputStream(incompleteUri!, "wt");
-                }
-
-                relevantItem.Progress = 0;
-                Logger.Debug("truncated the file and updated the size");
+                newStream = SeekerState.MainActivityRef.ContentResolver!
+                    .OpenOutputStream(incompleteUri!, "wt");
             }
 
+            relevantItem.Progress = 0;
+            Logger.Debug("truncated the file and updated the size");
         }
         catch (Exception exception)
         {
             Logger.Debug("OnTransferSizeMismatchFunc: " + exception);
             return false;
         }
+        
         return true;
     }
         
@@ -568,7 +571,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
 
         if (relevantItem == null)
         {
-            //this happens on Clear and Cancel All.
+            // this happens on Clear and Cancel All.
             Logger.Debug("Relevant Item Null " + e.Transfer.Filename);
             Logger.Debug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
             return;
@@ -622,22 +625,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             percentComplete, e.Transfer.AverageSpeed);
         ProgressUpdated?.Invoke(null, args);
     }
-
-    public static string GetVersionString()
-    {
-        try
-        {
-            var pInfo = SeekerState.ActiveActivityRef.PackageManager!
-                .GetPackageInfo(SeekerState.ActiveActivityRef.PackageName!, 0);
-            return pInfo!.VersionName;
-        }
-        catch (Exception e)
-        {
-            Logger.FirebaseDebug("GetVersionString: " + e.Message);
-            return string.Empty;
-        }
-    }
-        
+    
     public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
     {
         if (IsUserInIgnoreList(uname))
@@ -692,7 +680,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         var documentFile = DocumentFile.FromFile(userInfoPic);
         var imageStream = ApplicationContext.ContentResolver!.OpenInputStream(documentFile.Uri);
         var picFile = new byte[imageStream!.Length];
-        imageStream.Read(picFile, 0, (int)imageStream.Length);
+        imageStream.ReadExactly(picFile, 0, (int)imageStream.Length);
             
         return picFile;
     }
@@ -794,19 +782,6 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
     private void SoulseekClient_Connected(object sender, EventArgs e)
     {
         Logger.Debug("connected " + DateTime.UtcNow);
-    }
-
-    // TODO: Remove this with other static references to context
-    public static void ShowToast(string msg, ToastLength toastLength)
-    {
-        if (SeekerState.ActiveActivityRef == null)
-        {
-            Logger.Debug("cant show toast, active activity ref is null");
-        }
-        else
-        {
-            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, msg, toastLength).Show(); });
-        }
     }
 
     public static bool ShouldWeTryToConnect()

@@ -1,4 +1,5 @@
 ﻿using System;
+using _Microsoft.Android.Resource.Designer;
 using Android.Content;
 using Android.Net;
 using Android.Widget;
@@ -34,30 +35,30 @@ public class ConnectionReceiver : BroadcastReceiver
             if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
             {
                 Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
-                SeekerApplication.ShowToast("Is Connected", ToastLength.Long);
-                NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
+                
+                // TODO: Use a resource string
+                context.ShowShortToast("Is Connected");
+                
+                var info = cm.GetNetworkInfo(ConnectivityType.Wifi);
                 if (info.IsConnected)
                 {
-                    SeekerApplication.ShowToast("Is Connected Wifi", ToastLength.Long);
+                    // TODO: Use a resource string
+                    context.ShowShortToast("Is Connected Wifi");
                 }
                 info = cm.GetNetworkInfo(ConnectivityType.Mobile);
                 if (info.IsConnected)
                 {
-                    SeekerApplication.ShowToast("Is Connected Mobile", ToastLength.Long);
+                    // TODO: Use a resource string
+                    context.ShowShortToast("Is Connected Mobile");
                 }
             }
             else
             {
-                if (cm.ActiveNetworkInfo != null)
-                {
-                    Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState());
-                    SeekerApplication.ShowToast("Is Disconnected", ToastLength.Long);
-                }
-                else
-                {
-                    Logger.Debug("info: Is Disconnected(null)");
-                    SeekerApplication.ShowToast("Is Disconnected (null)", ToastLength.Long);
-                }
+                Logger.Debug("info: " + cm.ActiveNetworkInfo?.GetDetailedState());
+                    
+                // TODO: Use a resource string
+                var state = cm.ActiveNetworkInfo != null ? string.Empty : ", no network state";
+                context.ShowShortToast($"Is Disconnected" + state);
             }
 #endif
         }

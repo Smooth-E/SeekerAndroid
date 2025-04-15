@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
@@ -19,8 +20,10 @@ namespace Seeker.Transfers
         {
             if (username == SeekerState.Username)
             {
-                SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long);
-                return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
+                SeekerApplication.ApplicationContext.ShowLongToast(ResourceConstant.String.cannot_download_from_self);
+                
+                // since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
+                return new Task(() => { });
             }
 
             Task task = new Task(() =>
@@ -46,21 +49,12 @@ namespace Seeker.Transfers
                 }
             }
 
-            if (allExist)
-            {
-                SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short);
-            }
-            else
-            {
-                if (queuePaused)
-                {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.QueuedForDownload), ToastLength.Short);
-                }
-                else
-                {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short);
-                }
-            }
+            var toastMessage = allExist
+                ? ResourceConstant.String.error_duplicate
+                : queuePaused
+                    ? ResourceConstant.String.QueuedForDownload
+                    : ResourceConstant.String.download_is_starting;
+            SeekerApplication.ApplicationContext.ShowShortToast(toastMessage);
 
             if (!allExist && !queuePaused)
             {

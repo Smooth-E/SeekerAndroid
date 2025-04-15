@@ -984,6 +984,7 @@ public static class StorageUtils
         int depth,
         bool noSubFolder,
         out string finalUri,
+        // TODO: Pass a non-nullable context
         Activity activity = null)
     {
         string name = CommonHelpers.GetFileNameFromFile(fullFileName);
@@ -1243,7 +1244,9 @@ public static class StorageUtils
                     catch (Exception e)
                     {
                         Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR pre" + e.Message);
-                        SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                        
+                        // TODO: Use a resource string
+                        SeekerApplication.ApplicationContext.ShowLongToast("Error Saving File");
                         Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
                     }
                 }
@@ -1303,18 +1306,18 @@ public static class StorageUtils
                                     // incomplete file (since the incomplete and complete folders
                                     // couldnt be created.
                                     // This error is misleading though so do a more generic error.
-                                    SeekerApplication.ShowToast($"Filesystem Error for file {realName}.",
-                                        ToastLength.Long);
+                                    
+                                    // TODO: Use a resource string
+                                    SeekerApplication.ApplicationContext
+                                        .ShowLongToast($"Filesystem Error for file {realName}.");
                                     
                                     Logger.Debug("complete and incomplete locations are the same");
                                 }
                                 else
                                 {
-                                    SeekerApplication.ShowToast(
-                                        string.Format(
-                                            "File {0} already exists at {1}.  Delete it and try again " +
-                                            "if you want to overwrite it.",
-                                            realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                    SeekerApplication.ApplicationContext.ShowLongToast(
+                                        $"File {realName} already exists at {uri.LastPathSegment}. " +
+                                        $" Delete it and try again if you want to overwrite it.");
                                 }
                             }
                             catch (Exception e2)
@@ -1354,7 +1357,8 @@ public static class StorageUtils
                                     Logger.FirebaseDebug(
                                         "Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" +
                                         secondTryErr.Message);
-                                    SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                    // TODO: Use a resource string
+                                    SeekerApplication.ApplicationContext.ShowLongToast("Error Saving File");
                                     Logger.Debug(secondTryErr.Message + " " + uriOfIncomplete.Path);
                                 }
                             }
@@ -1363,12 +1367,14 @@ public static class StorageUtils
                                 Logger.FirebaseInfo("uri!=null");
                                 Logger.FirebaseDebug("CRITICAL FILESYSTEM ERROR " + e.Message +
                                                          " path child: " +
-                                                         Android.Net.Uri.Decode(uriOfIncomplete.ToString()) +
+                                                         Uri.Decode(uriOfIncomplete.ToString()) +
                                                          " path parent: " +
-                                                         Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) +
+                                                         Uri.Decode(parentUriOfIncomplete.ToString()) +
                                                          " path dest: " +
-                                                         Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
-                                SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                                         Uri.Decode(folderDir1?.Uri?.ToString()));
+                                
+                                // TODO: Use a resource string
+                                SeekerApplication.ApplicationContext.ShowLongToast("Error Saving File");
                                 
                                 // Unknown Authority happens when source is
                                 // file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/

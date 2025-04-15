@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Main;
 using Seeker.Managers;
 using Seeker.Utils;
@@ -227,7 +228,7 @@ namespace Seeker.Chatroom
                 if (t.IsFaulted)
                 {
                     msg.SentMsgStatus = SentStatus.Failed;
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
+                    SeekerApplication.ApplicationContext.ShowLongToast(ResourceConstant.String.failed_to_send_message);
                 }
                 else
                 {
@@ -1377,10 +1378,12 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    string ownershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.ownership);
-                    string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
-                    string membership = ownership ? ownershipString : membershipString;
-                    SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                    var ownershipString = SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.ownership);
+                    var membershipString = SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.membership);
+                    var membership = ownership ? ownershipString : membershipString;
+                    var rawString =
+                        SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.failed_to_remove);
+                    SeekerApplication.ApplicationContext.ShowShortToast(string.Format(rawString, membership));
                     Logger.FirebaseDebug("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
                 }
                 return;
@@ -1394,8 +1397,9 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                        SeekerApplication.ApplicationContext.ShowShortToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership));
                     }
+                    
                     Logger.FirebaseDebug("DropMembershipOrOwnershipLogic " + task.Exception);
                 }
                 else
@@ -1403,7 +1407,7 @@ namespace Seeker.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
+                        SeekerApplication.ApplicationContext.ShowShortToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership));
                     }
 
                 }
@@ -1459,12 +1463,13 @@ namespace Seeker.Chatroom
             {
                 task = SeekerState.SoulseekClient.SetRoomTickerAsync(roomName, tickerMessage); //this will create it if it does not exist..
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (feedback)
                 {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                    SeekerApplication.ApplicationContext.ShowShortToast(ResourceConstant.String.failed_to_set_ticker);
                 }
+                
                 return;
             }
             task.ContinueWith((Task task) =>
@@ -1473,7 +1478,7 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                        SeekerApplication.ApplicationContext.ShowShortToast(ResourceConstant.String.failed_to_set_ticker);
                     }
                 }
                 else
@@ -1481,7 +1486,7 @@ namespace Seeker.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
+                        SeekerApplication.ApplicationContext.ShowShortToast(ResourceConstant.String.successfully_set_ticker);
                     }
                 }
             });

@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
@@ -1207,15 +1208,17 @@ namespace Seeker
                         return;
                     }
 
-                    t.ContinueWith(new Action<Task>((Task t) =>
+                    t.ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                         {
-                            SeekerApplication.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                            var stringId = ResourceConstant.String.failed_to_connect;
+                            SeekerApplication.ApplicationContext.ShowShortToast(stringId);
                             return;
                         }
+                        
                         TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
-                    }));
+                    });
                 }
                 else
                 {

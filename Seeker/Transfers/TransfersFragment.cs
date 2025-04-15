@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Managers;
 using Seeker.Models;
 using Seeker.Utils;
@@ -1208,37 +1209,20 @@ namespace Seeker
 
         private void DownloadRetryLogic(ITransferItem transferItem)
         {
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-            //its possible that in between creating this contextmenu and getting here that the transfer items changed especially if maybe a re-login was done...
-            //either position changed, or someone just straight up cleared them in the meantime...
-            //maybe we can add the filename in the menuinfo to match it with, rather than the index..
-
-            //NEVER USE GetChildAt!!!  IT WILL RETURN NULL IF YOU HAVE MORE THAN ONE PAGE OF DATA
-            //FindViewByPosition works PERFECTLY.  IT RETURNS THE VIEW CORRESPONDING TO THE TRANSFER LIST..
-
-            //ITransferItemView targetView = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(position) as ITransferItemView;
-
-            //TransferItem item1 = null;
-            //Logger.Debug("targetView is null? " + (targetView == null).ToString());
-            //if (targetView == null)
-            //{
-            //    SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
-            //    return;
-            //}
-            string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
-            string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            var chosenFname = (transferItem as TransferItem)!.FullFilename;
+            var chosenUname = (transferItem as TransferItem)!.Username;
+            
             Logger.Debug("chosenFname? " + chosenFname);
             TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
             int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1);
-            Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
+            Logger.Debug("item1 is null?" + (item1 == null)); // tested
             if (item1 == null || indexToRefresh == -1)
             {
-                SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
+                Context.ShowShortToast(ResourceConstant.String.chosen_transfer_doesnt_exist);
                 return;
             }
 
-            //int tokenNum = int.MinValue;
-            if (SeekerState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
+            if (SeekerState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename))
             {
                 Logger.Debug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;

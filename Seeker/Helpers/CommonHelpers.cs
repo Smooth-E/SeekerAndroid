@@ -606,7 +606,8 @@ namespace Seeker
                         {
                             emptyTextErrorString = "Input Required";
                         }
-                        SeekerApplication.ShowToast(emptyTextErrorString, ToastLength.Short);
+                        
+                        SeekerApplication.ApplicationContext.ShowShortToast(emptyTextErrorString);
                     }
                     else
                     {
@@ -932,7 +933,9 @@ namespace Seeker
                 if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                 {
                     Logger.FirebaseDebug("viewUri: " + e.Message + httpUri.ToString());
-                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
+                    SeekerApplication.ApplicationContext.ShowLongToast($"No application found to handle url" +
+                                                                       $" \"{httpUri.ToString()}\". " +
+                                                                       $" Please install or enable web browser.");
                 }
             }
         }
@@ -1432,18 +1435,28 @@ namespace Seeker
                         {
                             if (t.Exception.InnerException is TimeoutException)
                             {
-                                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.ApplicationContext.GetString(Resource.String.timeout), ToastLength.Long);
+                                // TODO: Replace this with a single resource string
+                                var failedToChangePassword = SeekerApplication.ApplicationContext
+                                    .GetString(ResourceConstant.String.failed_to_change_password);
+                                var timeout = SeekerApplication.ApplicationContext
+                                    .GetString(ResourceConstant.String.timeout);
+                                SeekerApplication.ApplicationContext
+                                    .ShowLongToast($"{failedToChangePassword}: {timeout}");
                             }
                             else
                             {
-                                Logger.FirebaseDebug("Failed to change password" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
+                                Logger.FirebaseDebug("Failed to change password" + t.Exception.InnerException?.Message);
+                                SeekerApplication.ApplicationContext
+                                    .ShowLongToast(ResourceConstant.String.failed_to_change_password);
                             }
+                            
                             return;
                         }
                         else
                         {
-                            SeekerApplication.ShowToast(SeekerApplication.ApplicationContext.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
+                            SeekerApplication.ApplicationContext
+                                .ShowLongToast(ResourceConstant.String.password_successfully_updated);
+                            
                             SeekerState.Password = newPassword;
                             lock (SeekerApplication.SharedPrefLock)
                             {
@@ -1455,7 +1468,6 @@ namespace Seeker
                     });
                 }
                 ));
-
         }
 
         /// <summary>
@@ -1521,38 +1533,44 @@ namespace Seeker
                 return true;
             }
         }
-
-
+        
         private static void GivePrivilegesLogic(string username, int numDaysInt)
         {
-            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
-            SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
-                ((Task t) =>
+            SeekerApplication.ApplicationContext.ShowShortToast(ResourceConstant.String.sending__);
+            SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
                 {
-                    if (t.IsFaulted)
+                    if (t.Exception.InnerException is TimeoutException)
                     {
-                        if (t.Exception.InnerException is TimeoutException)
-                        {
-                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.ApplicationContext.GetString(Resource.String.timeout), ToastLength.Long);
-                        }
-                        else
-                        {
-                            Logger.FirebaseDebug(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
-                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
-                        }
-                        return;
+                        var prefix = SeekerApplication.ApplicationContext
+                            .GetString(ResourceConstant.String.error_give_priv);
+                        var suffix = SeekerApplication.ApplicationContext
+                            .GetString(ResourceConstant.String.timeout);
+                        SeekerApplication.ApplicationContext.ShowLongToast($"{prefix}: {suffix}");
                     }
                     else
                     {
-                        //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
-                        PrivilegesManager.Instance.SubtractDays(numDaysInt);
-
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
-
-                        //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
-                        //in the rare case that it fails they do get a message so they can figure it out
+                        Logger.FirebaseDebug(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
+                        SeekerApplication.ApplicationContext.ShowLongToast(ResourceConstant.String.error_give_priv);
                     }
-                }));
+                    return;
+                }
+                else
+                {
+                    // now there is a chance the user does not exist or something happens.
+                    // in which case our days will be incorrect...
+                    PrivilegesManager.Instance.SubtractDays(numDaysInt);
+
+                    var rawString = SeekerApplication.ApplicationContext
+                        .GetString(ResourceConstant.String.give_priv_success);
+                    SeekerApplication.ApplicationContext
+                        .ShowLongToast(string.Format(rawString, numDaysInt, username));
+
+                    //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
+                    //in the rare case that it fails they do get a message so they can figure it out
+                }
+            });
         }
 
         public static void ShowReportErrorDialog(Context c, string message)

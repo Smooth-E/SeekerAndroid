@@ -960,7 +960,7 @@ public class MainActivity : ThemeableActivity
                 // this is a literal CDATA string.
                 var origString = string.Format(
                     SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.about_body),
-                    SeekerApplication.GetVersionString()
+                    PackageManager?.GetPackageInfo(PackageName!, 0)?.VersionName ?? string.Empty
                 );
 
                 // this can be slow so do NOT do it in loops...
