@@ -136,7 +136,7 @@ public class MainActivity : ThemeableActivity
             return;
         }
         
-        if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+        if (Intent.GetIntExtra(SeekerApplication.FROM_FOLDER_ALERT, -1) == 2)
         {
             pager.SetCurrentItem(2, false);
             return;
@@ -869,7 +869,7 @@ public class MainActivity : ThemeableActivity
         {
             pager.SetCurrentItem(2, false);
         }
-        else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+        else if (Intent.GetIntExtra(SeekerApplication.FROM_FOLDER_ALERT, -1) == 2)
         {
             pager.SetCurrentItem(2, false);
         }

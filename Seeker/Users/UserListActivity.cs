@@ -387,14 +387,14 @@ namespace Seeker
 
         protected override void OnPause()
         {
-            SeekerApplication.UserStatusChangedUIEvent -= OnUserStatusChanged;
+            SeekerApplication.UserStatusChangedUiEvent -= OnUserStatusChanged;
             base.OnPause();
         }
 
         protected override void OnResume()
         {
             RefreshUserList();
-            SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
+            SeekerApplication.UserStatusChangedUiEvent += OnUserStatusChanged;
             base.OnResume();
         }
 

@@ -784,7 +784,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         Logger.Debug("connected " + DateTime.UtcNow);
     }
 
-    public static bool ShouldWeTryToConnect()
+    private static bool ShouldWeTryToConnect()
     {
         if (!SeekerState.currentlyLoggedIn)
         {
@@ -810,20 +810,20 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
     // want to trigger it immediately, then we can just set this event.
     public static AutoResetEvent ReconnectAutoResetEvent = new(false);
     public static volatile bool ReconnectSteppedBackOffThreadIsRunning;
-        
-    public static void ReconnectSteppedBackOffThreadTask()
+
+    private static void ReconnectSteppedBackOffThreadTask()
     {
         try
         {
             ReconnectSteppedBackOffThreadIsRunning = true;
-            for (int i = 0; i < MAX_TRIES; i++)
+            for (var i = 0; i < MAX_TRIES; i++)
             {
                 if (!ShouldWeTryToConnect())
                 {
                     return; //our work here is done
                 }
 
-                bool isDueToAutoReset = ReconnectAutoResetEvent.WaitOne(retrySeconds[i] * 1000);
+                var isDueToAutoReset = ReconnectAutoResetEvent.WaitOne(retrySeconds[i] * 1000);
                 if (isDueToAutoReset)
                 {
                     Logger.Debug("is woken due to auto reset");
@@ -870,7 +870,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         context.ShowShortToast(string.Format(context.GetString(stringId), username));
     }
         
-    public static Android.Graphics.Drawables.Drawable? GetDrawableFromAttribute(Context context, int attr)
+    public static Android.Graphics.Drawables.Drawable GetDrawableFromAttribute(Context context, int attr)
     {
         var typedValue = new TypedValue();
         context.Theme?.ResolveAttribute(attr, typedValue, true);
@@ -972,7 +972,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         }
     }
 
-    public static Dictionary<string, NotificationInfo> NotificationUploadTracker = new();
+    private static readonly Dictionary<string, NotificationInfo> NotificationUploadTracker = new();
 
     /// <summary>
     /// this is for global uploading event handling only.
@@ -1124,27 +1124,46 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         return v;
     }
 
-    public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
-    public const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
-    public const string FromUserOnlineAlert = "FromUserOnlineAlert";
-    public static void ShowNotificationForUserOnlineAlert(string username)
+    // TODO: Move these notification-based methods into a separate file
+    
+    private const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
+    private const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
+    private const string FROM_USER_ONLINE_ALERT = "FromUserOnlineAlert";
+
+    private static void ShowNotificationForUserOnlineAlert(string username)
     {
         SeekerState.ActiveActivityRef.RunOnUiThread(() =>
         {
             try
             {
-                CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
-                Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(UserListActivity));
-                notifIntent.AddFlags(ActivityFlags.SingleTop);
-                notifIntent.PutExtra(FromUserOnlineAlert, true);
-                PendingIntent pendingIntent =
-                    PendingIntent.GetActivity(SeekerState.ActiveActivityRef, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
+                CommonHelpers.CreateNotificationChannel(
+                    SeekerState.ActiveActivityRef, 
+                    CHANNEL_ID_USER_ONLINE,
+                    CHANNEL_NAME_USER_ONLINE,
+                    NotificationImportance.High); //only high will "peek"
+                
+                var notificationIntent = new Intent(SeekerState.ActiveActivityRef, typeof(UserListActivity))
+                    .AddFlags(ActivityFlags.SingleTop)
+                    .PutExtra(FROM_USER_ONLINE_ALERT, true);
+                
+                var pendingIntent = PendingIntent.GetActivity(
+                    SeekerState.ActiveActivityRef, username.GetHashCode(),
+                    notificationIntent, 
+                    CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+
+                var rawString = ApplicationContext.GetString(Resource.String.user_X_is_now_online);
+                var notification = CommonHelpers.CreateNotification(
+                    SeekerState.ActiveActivityRef,
+                    pendingIntent, CHANNEL_ID_USER_ONLINE, 
+                    // TODO: Use a resource string
+                    "User Online",
+                    string.Format(rawString, username),
+                    false);
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                 // notificationId is a unique int for each notification that you must define
-                notificationManager.Notify(username.GetHashCode(), n);
+                notificationManager.Notify(username.GetHashCode(), notification);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Logger.FirebaseDebug("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
             }
@@ -1152,11 +1171,11 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
     }
 
 
-    public const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
-    public const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
-    public const string FromFolderAlert = "FromFolderAlert";
-    public const string FromFolderAlertUsername = "FromFolderAlertUsername";
-    public const string FromFolderAlertFoldername = "FromFolderAlertFoldername";
+    private const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
+    private const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
+    public const string FROM_FOLDER_ALERT = "FromFolderAlert";
+    private const string FROM_FOLDER_ALERT_USERNAME = "FromFolderAlertUsername";
+    private const string FROM_FOLDER_ALERT_FOLDER_NAME = "FromFolderAlertFoldername";
         
     public static void ShowNotificationForCompletedFolder(string foldername, string username)
     {
@@ -1164,20 +1183,43 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         {
             try
             {
-                CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
-                Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                notifIntent.PutExtra(FromFolderAlert, 2);
-                notifIntent.PutExtra(FromFolderAlertUsername, username);
-                notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
-                PendingIntent pendingIntent =
-                    PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, ApplicationContext.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
+                CommonHelpers.CreateNotificationChannel(
+                    SeekerState.ActiveActivityRef, 
+                    CHANNEL_ID_FOLDER_ALERT, 
+                    CHANNEL_NAME_FOLDER_ALERT, 
+                    NotificationImportance.High); //only high will "peek"
+                
+                var notificationIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity))
+                    // otherwise if another activity is in front then this intent will do nothing...
+                    .AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront) 
+                    .PutExtra(FROM_FOLDER_ALERT, 2)
+                    .PutExtra(FROM_FOLDER_ALERT_USERNAME, username)
+                    .PutExtra(FROM_FOLDER_ALERT_FOLDER_NAME, foldername);
+
+                var reqCode = (foldername + username).GetHashCode();
+                var flags = CommonHelpers
+                    .AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true);
+                var pendingIntent = 
+                    PendingIntent.GetActivity(SeekerState.ActiveActivityRef, reqCode, notificationIntent, flags);
+
+                var rawString = ApplicationContext
+                    .GetString(ResourceConstant.String.folder_X_from_user_Y_finished);
+                var notificationBody = string.Format(rawString, foldername, username);
+                    
+                var notification = CommonHelpers.CreateNotification(
+                    SeekerState.ActiveActivityRef,
+                    pendingIntent,
+                    CHANNEL_ID_FOLDER_ALERT,
+                    ApplicationContext.GetString(ResourceConstant.String.FolderFinishedDownloading),
+                    notificationBody,
+                    false);
+                    
+                var notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
+
                 // notificationId is a unique int for each notification that you must define
-                notificationManager.Notify((foldername + username).GetHashCode(), n);
+                notificationManager.Notify((foldername + username).GetHashCode(), notification);
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Logger.FirebaseDebug("ShowNotificationForCompletedFolder failed: " + e.Message + e.StackTrace);
             }
@@ -1186,59 +1228,60 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         
     public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
     {
-        if (SeekerState.ShowRecentUsers)
+        if (!SeekerState.ShowRecentUsers)
         {
-            if (forAddingUser)
-            {
-                //dont show people that we have already added...
-                var recents = SeekerState.RecentUsersManager.GetRecentUserList();
-                lock (UserListManager.UserList)
-                {
-                    foreach (var uli in UserListManager.UserList)
-                    {
-                        recents.Remove(uli.Username);
-                    }
-                }
-                actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, recents);
-            }
-            else
-            {
-                actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SeekerState.RecentUsersManager.GetRecentUserList());
-            }
+            return;
         }
+
+        var recentUsers = SeekerState.RecentUsersManager.GetRecentUserList();
+        if (forAddingUser)
+        {
+            // don't show people that we have already added...
+            lock (UserListManager.UserList)
+            {
+                foreach (var uli in UserListManager.UserList)
+                {
+                    recentUsers.Remove(uli.Username);
+                }
+            }
+
+        }
+        
+        actv.Adapter = new ArrayAdapter<string>(
+            SeekerState.ActiveActivityRef, 
+            ResourceConstant.Layout.autoSuggestionRow, 
+            recentUsers);
     }
 
     public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
     {
-        SeekerState.SmartFilterOptions = new SeekerState.SmartFilterState();
-        SeekerState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true);
-        SeekerState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0);
-        SeekerState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true);
-        SeekerState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1);
-        SeekerState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true);
-        SeekerState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2);
+        SeekerState.SmartFilterOptions = new SeekerState.SmartFilterState
+        {
+            KeywordsEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true),
+            KeywordsOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0),
+            FileTypesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true),
+            FileTypesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1),
+            NumFilesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true),
+            NumFilesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2)
+        };
     }
 
     public static void SaveSmartFilterState()
     {
         lock (SharedPrefLock)
         {
-            var editor = SeekerState.SharedPreferences.Edit();
-            editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
-            editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, SeekerState.SmartFilterOptions.FileTypesEnabled);
-            editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, SeekerState.SmartFilterOptions.NumFilesEnabled);
-            editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, SeekerState.SmartFilterOptions.KeywordsOrder);
-            editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, SeekerState.SmartFilterOptions.FileTypesOrder);
-            editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, SeekerState.SmartFilterOptions.NumFilesOrder);
-            editor.Commit();
+            SeekerState.SharedPreferences.Edit()!
+                .PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled)!
+                .PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, SeekerState.SmartFilterOptions.FileTypesEnabled)!
+                .PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, SeekerState.SmartFilterOptions.NumFilesEnabled)!
+                .PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, SeekerState.SmartFilterOptions.KeywordsOrder)!
+                .PutInt(KeyConsts.M_SmartFilter_TypesOrder, SeekerState.SmartFilterOptions.FileTypesOrder)!
+                .PutInt(KeyConsts.M_SmartFilter_CountsOrder, SeekerState.SmartFilterOptions.NumFilesOrder)!
+                .Commit();
         }
     }
         
-    /// <summary>
-    /// This is from the server after sending it a UserData request.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
+    /// <summary>This is from the server after sending it a UserData request.</summary>
     private void SoulseekClient_UserDataReceived(object sender, UserData e)
     {
         Logger.Debug("User Data Received: " + e.Username);
@@ -1261,25 +1304,27 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         }
     }
 
-    private static string DeduplicateUsername;
-    private static UserPresence DeduplicateStatus = UserPresence.Offline;
+    private static string _deduplicateUsername;
+    private static UserPresence _deduplicateStatus = UserPresence.Offline;
+    
     private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatusChangedEventArgs e)
     {
 
-        if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
+        if (_deduplicateUsername == e.Username && _deduplicateStatus == e.Status)
         {
             Logger.Debug($"throwing away {e.Username} status changed");
             return;
         }
 
         Logger.Debug($"handling {e.Username} status changed");
-        DeduplicateUsername = e.Username;
-        DeduplicateStatus = e.Status;
+        _deduplicateUsername = e.Username;
+        _deduplicateStatus = e.Status;
         UserStatusChangedDeDuplicated?.Invoke(sender, e);
     }
 
 
-    public static EventHandler<string> UserStatusChangedUIEvent;
+    public static EventHandler<string> UserStatusChangedUiEvent;
+    
     private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
     {
         if (e.Username == SeekerState.Username)
@@ -1294,7 +1339,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             if (UserListAddIfContainsUser(e.Username, null, status))
             {
                 Logger.Debug("friend status changed " + e.Username);
-                UserStatusChangedUIEvent?.Invoke(null, e.Username);
+                UserStatusChangedUiEvent?.Invoke(null, e.Username);
             }
         }
 
