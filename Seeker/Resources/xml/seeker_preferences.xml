@@ -8,6 +8,12 @@
             android:title="@string/preference_category_download_folders"
             app:iconSpaceReserved="false">
         
+        <Preference
+            app:key="@string/key_data_directory_uri"
+            app:title="@string/preference_download_folder"
+            app:iconSpaceReserved="false"
+            android:widgetLayout="@layout/preference_widget_edit_folderxml"/>
+        
         <SwitchPreferenceCompat
                 app:key="@string/key_create_complete_and_incomplete_folders"
                 app:title="@string/preference_create_complete_and_incomplete_folders"

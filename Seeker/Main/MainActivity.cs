@@ -2225,7 +2225,7 @@ public class MainActivity : ThemeableActivity
                 .PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn)!
                 .PutString(KeyConsts.M_Username, SeekerState.Username)!
                 .PutString(KeyConsts.M_Password, SeekerState.Password)!
-                .PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri)!
+                .PutString(ResourceConstant.String.key_data_directory_uri, SeekerState.SaveDataDirectoryUri)!
                 .PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree)!
                 .PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults)!
                 .PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode)!
@@ -2263,7 +2263,7 @@ public class MainActivity : ThemeableActivity
         outState.PutString(KeyConsts.M_Username, SeekerState.Username);
         outState.PutString(KeyConsts.M_Password, SeekerState.Password);
         outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree);
-        outState.PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri);
+        outState.PutString(GetString(ResourceConstant.String.key_data_directory_uri), SeekerState.SaveDataDirectoryUri);
         outState.PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults);
         outState.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
         outState.PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads);

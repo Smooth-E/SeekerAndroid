@@ -29,7 +29,7 @@ public static class SharedPreferencesUtils
         SeekerState.currentlyLoggedIn = prefs.GetBoolean(KeyConsts.M_CurrentlyLoggedIn, false);
         SeekerState.Username = prefs.GetString(KeyConsts.M_Username, string.Empty);
         SeekerState.Password = prefs.GetString(KeyConsts.M_Password, string.Empty);
-        SeekerState.SaveDataDirectoryUri = prefs.GetString(KeyConsts.M_SaveDataDirectoryUri, string.Empty);
+        SeekerState.SaveDataDirectoryUri = prefs.GetString(ResourceConstant.String.key_data_directory_uri, string.Empty);
         SeekerState.SaveDataDirectoryUriIsFromTree = prefs.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
         SeekerState.NumberSearchResults = prefs.GetInt(KeyConsts.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
         SeekerState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, AppCompatDelegate.ModeNightFollowSystem);
@@ -164,5 +164,18 @@ public static class SharedPreferencesUtils
     {
         var key = SeekerApplication.ApplicationContext.GetString(keyId);
         return preferencesEditor.PutBoolean(key, value);
+    }
+
+    public static string GetString(this ISharedPreferences preferences, int keyId, string defaultValue)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferences.GetString(key, defaultValue);
+    }
+
+    public static ISharedPreferencesEditor PutString(this ISharedPreferencesEditor preferencesEditor, int keyId,
+        string value)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferencesEditor.PutString(key, value);
     }
 }

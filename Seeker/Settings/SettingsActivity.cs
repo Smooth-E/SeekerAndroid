@@ -81,7 +81,6 @@ public class SettingsActivity : ThemeableActivity
 
     private CheckBox createCompleteAndIncompleteFoldersView;
     private CheckBox manuallyChooseIncompleteFolderView;
-    private TextView currentCompleteFolderView;
     private TextView currentIncompleteFolderView;
 
     private ViewGroup incompleteFolderViewLayout;
@@ -161,8 +160,6 @@ public class SettingsActivity : ThemeableActivity
         var progBar = FindViewById<ProgressBar>(ResourceConstant.Id.progressBarSharedStatus)!;
         progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
         progBar.Click += ImageView_Click;
-        var changeDirSettings = FindViewById<Button>(Resource.Id.changeDirSettings);
-        changeDirSettings.Click += ChangeDownloadDirectory;
 
         var autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
         autoClearComplete.Checked = SeekerState.AutoClearCompleteDownloads;
@@ -465,19 +462,26 @@ public class SettingsActivity : ThemeableActivity
          * Regarding Directory Options (Incomplete Folder Options, Complete Folder Options):
          * Incomplete Folder internal structure is always the same (folder is username concat file foldername),
          *   it is just the placement of it that differs
-         * The automatic placement is "Soulseek Incomplete" in the same directory chosen for downloads (if "Create Folders for Downloads and Incomplete" is on.
+         * The automatic placement is "Soulseek Incomplete" in the same directory chosen for downloads
+         * (if "Create Folders for Downloads and Incomplete" is on.
          * Otherwise the placement is in AppData Local - what Android calls "Internal Storage"
          *
-         * The incomplete folder choices are used when the stream is created and saved in IncompleteUri.  Therefore, changing this on the fly is okay, it just wont
+         * The incomplete folder choices are used when the stream is created and saved in IncompleteUri.
+         * Therefore, changing this on the fly is okay, it just wont
          *   take effect until one starts a new download.
-         * The complete folder choices are used when the file is actually saved / moved.  So changing this on the fly is okay, the transfer, once finished, will just go into its new place.
+         * The complete folder choices are used when the file is actually saved / moved.
+         * So changing this on the fly is okay, the transfer, once finished, will just go into its new place.
          *
-         * When one turns "Manual Selection for Incomplete" off, it reverts back to Automatic.  The user will have to reselect their folder if they choose to turn it back on.
+         * When one turns "Manual Selection for Incomplete" off, it reverts back to Automatic.
+         * The user will have to reselect their folder if they choose to turn it back on.
          *
-         * To clear Incomplete, there cannot be any pending transfers.  Paused transfers are okay, they will just start from the top...
+         * To clear Incomplete, there cannot be any pending transfers.
+         * Paused transfers are okay, they will just start from the top...
          *
-         * If "Use Manual Incomplete Folder" is checked, but no Manual Incomplete Folder is chosen, then it is as if it is not checked.
-         * Also its fine if its null, or no longer writable, etc.  It will just get set back to default.  User will have to re-set it on their own.
+         * If "Use Manual Incomplete Folder" is checked, but no Manual Incomplete Folder is chosen,
+         * then it is as if it is not checked.
+         * Also its fine if its null, or no longer writable, etc.  It will just get set back to default.
+         * User will have to re-set it on their own.
          *
          **NOTE**
          */
@@ -485,7 +489,6 @@ public class SettingsActivity : ThemeableActivity
         manuallyChooseIncompleteFolderView = this.FindViewById<CheckBox>(Resource.Id.manuallySetIncomplete);
         manuallyChooseIncompleteFolderView.Checked = SeekerState.OverrideDefaultIncompleteLocations;
         manuallyChooseIncompleteFolderView.CheckedChange += ManuallyChooseIncompleteFolderView_CheckedChange;
-        currentCompleteFolderView = this.FindViewById<TextView>(Resource.Id.completeFolderPath);
         currentIncompleteFolderView = this.FindViewById<TextView>(Resource.Id.incompleteFolderPath);
 
         changeIncompleteDirectory = this.FindViewById<Button>(Resource.Id.changeIncompleteDirSettings);
@@ -496,7 +499,6 @@ public class SettingsActivity : ThemeableActivity
         cleanUpIncompleteDirectory.Click += CleanUpIncompleteDirectory_Click;
 
         SetIncompleteDirectoryState();
-        SetCompleteFolderView();
         SetIncompleteFolderView();
         SetSharedFolderView();
         
@@ -620,7 +622,6 @@ public class SettingsActivity : ThemeableActivity
     private void UpdateDirectoryViews()
     {
         SetIncompleteFolderView();
-        SetCompleteFolderView();
         SetSharedFolderView();
     }
 
@@ -1112,28 +1113,6 @@ public class SettingsActivity : ThemeableActivity
         Rescan(null, -1, SeekerState.PreOpenDocumentTree(), true);
     }
 
-    private static string GetFriendlyDownloadDirectoryName()
-    {
-        if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
-        {
-            if (SeekerState.UseLegacyStorage())
-            {
-                //if not set and legacy storage, then the directory is simple the default music
-                string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
-            }
-            else
-            {
-                //if not set and not legacy storage, then that is bad.  user must set it.
-                return SeekerApplication.ApplicationContext.GetString(Resource.String.NotSet);
-            }
-        }
-        else
-        {
-            return SeekerState.RootDocumentFile.Uri.LastPathSegment;
-        }
-    }
-
     public static bool UseIncompleteManualFolder()
     {
         return (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null);
@@ -1197,13 +1176,6 @@ public class SettingsActivity : ThemeableActivity
             changeIncompleteDirectory.Clickable = false;
             recyclerViewFolders.Clickable = false;
         }
-    }
-
-    private void SetCompleteFolderView()
-    {
-        string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
-        currentCompleteFolderView.Text = friendlyName;
-        CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
     }
 
     public void SetIncompleteFolderView()
@@ -2717,10 +2689,8 @@ public class SettingsActivity : ThemeableActivity
 
             });
     }
-
-
-
-    private void ShowDirSettings(string startingDirectory, DirectoryType directoryType, bool errorReselectCase = false)
+    
+    public void ShowDirSettings(string startingDirectory, DirectoryType directoryType, bool errorReselectCase = false)
     {
         int requestCode = -1;
         if (SeekerState.UseLegacyStorage())
@@ -3468,7 +3438,7 @@ public class SettingsActivity : ThemeableActivity
     }
 }
 
-enum DirectoryType : ushort
+public enum DirectoryType : ushort
 {
     Download = 0,
     Upload = 1,

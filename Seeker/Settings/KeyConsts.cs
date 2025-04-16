@@ -42,7 +42,6 @@ namespace Seeker
 
         public const string M_LOG_DIAGNOSTICS = "Momento_LOG_DIAGNOSTICS";
         
-        public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_SaveDataDirectoryUriIsFromTree = "Momento_SaveDataDirectoryUriIsFromTree";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
