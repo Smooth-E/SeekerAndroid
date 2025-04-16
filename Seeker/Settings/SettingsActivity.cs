@@ -45,6 +45,7 @@ using Seeker.Main;
 using Seeker.Managers;
 using Seeker.UPnP;
 using Seeker.Utils;
+using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace Seeker.Settings;
 
@@ -56,9 +57,9 @@ public class SettingsActivity : ThemeableActivity
     private const int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
 
     private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL = 0x911;
-    private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case = 0x834;
+    private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE = 0x834;
     private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY = 0x912;
-    private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case = 0x835;
+    private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_RESELECT_CASE = 0x835;
 
     private const int SAVE_SEEKER_SETTINGS = 0x856;
 
@@ -72,7 +73,7 @@ public class SettingsActivity : ThemeableActivity
     public const int SCROLL_TO_SHARING_SECTION = 10;
     public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
-    private List<Tuple<int, int>> positionNumberPairs = new();
+    private readonly List<Tuple<int, int>> positionNumberPairs = [];
     private CheckBox allowPrivateRoomInvitations;
 
     private CheckBox createUsernameSubfoldersView;
@@ -81,7 +82,6 @@ public class SettingsActivity : ThemeableActivity
     private CheckBox manuallyChooseIncompleteFolderView;
     private TextView currentCompleteFolderView;
     private TextView currentIncompleteFolderView;
-    private TextView currentSharedFolderView;
 
     private ViewGroup incompleteFolderViewLayout;
     private Button changeIncompleteDirectory;
@@ -93,43 +93,44 @@ public class SettingsActivity : ThemeableActivity
     private ViewGroup listeningSubLayout3;
 
     private ViewGroup limitDlSpeedSubLayout;
-    Button changeDlSpeed;
-    TextView dlSpeedTextView;
-    Spinner dlLimitPerTransfer;
+    private Button changeDlSpeed;
+    private TextView dlSpeedTextView;
+    private Spinner dlLimitPerTransfer;
 
 
     private ViewGroup limitUlSpeedSubLayout;
-    Button changeUlSpeed;
-    TextView ulSpeedTextView;
-    Spinner ulLimitPerTransfer;
+    private Button changeUlSpeed;
+    private TextView ulSpeedTextView;
+    private Spinner ulLimitPerTransfer;
 
     private ViewGroup concurrentDlSublayout;
     private TextView concurrentDlLabel;
     private Button concurrentDlButton;
     private CheckBox concurrentDlCheckbox;
-
-
-    Button addFolderButton;
-    Button clearAllFoldersButton;
-
-    TextView noSharedFoldersView;
-    RecyclerView recyclerViewFolders;
-    LinearLayoutManager recyclerViewFoldersLayoutManager;
-    UploadsRecyclerViewAdapter uploadsRecyclerViewFoldersAdapter;
-
-    Button browseSelfButton;
-    Button rescanSharesButton;
-
-    Button checkStatus;
-    Button changePort;
-
-    CheckBox useUPnPCheckBox;
-    CheckBox showSmartFilters;
     
-    private static UploadDirectoryInfo ContextMenuItem = null;
+    private Button addFolderButton;
+    private Button clearAllFoldersButton;
+
+    private TextView noSharedFoldersView;
+    private RecyclerView recyclerViewFolders;
+    private LinearLayoutManager recyclerViewFoldersLayoutManager;
+    private UploadsRecyclerViewAdapter uploadsRecyclerViewFoldersAdapter;
+
+    private Button browseSelfButton;
+    private Button rescanSharesButton;
+
+    private Button checkStatus;
+    private Button changePort;
+    
+    private CheckBox useUPnPCheckBox;
+    private CheckBox showSmartFilters;
+    
+    private static UploadDirectoryInfo ContextMenuItem;
     
     private ScrollView mainScrollView;
     private View sharingLayoutParent;
+
+    private Spinner languageSpinner;
     
     public override bool OnOptionsItemSelected(IMenuItem item)
     {
@@ -141,231 +142,6 @@ public class SettingsActivity : ThemeableActivity
         }
         
         return base.OnOptionsItemSelected(item);
-    }
-
-    protected override void OnResume()
-    {
-        base.OnResume();
-
-        UPnpManager.Instance.SearchFinished += OnUpnpSearchFinished;
-        UPnpManager.Instance.SearchStarted += UpnpSearchStarted;
-        UPnpManager.Instance.DeviceSuccessfullyMapped += OnUpnpDeviceMapped;
-        PrivilegesManager.Instance.PrivilegesChecked += OnPrivilegesChecked;
-        UploadDirectoryChanged += DirectoryViewsChanged;
-
-        // when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
-        UpdateDirectoryViews();
-
-        // however with the api<21 it is not paused and so an event is needed.
-        SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
-        SeekerState.SharingStatusChangedEvent += SharingStatusUpdated;
-
-        // moved to OnResume from OnCreate
-        // this fixes an issue where, when the settings activity is up but one 
-        // goes to system settings to change per app language, it triggers 
-        // ItemSelected with the old values (resetting the language preference)
-        // ("onItemSelected method is also invoked when the view is being build")
-        Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
-        languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-        String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.ApplicationContext.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
-        ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
-        languageSpinner.Adapter = languageSpinnerOptions;
-        SetSpinnerPositionLangauge(languageSpinner);
-        languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
-    }
-
-    public void DirectoryViewsChanged(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged();
-        });
-    }
-
-    private void SharingStatusUpdated(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            UpdateShareImageView();
-        });
-    }
-
-    private void OnPrivilegesChecked(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            SetPrivStatusView(FindViewById<TextView>(Resource.Id.privStatusView));
-        });
-    }
-
-    private void OnUpnpDeviceMapped(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            Toast.MakeText(this, Resource.String.upnp_success, ToastLength.Short).Show();
-            SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
-        });
-    }
-
-    private void OnUpnpSearchFinished(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            if (SeekerState.ListenerEnabled 
-                && SeekerState.ListenerUPnpEnabled 
-                && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished
-                && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
-            {
-                this.ShowShortToast(ResourceConstant.String.upnp_search_finished);
-            }
-            
-            SetUpnpStatusView(this.FindViewById<ImageView>(ResourceConstant.Id.UPnPStatus));
-        });
-    }
-
-    private void DirectoryUpdated(object sender, EventArgs e)
-    {
-        UpdateDirectoryViews();
-    }
-
-    private void UpdateDirectoryViews()
-    {
-        SetIncompleteFolderView();
-        SetCompleteFolderView();
-        SetSharedFolderView();
-    }
-
-    private void UpnpSearchStarted(object sender, EventArgs e)
-    {
-        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-        {
-            SetUpnpStatusView(FindViewById<ImageView>(ResourceConstant.Id.UPnPStatus));
-        });
-    }
-
-    protected override void OnPause()
-    {
-
-        UPnpManager.Instance.SearchFinished -= OnUpnpSearchFinished;
-        UPnpManager.Instance.SearchStarted -= UpnpSearchStarted;
-        UPnpManager.Instance.DeviceSuccessfullyMapped -= OnUpnpDeviceMapped;
-        PrivilegesManager.Instance.PrivilegesChecked -= OnPrivilegesChecked;
-        SeekerState.DirectoryUpdatedEvent -= DirectoryUpdated;
-        UploadDirectoryChanged -= DirectoryViewsChanged;
-        SeekerState.SharingStatusChangedEvent -= SharingStatusUpdated;
-        
-        SaveAdditionalDirectorySettingsToSharedPreferences();
-        
-        base.OnPause();
-    }
-    
-    public class RecyclerViewFolderHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
-    {
-        public SettingsActivity.RecyclerViewFolderView folderView;
-        
-        public RecyclerViewFolderHolder(View view) : base(view)
-        {
-            folderView = (SettingsActivity.RecyclerViewFolderView)view;
-            folderView.ViewHolder = this;
-            folderView.SetOnCreateContextMenuListener(this);
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            SettingsActivity.RecyclerViewFolderView folderRowView = v as SettingsActivity.RecyclerViewFolderView;
-            ContextMenuItem = folderRowView.BoundItem;
-            if (ContextMenuItem.HasError())
-            {
-                menu.Add(0, 1, 0, Resource.String.ViewErrorOptions);
-            }
-            else
-            {
-                menu.Add(0, 1, 0, Resource.String.ViewFolderOptions);
-            }
-        
-            menu.Add(0, 2, 1, Resource.String.Remove);
-        }
-    }
-    
-    public class RecyclerViewFolderView : RelativeLayout
-    {
-        public UploadDirectoryInfo BoundItem;
-
-        public RecyclerViewFolderHolder ViewHolder;
-        public SettingsActivity SettingsActivity = null;
-        public TextView viewFolderName;
-        public ImageView viewFolderStatus;
-
-        public RecyclerViewFolderView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
-            setupChildren();
-        }
-        public RecyclerViewFolderView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
-            setupChildren();
-        }
-
-        public void FolderLongClick(object sender, View.LongClickEventArgs e)
-        {
-            (sender as View).ShowContextMenu();
-        }
-
-        public void FolderClick(object sender, EventArgs e)
-        {
-
-            (ViewHolder.BindingAdapter as UploadsRecyclerViewAdapter).settingsActivity.ShowDialogForUploadDir((sender as RecyclerViewFolderView).ViewHolder.folderView.BoundItem);
-        }
-
-        public static RecyclerViewFolderView inflate(ViewGroup parent)
-        {
-            RecyclerViewFolderView itemView = (RecyclerViewFolderView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.upload_folder_row_dummy, parent, false);
-            return itemView;
-        }
-
-        public void setupChildren()
-        {
-            viewFolderName = FindViewById<TextView>(Resource.Id.uploadFolderName);
-            viewFolderStatus = FindViewById<ImageView>(Resource.Id.uploadFolderStatus);
-
-        }
-
-        public void setItem(UploadDirectoryInfo item)
-        {
-            this.Clickable = SeekerState.SharingOn;
-            this.LongClickable = SeekerState.SharingOn;
-
-            BoundItem = item;
-            if (string.IsNullOrEmpty(item.DisplayNameOverride))
-            {
-                viewFolderName.Text = item.GetLastPathSegment();
-            }
-            else
-            {
-                viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
-            }
-
-            if (item.HasError())
-            {
-                viewFolderStatus.Visibility = ViewStates.Visible;
-                viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
-            }
-            else if (item.IsHidden)
-            {
-                viewFolderStatus.Visibility = ViewStates.Visible;
-                viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
-            }
-            else if (item.IsLocked)
-            {
-                viewFolderStatus.Visibility = ViewStates.Visible;
-                viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);
-            }
-            else
-            {
-                viewFolderStatus.Visibility = ViewStates.Gone;
-            }
-        }
     }
 
     protected override void OnCreate(Bundle savedInstanceState)
@@ -535,8 +311,7 @@ public class SettingsActivity : ThemeableActivity
 
         recyclerViewFolders.SetLayoutManager(llm);
         recyclerViewFolders.SetAdapter(uploadsRecyclerViewFoldersAdapter);
-
-
+        
         CheckBox shareCheckBox = FindViewById<CheckBox>(Resource.Id.enableSharing);
         shareCheckBox.Checked = SeekerState.SharingOn;
         shareCheckBox.CheckedChange += ShareCheckBox_CheckedChange;
@@ -583,8 +358,7 @@ public class SettingsActivity : ThemeableActivity
         CheckBox enableUlSpeedLimits = FindViewById<CheckBox>(Resource.Id.enable_ul_speed_limits);
         enableUlSpeedLimits.Checked = SeekerState.SpeedLimitUploadOn;
         enableUlSpeedLimits.CheckedChange += EnableUlSpeedLimits_CheckedChange;
-
-
+        
         limitDlSpeedSubLayout = FindViewById<ViewGroup>(Resource.Id.dlSpeedSubLayout);
         dlSpeedTextView = FindViewById<TextView>(Resource.Id.downloadSpeed);
         changeDlSpeed = FindViewById<Button>(Resource.Id.changeDlSpeed);
@@ -610,9 +384,7 @@ public class SettingsActivity : ThemeableActivity
         concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
         concurrentDlButton.Click += ConcurrentDlBottom_Click;
         concurrentDlLabel.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
-
-
-
+        
         UpdateConcurrentDownloadLimitsState();
 
         String[] dlOptions = new String[] { SeekerApplication.ApplicationContext.GetString(Resource.String.PerTransfer), SeekerApplication.ApplicationContext.GetString(Resource.String.Global) };
@@ -753,6 +525,225 @@ public class SettingsActivity : ThemeableActivity
         }
 
         UpdateLayoutParametersForScreenSize();
+    }
+    
+    protected override void OnResume()
+    {
+        base.OnResume();
+
+        UPnpManager.Instance.SearchFinished += OnUpnpSearchFinished;
+        UPnpManager.Instance.SearchStarted += UpnpSearchStarted;
+        UPnpManager.Instance.DeviceSuccessfullyMapped += OnUpnpDeviceMapped;
+        PrivilegesManager.Instance.PrivilegesChecked += OnPrivilegesChecked;
+        UploadDirectoryChanged += OnDirectoryViewsChanged;
+
+        // when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
+        UpdateDirectoryViews();
+
+        // however with the api<21 it is not paused and so an event is needed.
+        SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
+        SeekerState.SharingStatusChangedEvent += SharingStatusUpdated;
+
+        // moved to OnResume from OnCreate
+        // this fixes an issue where, when the settings activity is up but one 
+        // goes to system settings to change per app language, it triggers 
+        // ItemSelected with the old values (resetting the language preference)
+        // ("onItemSelected method is also invoked when the view is being build")
+        languageSpinner = FindViewById<Spinner>(ResourceConstant.Id.languageSpinner)!;
+        languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
+        
+        // TODO: Use resource strings for language names
+        string[] languageSpinnerOptionsStrings = [
+            SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.Automatic),
+            "English", "Português (Brazil)", 
+            "Français",
+            "ру́сский язы́к", 
+            "Español",
+            "украї́нська мо́ва",
+            "Nederlands", 
+            "čeština", 
+            "italiano"
+        ];
+        
+        var languageSpinnerOptions = new ArrayAdapter<string>(
+            this,
+            ResourceConstant.Layout.support_simple_spinner_dropdown_item,
+            languageSpinnerOptionsStrings);
+        
+        languageSpinner.Adapter = languageSpinnerOptions;
+        SetSpinnerPositionLangauge(languageSpinner);
+        languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
+    }
+
+    protected override void OnPause()
+    {
+        UPnpManager.Instance.SearchFinished -= OnUpnpSearchFinished;
+        UPnpManager.Instance.SearchStarted -= UpnpSearchStarted;
+        UPnpManager.Instance.DeviceSuccessfullyMapped -= OnUpnpDeviceMapped;
+        PrivilegesManager.Instance.PrivilegesChecked -= OnPrivilegesChecked;
+        SeekerState.DirectoryUpdatedEvent -= DirectoryUpdated;
+        UploadDirectoryChanged -= OnDirectoryViewsChanged;
+        SeekerState.SharingStatusChangedEvent -= SharingStatusUpdated;
+        
+        SaveAdditionalDirectorySettingsToSharedPreferences();
+        
+        base.OnPause();
+    }
+    
+    private void OnDirectoryViewsChanged(object sender, EventArgs e) =>
+        RunOnUiThread(() => uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged());
+
+    private void SharingStatusUpdated(object sender, EventArgs e) =>
+        RunOnUiThread(() => UpdateShareImageView());
+
+    private void OnPrivilegesChecked(object sender, EventArgs e) =>
+        RunOnUiThread(() => SetPrivStatusView(FindViewById<TextView>(ResourceConstant.Id.privStatusView)));
+
+    private void OnUpnpDeviceMapped(object sender, EventArgs e)
+    {
+        RunOnUiThread(() =>
+        {
+            this.ShowShortToast(ResourceConstant.String.upnp_success);
+            SetUpnpStatusView(FindViewById<ImageView>(ResourceConstant.Id.UPnPStatus));
+        });
+    }
+
+    private void OnUpnpSearchFinished(object sender, EventArgs e)
+    {
+        RunOnUiThread(() =>
+        {
+            if (SeekerState.ListenerEnabled 
+                && SeekerState.ListenerUPnpEnabled 
+                && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished
+                && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
+            {
+                this.ShowShortToast(ResourceConstant.String.upnp_search_finished);
+            }
+            
+            SetUpnpStatusView(FindViewById<ImageView>(ResourceConstant.Id.UPnPStatus));
+        });
+    }
+
+    private void DirectoryUpdated(object sender, EventArgs e) => 
+        UpdateDirectoryViews();
+
+    private void UpdateDirectoryViews()
+    {
+        SetIncompleteFolderView();
+        SetCompleteFolderView();
+        SetSharedFolderView();
+    }
+
+    private void UpnpSearchStarted(object sender, EventArgs e) =>
+        RunOnUiThread(() => SetUpnpStatusView(FindViewById<ImageView>(ResourceConstant.Id.UPnPStatus)));
+    
+    public class RecyclerViewFolderHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    {
+        public RecyclerViewFolderView folderView;
+        
+        public RecyclerViewFolderHolder(View view) : base(view)
+        {
+            folderView = (RecyclerViewFolderView)view;
+            folderView.ViewHolder = this;
+            folderView.SetOnCreateContextMenuListener(this);
+        }
+
+        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            RecyclerViewFolderView folderRowView = v as RecyclerViewFolderView;
+            ContextMenuItem = folderRowView.BoundItem;
+            if (ContextMenuItem.HasError())
+            {
+                menu.Add(0, 1, 0, Resource.String.ViewErrorOptions);
+            }
+            else
+            {
+                menu.Add(0, 1, 0, Resource.String.ViewFolderOptions);
+            }
+        
+            menu.Add(0, 2, 1, Resource.String.Remove);
+        }
+    }
+    
+    public class RecyclerViewFolderView : RelativeLayout
+    {
+        public UploadDirectoryInfo BoundItem;
+
+        public RecyclerViewFolderHolder ViewHolder;
+        public SettingsActivity SettingsActivity = null;
+        public TextView viewFolderName;
+        public ImageView viewFolderStatus;
+
+        public RecyclerViewFolderView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        {
+            LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
+            setupChildren();
+        }
+        public RecyclerViewFolderView(Context context, IAttributeSet attrs) : base(context, attrs)
+        {
+            LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
+            setupChildren();
+        }
+
+        public void FolderLongClick(object sender, View.LongClickEventArgs e)
+        {
+            (sender as View).ShowContextMenu();
+        }
+
+        public void FolderClick(object sender, EventArgs e)
+        {
+
+            (ViewHolder.BindingAdapter as UploadsRecyclerViewAdapter).settingsActivity.ShowDialogForUploadDir((sender as RecyclerViewFolderView).ViewHolder.folderView.BoundItem);
+        }
+
+        public static RecyclerViewFolderView inflate(ViewGroup parent)
+        {
+            RecyclerViewFolderView itemView = (RecyclerViewFolderView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.upload_folder_row_dummy, parent, false);
+            return itemView;
+        }
+
+        public void setupChildren()
+        {
+            viewFolderName = FindViewById<TextView>(Resource.Id.uploadFolderName);
+            viewFolderStatus = FindViewById<ImageView>(Resource.Id.uploadFolderStatus);
+
+        }
+
+        public void setItem(UploadDirectoryInfo item)
+        {
+            this.Clickable = SeekerState.SharingOn;
+            this.LongClickable = SeekerState.SharingOn;
+
+            BoundItem = item;
+            if (string.IsNullOrEmpty(item.DisplayNameOverride))
+            {
+                viewFolderName.Text = item.GetLastPathSegment();
+            }
+            else
+            {
+                viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
+            }
+
+            if (item.HasError())
+            {
+                viewFolderStatus.Visibility = ViewStates.Visible;
+                viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
+            }
+            else if (item.IsHidden)
+            {
+                viewFolderStatus.Visibility = ViewStates.Visible;
+                viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
+            }
+            else if (item.IsLocked)
+            {
+                viewFolderStatus.Visibility = ViewStates.Visible;
+                viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);
+            }
+            else
+            {
+                viewFolderStatus.Visibility = ViewStates.Gone;
+            }
+        }
     }
         
     private void MoreInfoExport_Click(object sender, EventArgs e)
@@ -2775,7 +2766,7 @@ public class SettingsActivity : ThemeableActivity
             {
                 if (errorReselectCase)
                 {
-                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case;
+                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_RESELECT_CASE;
                 }
                 else
                 {
@@ -2821,7 +2812,7 @@ public class SettingsActivity : ThemeableActivity
             {
                 if (errorReselectCase)
                 {
-                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case;
+                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE;
                 }
                 else
                 {
@@ -2861,8 +2852,8 @@ public class SettingsActivity : ThemeableActivity
                 return CHANGE_INCOMPLETE_EXTERNAL_LEGACY;
             case CHANGE_WRITE_EXTERNAL:
                 return CHANGE_WRITE_EXTERNAL_LEGACY;
-            case UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case:
-                return UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case;
+            case UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE:
+                return UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_RESELECT_CASE;
             default:
                 return requestCodeNotLegacy;
         }
@@ -2990,14 +2981,14 @@ public class SettingsActivity : ThemeableActivity
 
     public void ShowUploadDirectoryOptionsDialog(UploadDirectoryInfo uploadDirInfo)
     {
-        AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
-        builder.SetTitle(Resource.String.UploadFolderOptions);
-        View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
-        EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);
-        CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
-        CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.hiddenUserlistOnly);
-        CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.lockedUserlistOnly);
-        overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) =>
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, ResourceConstant.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+        builder.SetTitle(ResourceConstant.String.UploadFolderOptions);
+        View viewInflated = LayoutInflater.From(this).Inflate(ResourceConstant.Layout.upload_folder_options, FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
+        EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(ResourceConstant.Id.customFolderNameEditText);
+        CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(ResourceConstant.Id.overrideFolderName);
+        CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(ResourceConstant.Id.hiddenUserlistOnly);
+        CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(ResourceConstant.Id.lockedUserlistOnly);
+        overrideFolderName.CheckedChange += (sender, e) =>
         {
             if (e.IsChecked)
             {
@@ -3026,7 +3017,7 @@ public class SettingsActivity : ThemeableActivity
 
         builder.SetView(viewInflated);
 
-        EventHandler<DialogClickEventArgs> eventHandlerOkay = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+        EventHandler<DialogClickEventArgs> eventHandlerOkay = (sender, _) =>
         {
             bool hiddenChanged = uploadDirInfo.IsHidden != hiddenCheck.Checked;
             bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
@@ -3048,8 +3039,8 @@ public class SettingsActivity : ThemeableActivity
                     if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
                     {
                         uploadDirInfo.DisplayNameOverride = displayNameOld;
-                        Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
-                        overrideNameChanged = false; //we prevented it
+                        this.ShowLongToast(ResourceConstant.String.CannotChangeNameNotUnique);
+                        overrideNameChanged = false; // we prevented it
                     }
                 }
             }
@@ -3062,37 +3053,32 @@ public class SettingsActivity : ThemeableActivity
                     if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
                     {
                         uploadDirInfo.DisplayNameOverride = displayNameOld;
-                        Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
-                        overrideNameChanged = false; //we prevented it
+                        this.ShowLongToast(ResourceConstant.String.CannotChangeNameNotUnique);
+                        overrideNameChanged = false; // we prevented it
                     }
                 }
             }
 
-            this.uploadsRecyclerViewFoldersAdapter.NotifyDataSetChanged();
+            uploadsRecyclerViewFoldersAdapter.NotifyDataSetChanged();
             if (hiddenChanged || lockedChanged || overrideNameChanged)
             {
                 Logger.Debug("things changed re: folder options..");
-                Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy());
             }
 
-            if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+            if (sender is AlertDialog aDiag)
             {
                 aDiag.Dismiss();
             }
-            else
-            {
+        };
 
-            }
-        });
-
-        builder.SetPositiveButton(Resource.String.okay, eventHandlerOkay);
+        builder.SetPositiveButton(ResourceConstant.String.okay, eventHandlerOkay);
         var diag = builder.Create();
         diag.Show();
     }
 
     public static EventHandler<EventArgs> UploadDirectoryChanged;
-    public static volatile bool MoreChangesHaveBeenMadeSoRescanWhenDone = false;
-    public static volatile List<Android.Net.Uri> NewlyAddedUrisWeHaveToAddAfter = new List<Android.Net.Uri>();
+    public static volatile bool MoreChangesHaveBeenMadeSoRescanWhenDone;
 
     public void ParseDatabaseAndUpdateUI(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
     {
@@ -3237,11 +3223,10 @@ public class SettingsActivity : ThemeableActivity
                 UploadDirectoryChanged?.Invoke(null, new EventArgs());
                 return;
             }
-            //SeekerState.UploadDataDirectoryUri = uri.ToString();
-            //SeekerState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
-            if ((UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode) && newlyAddedUriIfApplicable != null)
+            
+            if ((UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE == requestCode) && newlyAddedUriIfApplicable != null)
             {
-                this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                ContentResolver!.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
             }
             //setup soulseek client with handlers if all conditions met
             SharingManager.SetUnsetSharingBasedOnConditions(true, true);
@@ -3404,8 +3389,8 @@ public class SettingsActivity : ThemeableActivity
 
         if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode ||
             UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode ||
-            UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode ||
-            UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode)
+            UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_RESELECT_CASE == requestCode ||
+            UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE == requestCode)
         {
             if (resultCode != Result.Ok)
             {
@@ -3413,7 +3398,7 @@ public class SettingsActivity : ThemeableActivity
             }
 
             bool reselectCase = false;
-            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode)
+            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL_RESELECT_CASE == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_RESELECT_CASE == requestCode)
             {
                 reselectCase = true;
             }
