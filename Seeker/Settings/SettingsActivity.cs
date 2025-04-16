@@ -46,6 +46,7 @@ using Seeker.Managers;
 using Seeker.UPnP;
 using Seeker.Utils;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
+using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace Seeker.Settings;
 
@@ -73,6 +74,8 @@ public class SettingsActivity : ThemeableActivity
     public const int SCROLL_TO_SHARING_SECTION = 10;
     public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
+    private Toolbar toolbar;
+    
     private readonly List<Tuple<int, int>> positionNumberPairs = [];
     private CheckBox allowPrivateRoomInvitations;
 
@@ -146,17 +149,12 @@ public class SettingsActivity : ThemeableActivity
 
     protected override void OnCreate(Bundle savedInstanceState)
     {
-        Logger.Debug("Settings Created");
-        
         base.OnCreate(savedInstanceState);
-        
-        SeekerState.ActiveActivityRef = this;
         SetContentView(ResourceConstant.Layout.settings_layout);
+        SeekerState.ActiveActivityRef = this;
 
-        var myToolbar = FindViewById<AndroidX.AppCompat.Widget.Toolbar>(ResourceConstant.Id.setting_toolbar)!;
-        myToolbar.InflateMenu(ResourceConstant.Menu.search_menu);
-        myToolbar.Title = GetString(ResourceConstant.String.settings);
-        SetSupportActionBar(myToolbar);
+        toolbar = FindViewById<Toolbar>(ResourceConstant.Id.setting_toolbar)!;
+        SetSupportActionBar(toolbar);
         SupportActionBar!.SetDisplayHomeAsUpEnabled(true);
 
         var progBar = FindViewById<ProgressBar>(ResourceConstant.Id.progressBarSharedStatus)!;

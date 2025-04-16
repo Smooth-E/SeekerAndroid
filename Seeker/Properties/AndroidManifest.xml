@@ -1,7 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest
-        xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="109"
-        android:versionName="2.11.4" package="com.companyname.andriodapp1" android:installLocation="auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:versionCode="109"
+        android:versionName="2.11.4"
+        package="com.companyname.andriodapp1"
+        android:installLocation="auto"
         android:requestLegacyExternalStorage="true">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>

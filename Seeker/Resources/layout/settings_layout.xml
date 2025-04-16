@@ -20,10 +20,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/mainPurple"
-                android:minHeight="100dp"
                 android:theme="?attr/actionBarTheme"
-                tools:layout_editor_absoluteX="0dp"
-                tools:layout_editor_absoluteY="0dp"/>
+                app:title="@string/settings"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
