@@ -4,7 +4,7 @@ using Android.Runtime;
 using Android.Views;
 using AndroidX.ViewPager.Widget;
 
-namespace Seeker;
+namespace Seeker.Components;
 
 /// Fixes this:
 /// java.lang.IllegalArgumentException: pointerIndex out of range
