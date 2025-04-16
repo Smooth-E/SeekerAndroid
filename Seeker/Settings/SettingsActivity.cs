@@ -500,7 +500,7 @@ public class SettingsActivity : ThemeableActivity
         
         Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
         dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
-        String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
+        String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.CLASSIC_PURPLE, ThemeHelper.RED, ThemeHelper.BLUE };
         ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
         dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
         SetSpinnerPositionDayVarient(dayVarientSpinner);
@@ -508,7 +508,7 @@ public class SettingsActivity : ThemeableActivity
         
         Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
         nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
-        String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
+        String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.CLASSIC_PURPLE, ThemeHelper.GREY, ThemeHelper.BLUE, ThemeHelper.AMOLED_CLASSIC_PURPLE, ThemeHelper.AMOLED_GREY };
         ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
         nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
         SetSpinnerPositionNightVarient(nightVarientSpinner);
@@ -3507,210 +3507,6 @@ public class SettingsActivity : ThemeableActivity
             bool success = editor.Commit();
         }
     }
-
-    public static void SaveManualIncompleteDirToSharedPreferences()
-    {
-        lock (SeekerApplication.SharedPrefLock)
-        {
-            var editor = SeekerState.SharedPreferences.Edit();
-            editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
-            editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree);
-            bool success = editor.Commit();
-        }
-    }
-
-}
-
-public static class ThemeHelper
-{
-    public const string ClassicPurple = "Classic Purple";
-    public const string Grey = "Grey";
-    public const string Blue = "Blue";
-    public const string Red = "Red";
-    public const string AmoledClassicPurple = "Amoled - Classic Purple";
-    public const string AmoledGrey = "Amoled - Grey";
-
-    public enum DayThemeType : ushort
-    {
-        ClassicPurple = 0,
-        Red = 1,
-        Blue = 2,
-        Grey = 3,
-    }
-
-    public static DayThemeType FromDayThemeTypeString(string themeTypeString)
-    {
-        switch (themeTypeString)
-        {
-            case ClassicPurple:
-                return DayThemeType.ClassicPurple;
-            case Grey:
-                return DayThemeType.Grey;
-            case Blue:
-                return DayThemeType.Blue;
-            case Red:
-                return DayThemeType.Red;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-    public static string ToDayThemeString(DayThemeType dayTheme)
-    {
-        switch (dayTheme)
-        {
-            case DayThemeType.ClassicPurple:
-                return ClassicPurple;
-            case DayThemeType.Grey:
-                return Grey;
-            case DayThemeType.Blue:
-                return Blue;
-            case DayThemeType.Red:
-                return Red;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-    public static int ToDayThemeProper(DayThemeType dayTheme)
-    {
-        switch (dayTheme)
-        {
-            case DayThemeType.ClassicPurple:
-                return Resource.Style.DefaultLight;
-            case DayThemeType.Grey:
-                return Resource.Style.DefaultDark_Grey; //TODO
-            case DayThemeType.Blue:
-                return Resource.Style.DefaultLight_Blue;
-            case DayThemeType.Red:
-                return Resource.Style.DefaultLight_Red;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-    public enum NightThemeType : ushort
-    {
-        ClassicPurple = 0,
-        Grey = 1,
-        Blue = 2,
-        Red = 3,
-        AmoledClassicPurple = 4,
-        AmoledGrey = 5
-    }
-
-    public static NightThemeType FromNightThemeTypeString(string themeTypeString)
-    {
-        switch (themeTypeString)
-        {
-            case ClassicPurple:
-                return NightThemeType.ClassicPurple;
-            case Grey:
-                return NightThemeType.Grey;
-            case Blue:
-                return NightThemeType.Blue;
-            case Red:
-                return NightThemeType.Red;
-            case AmoledClassicPurple:
-                return NightThemeType.ClassicPurple;
-            case AmoledGrey:
-                return NightThemeType.AmoledGrey;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-
-    public static string ToNightThemeString(NightThemeType nightTheme)
-    {
-        switch (nightTheme)
-        {
-            case NightThemeType.ClassicPurple:
-                return ClassicPurple;
-            case NightThemeType.Grey:
-                return Grey;
-            case NightThemeType.Blue:
-                return Blue;
-            case NightThemeType.Red:
-                return Red;
-            case NightThemeType.AmoledClassicPurple:
-                return ClassicPurple;
-            case NightThemeType.AmoledGrey:
-                return AmoledGrey;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-    public static int ToNightThemeProper(NightThemeType nightTheme)
-    {
-        switch (nightTheme)
-        {
-            case NightThemeType.ClassicPurple:
-                return Resource.Style.DefaultDark;
-            case NightThemeType.Grey:
-                return Resource.Style.DefaultDark_Grey;
-            case NightThemeType.Blue:
-                return Resource.Style.DefaultDark_Blue;
-            case NightThemeType.Red:
-                return Resource.Style.DefaultDark_Blue; //doesnt exist
-            case NightThemeType.AmoledClassicPurple:
-                return Resource.Style.Amoled;
-            case NightThemeType.AmoledGrey:
-                return Resource.Style.Amoled_Grey;
-            default:
-                throw new Exception("unknown");
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="isNightMode">This is for the SYSTEM</param>
-    /// <returns></returns>
-    public static int GetThemeInChosenDayNightMode(bool isNightMode, Context c)
-    {
-        Context contextToUse = c == null ? SeekerState.ActiveActivityRef : c;
-        if (contextToUse.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
-        {
-            if (isNightMode)
-            {
-                return ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient);
-            }
-            else
-            {
-                switch (SeekerState.NightModeVarient)
-                {
-                    case NightThemeType.ClassicPurple:
-                        return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
-                    case NightThemeType.Blue:
-                        return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.Blue);
-                    default:
-                        return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
-                }
-            }
-        }
-        else
-        {
-            if (!isNightMode)
-            {
-                return ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient);
-            }
-            else
-            {
-                switch (SeekerState.DayModeVarient)
-                {
-                    case DayThemeType.ClassicPurple:
-                        return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
-                    case DayThemeType.Blue:
-                        return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.Blue);
-                    default:
-                        return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
-                }
-            }
-        }
-    }
-
 }
 
 enum DirectoryType : ushort
