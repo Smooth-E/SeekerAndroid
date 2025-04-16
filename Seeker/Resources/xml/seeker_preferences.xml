@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <PreferenceCategory
+            android:title="@string/preference_category_download_folders"
+            app:iconSpaceReserved="false">
+        
+        <SwitchPreferenceCompat
+                app:key="@string/key_create_complete_and_incomplete_folders"
+                app:title="@string/preference_create_complete_and_incomplete_folders"
+                android:summary="@string/CreateCompleteAndIncomplete"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_create_username_subfolders"
+                app:title="@string/preference_create_username_subfolders"
+                android:summary="@string/CreateUsernameSubfolders"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_create_subfolders_for_single_downloads"
+                app:title="@string/preference_create_subfolders_for_single_downloads"
+                android:summary="@string/preference_create_subfolders_for_single_downloads_description"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

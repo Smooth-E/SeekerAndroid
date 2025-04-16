@@ -771,8 +771,6 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="NoUsersFound">No Users Found</string>
 	<string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
 	<string name="CurrentDownloadFolder_">Current Download Folder: </string>
-	<string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete Directories</string>
-	<string name="CreateUsernameSubfolders">Create Username Subfolders</string>
 	<string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
 	<string name="ShowSmartFilters">Show Smart Filters</string>
 	<string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
@@ -914,5 +912,15 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="failed_to_change_password">Failed to change password</string>
 	<string name="password_successfully_updated">Password successfully updated</string>
 	<string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
+    
+    <string name="preference_category_download_folders">Download folders</string>
+    
+    <string name="preference_create_complete_and_incomplete_folders">Complete and Incomplete folders</string>
+    <string name="CreateCompleteAndIncomplete">Create \"Soulseek Complete\" and \"Soulseek Incomplete\" directories</string>
 
+    <string name="preference_create_username_subfolders">Username Subfolders</string>
+    <string name="CreateUsernameSubfolders">Create username subdirectories</string>
+    
+    <string name="preference_create_subfolders_for_single_downloads">Single Download Subfolders</string>
+    <string name="preference_create_subfolders_for_single_downloads_description">Create subfolders for single-file downloads</string>
 </resources>

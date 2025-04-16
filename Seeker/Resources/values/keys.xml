@@ -1,0 +1,5 @@
+﻿<resources>
+    <string translatable="false" name="key_create_complete_and_incomplete_folders">create_complete_and_incomplete_folders</string>
+    <string translatable="false" name="key_create_username_subfolders">create_username_subdirectories</string>
+    <string translatable="false" name="key_create_subfolders_for_single_downloads">create_subfolders_for_single_downloads</string>
+</resources>

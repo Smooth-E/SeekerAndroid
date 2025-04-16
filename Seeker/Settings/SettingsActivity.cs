@@ -79,8 +79,6 @@ public class SettingsActivity : ThemeableActivity
     private readonly List<Tuple<int, int>> positionNumberPairs = [];
     private CheckBox allowPrivateRoomInvitations;
 
-    private CheckBox createUsernameSubfoldersView;
-    private CheckBox doNotCreateSubfoldersForSingleDownloads;
     private CheckBox createCompleteAndIncompleteFoldersView;
     private CheckBox manuallyChooseIncompleteFolderView;
     private TextView currentCompleteFolderView;
@@ -137,14 +135,13 @@ public class SettingsActivity : ThemeableActivity
     
     public override bool OnOptionsItemSelected(IMenuItem item)
     {
-        switch (item.ItemId)
+        if (item.ItemId != Android.Resource.Id.Home)
         {
-            case Android.Resource.Id.Home:
-                OnBackPressedDispatcher.OnBackPressed();
-                return true;
+            return base.OnOptionsItemSelected(item);
         }
         
-        return base.OnOptionsItemSelected(item);
+        OnBackPressedDispatcher.OnBackPressed();
+        return true;
     }
 
     protected override void OnCreate(Bundle savedInstanceState)
@@ -157,13 +154,17 @@ public class SettingsActivity : ThemeableActivity
         SetSupportActionBar(toolbar);
         SupportActionBar!.SetDisplayHomeAsUpEnabled(true);
 
+        SupportFragmentManager.BeginTransaction()
+            .Replace(ResourceConstant.Id.preference_fragment_holder, new SettingsFragment())
+            .Commit();
+        
         var progBar = FindViewById<ProgressBar>(ResourceConstant.Id.progressBarSharedStatus)!;
         progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
         progBar.Click += ImageView_Click;
         var changeDirSettings = FindViewById<Button>(Resource.Id.changeDirSettings);
         changeDirSettings.Click += ChangeDownloadDirectory;
 
-        CheckBox autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
+        var autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
         autoClearComplete.Checked = SeekerState.AutoClearCompleteDownloads;
         autoClearComplete.CheckedChange += AutoClearComplete_CheckedChange;
 
@@ -480,16 +481,7 @@ public class SettingsActivity : ThemeableActivity
          *
          **NOTE**
          */
-
-        createUsernameSubfoldersView = this.FindViewById<CheckBox>(Resource.Id.createUsernameSubfolders);
-        createUsernameSubfoldersView.Checked = SeekerState.CreateUsernameSubfolders;
-        createUsernameSubfoldersView.CheckedChange += CreateUsernameSubfoldersView_CheckedChange;
-        doNotCreateSubfoldersForSingleDownloads = this.FindViewById<CheckBox>(Resource.Id.doNotCreateSubfoldersForSingleDownloads);
-        doNotCreateSubfoldersForSingleDownloads.Checked = SeekerState.NoSubfolderForSingle;
-        doNotCreateSubfoldersForSingleDownloads.CheckedChange += DoNotCreateSubfoldersForSingleDownloads_CheckedChange;
-        createCompleteAndIncompleteFoldersView = this.FindViewById<CheckBox>(Resource.Id.createCompleteAndIncompleteDirectories);
-        createCompleteAndIncompleteFoldersView.Checked = SeekerState.CreateCompleteAndIncompleteFolders;
-        createCompleteAndIncompleteFoldersView.CheckedChange += CreateCompleteAndIncompleteFoldersView_CheckedChange;
+        
         manuallyChooseIncompleteFolderView = this.FindViewById<CheckBox>(Resource.Id.manuallySetIncomplete);
         manuallyChooseIncompleteFolderView.Checked = SeekerState.OverrideDefaultIncompleteLocations;
         manuallyChooseIncompleteFolderView.CheckedChange += ManuallyChooseIncompleteFolderView_CheckedChange;
@@ -1214,7 +1206,7 @@ public class SettingsActivity : ThemeableActivity
         CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
     }
 
-    private void SetIncompleteFolderView()
+    public void SetIncompleteFolderView()
     {
         string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
         currentIncompleteFolderView.Text = friendlyName;
@@ -1244,22 +1236,6 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.OverrideDefaultIncompleteLocations = e.IsChecked;
         SetIncompleteDirectoryState();
         SetIncompleteFolderView();
-    }
-
-    private void CreateCompleteAndIncompleteFoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.CreateCompleteAndIncompleteFolders = e.IsChecked;
-        SetIncompleteFolderView();
-    }
-
-    private void CreateUsernameSubfoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.CreateUsernameSubfolders = e.IsChecked;
-    }
-
-    private void DoNotCreateSubfoldersForSingleDownloads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.NoSubfolderForSingle = e.IsChecked;
     }
 
     private void PrivHelp_Click(object sender, EventArgs e)
@@ -3457,9 +3433,9 @@ public class SettingsActivity : ThemeableActivity
     {
         lock (SeekerApplication.SharedPrefLock)
         {
-            SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
+            SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, true);
             SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
-            SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, false);
+            SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_username_subfolders, false);
             SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(KeyConsts.M_ManualIncompleteDirectoryUri, string.Empty);
             SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
         }
@@ -3470,10 +3446,10 @@ public class SettingsActivity : ThemeableActivity
         lock (SeekerApplication.SharedPrefLock)
         {
             var editor = SeekerState.SharedPreferences.Edit();
-            editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, SeekerState.CreateCompleteAndIncompleteFolders);
+            editor.PutBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, SeekerState.CreateCompleteAndIncompleteFolders);
             editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, SeekerState.OverrideDefaultIncompleteLocations);
-            editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, SeekerState.CreateUsernameSubfolders);
-            editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, SeekerState.NoSubfolderForSingle);
+            editor.PutBoolean(ResourceConstant.String.key_create_username_subfolders, SeekerState.CreateUsernameSubfolders);
+            editor.PutBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, SeekerState.NoSubfolderForSingle);
             editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
             editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree);
             bool success = editor.Commit();

@@ -1,4 +1,5 @@
-﻿using Android.Content;
+﻿using _Microsoft.Android.Resource.Designer;
+using Android.Content;
 using AndroidX.AppCompat.App;
 using Seeker.Chatroom;
 using Seeker.Helpers;
@@ -70,7 +71,7 @@ public static class SharedPreferencesUtils
         SeekerState.IgnoreUserList = UserListManager.FromString(prefs.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
         SeekerState.AllowPrivateRoomInvitations = prefs.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
         SeekerState.StartServiceOnStartup = prefs.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
-        SeekerState.NoSubfolderForSingle = prefs.GetBoolean(KeyConsts.M_NoSubfolderForSingle, false);
+        SeekerState.NoSubfolderForSingle = prefs.GetBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, false);
 
         SeekerState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
         SeekerApplication.RestoreSmartFilterState(prefs);
@@ -150,5 +151,18 @@ public static class SharedPreferencesUtils
             SeekerState.ListenerPort = sharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
             SeekerState.ListenerUPnpEnabled = sharedPreferences.GetBoolean(KeyConsts.M_ListenerUPnpEnabled, true);
         }
+    }
+
+    public static bool GetBoolean(this ISharedPreferences preferences, int keyId, bool defaultValue)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferences.GetBoolean(key, defaultValue);
+    }
+
+    public static ISharedPreferencesEditor PutBoolean(this ISharedPreferencesEditor preferencesEditor, 
+        int keyId, bool value)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferencesEditor.PutBoolean(key, value);
     }
 }

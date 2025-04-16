@@ -119,51 +119,11 @@
 
                 </TableLayout>
 
-                <CheckBox
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:text="@string/CreateCompleteAndIncomplete"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:layout_gravity="center"
-                        android:theme="@style/checkBoxStyle"
-                        android:layout_marginTop="10dp"
-                        android:id="@+id/createCompleteAndIncompleteDirectories"
-                        android:layout_marginBottom="10dp"/>
-
-                <CheckBox
-                        android:theme="@style/checkBoxStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:text="@string/CreateUsernameSubfolders"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="10dp"
-                        android:id="@+id/createUsernameSubfolders"
-                        android:layout_marginBottom="10dp"/>
-
-                <CheckBox
-                        android:theme="@style/checkBoxStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:text="@string/DoNotCreateSubfoldersForSingleDownloads"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="10dp"
-                        android:id="@+id/doNotCreateSubfoldersForSingleDownloads"
-                        android:layout_marginBottom="10dp"/>
-
+                <FrameLayout
+                        android:id="@+id/preference_fragment_holder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                
                 <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
