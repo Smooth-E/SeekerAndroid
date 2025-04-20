@@ -319,9 +319,6 @@ public class MainActivity : ThemeableActivity
         Xamarin.Essentials.Platform.Init(this, savedInstanceState); // this is what you are supposed to do.
         SetContentView(ResourceConstant.Layout.activity_main);
 
-        navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
-        navigation.SetOnItemSelectedListener(new NavigationBarItemSelectedListener(pager));
-
 
         toolbar = FindViewById<Toolbar>(ResourceConstant.Id.toolbar)!;
         toolbar.Title = GetString(ResourceConstant.String.home_tab);
@@ -335,8 +332,11 @@ public class MainActivity : ThemeableActivity
         
         sharedPreferences = GetSharedPreferences("SoulSeekPrefs", FileCreationMode.Private);
 
-
         pager = FindViewById<ViewPager>(ResourceConstant.Id.pager)!;
+        
+        navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
+        navigation.SetOnItemSelectedListener(new NavigationBarItemSelectedListener(pager));
+        
         pager.PageSelected += Pager_PageSelected;
         pager.AddOnPageChangeListener(new MenuChangerOnPageSwitch(navigation));
         pager.Adapter = new TabsPagerAdapter(SupportFragmentManager);
@@ -2458,7 +2458,7 @@ public class MainActivity : ThemeableActivity
         }
     }
 
-    private class NavigationBarItemSelectedListener(ViewPager pager) 
+    private class NavigationBarItemSelectedListener([NotNull] ViewPager pager) 
         : Java.Lang.Object, NavigationBarView.IOnItemSelectedListener
     {
         public bool OnNavigationItemSelected(IMenuItem item)

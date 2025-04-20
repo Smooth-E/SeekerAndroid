@@ -1,4 +1,5 @@
 ﻿using System;
+using Android.Util;
 using Seeker.Managers;
 
 namespace Seeker.Utils;
@@ -11,9 +12,7 @@ public static class Logger
     public static void Debug(string msg)
     {
         DiagnosticFile.AppendMessageToDiagFile(msg);
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
+        Log.Debug("Seeker_Debug", msg);
     }
     
     public static void FirebaseError(string msg, Exception e)
@@ -30,9 +29,7 @@ public static class Logger
             Firebase.Crashlytics.FirebaseCrashlytics.Instance.RecordException(new Java.Lang.Throwable(msg));
         }
 #endif
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
+        Log.Debug("Seeker_Debug", msg);
     }
 
     public static void FirebaseInfo(string msg)
@@ -44,8 +41,6 @@ public static class Logger
             Firebase.Crashlytics.FirebaseCrashlytics.Instance.Log(msg);
         }
 #endif
-#if ADB_LOGCAT
-            log.Debug(logCatTag, msg);
-#endif
+        Log.Debug("Seeker_Debug", msg);
     }
 }
