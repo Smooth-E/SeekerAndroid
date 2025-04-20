@@ -115,7 +115,6 @@ namespace Seeker
         public const string M_UserNotes = "Momento_UserNotes_v2";
         public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts_v2";
 
-        public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
         public const string M_ManualIncompleteDirectoryUriIsFromTree = "Momento_ManualIncompleteDirectoryUriIsFromTree";
         public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
 

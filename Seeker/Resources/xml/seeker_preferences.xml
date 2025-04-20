@@ -34,6 +34,13 @@
                 android:summary="@string/preference_create_subfolders_for_single_downloads_description"
                 android:defaultValue="false"
                 app:iconSpaceReserved="false"/>
+        
+        <SwitchPreferenceCompat
+            app:key="@string/key_use_manual_incomplete_directory_uri"
+            app:title="@string/ManuallySetIncompleteFolder"
+            android:summary="@string/preference_use_manual_incomplete_folder_summary"
+            android:defaultValue="false"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 

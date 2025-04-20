@@ -878,10 +878,6 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="SetLanguage">Language:</string>
 	<string name="Automatic">Automatic</string>
 
-	<string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
-	<string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
-	<string name="ClearFolder">Clear Folder</string>
-
 	<string name="HideSize">Hide Size</string>
 	<string name="HideSpeed">Hide Speed</string>
 
@@ -925,4 +921,10 @@ The standard way of requesting folder access does not always persist permissions
     
     <string name="preference_create_subfolders_for_single_downloads">Single Download Subfolders</string>
     <string name="preference_create_subfolders_for_single_downloads_description">Create subfolders for single-file downloads</string>
+  
+    <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
+    <string name="preference_use_manual_incomplete_folder_summary">Use manually selected folder for incomplete downloads</string>
+  
+    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="ClearFolder">Clear Folder</string>
 </resources>

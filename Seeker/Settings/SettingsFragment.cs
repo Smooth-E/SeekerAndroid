@@ -1,6 +1,9 @@
-﻿using _Microsoft.Android.Resource.Designer;
+﻿using System;
+using _Microsoft.Android.Resource.Designer;
 using Android.OS;
 using AndroidX.Preference;
+using Seeker.Utils;
+using Environment = Android.OS.Environment;
 
 namespace Seeker.Settings;
 
@@ -11,6 +14,7 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat createCompleteIncompleteFolders;
     private SwitchPreferenceCompat createUsernameSubfolders;
     private SwitchPreferenceCompat createSubfoldersForSingleDownloads;
+    private SwitchPreferenceCompat useManualIncompleteDirectory;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -20,25 +24,38 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         dataDirectoryUriPreference = FindPreference<Preference>(ResourceConstant.String.key_data_directory_uri);
         dataDirectoryUriPreference.PreferenceChange += (_, _) => UpdateDataDirectoryUriPreferenceSummary();
-        dataDirectoryUriPreference.PreferenceClick += (_, _) => settingsActivity.ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
+        dataDirectoryUriPreference.PreferenceClick += (_, _) => 
+            settingsActivity.ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
         UpdateDataDirectoryUriPreferenceSummary();
 
-        createCompleteIncompleteFolders =
-            FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_create_complete_and_incomplete_folders);
-        createCompleteIncompleteFolders.PreferenceChange += (_, _) =>
+        createCompleteIncompleteFolders = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_create_complete_and_incomplete_folders);
+        createCompleteIncompleteFolders.PreferenceChange += (_, args) =>
         {
-            SeekerState.CreateCompleteAndIncompleteFolders = createCompleteIncompleteFolders.Checked;
+            SeekerState.CreateCompleteAndIncompleteFolders = Convert.ToBoolean(args.NewValue);
             settingsActivity.SetIncompleteFolderView();
         };
 
-        createUsernameSubfolders =
-            FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_create_username_subfolders);
-        createUsernameSubfolders.PreferenceChange +=
-            (_, _) => SeekerState.CreateUsernameSubfolders = createUsernameSubfolders.Checked;
+        createUsernameSubfolders = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_create_username_subfolders);
+        createUsernameSubfolders.PreferenceChange += (_, args) =>
+            SeekerState.CreateUsernameSubfolders = Convert.ToBoolean(args.NewValue);
 
-        createSubfoldersForSingleDownloads = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_create_subfolders_for_single_downloads);
-        createSubfoldersForSingleDownloads.PreferenceChange += (_, _) =>
-            SeekerState.NoSubfolderForSingle = createSubfoldersForSingleDownloads.Checked;
+        createSubfoldersForSingleDownloads = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_create_subfolders_for_single_downloads);
+        createSubfoldersForSingleDownloads.PreferenceChange += (_, args) =>
+            SeekerState.NoSubfolderForSingle = Convert.ToBoolean(args.NewValue);
+
+        useManualIncompleteDirectory = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_use_manual_incomplete_directory_uri);
+        useManualIncompleteDirectory.PreferenceChange += (_, args) =>
+        {
+            Logger.Debug($"useManualIncompleteDirectory: {Convert.ToBoolean(args.NewValue)}");
+            
+            SeekerState.OverrideDefaultIncompleteLocations = Convert.ToBoolean(args.NewValue);
+            settingsActivity.SetIncompleteDirectoryState();
+            settingsActivity.SetIncompleteFolderView();
+        };
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
