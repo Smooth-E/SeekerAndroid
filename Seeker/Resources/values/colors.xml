@@ -5,56 +5,40 @@
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
 
-
-
-
-    
-    <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
+    <!--light transparency-->
+    <color name="mainPurpleTransparent">#994f58c4</color>
     <color name="lightPurpleNotTransparent">#959BDC</color>
 
+    <color name="androidStockMessagesNewBlue">#0B57D0</color>
 
+    <color name="defaultTextColor">#ff737373</color>
 
+    <color name="offline">#F7636A</color>
+    <color name="away">#FFCD87</color>
+    <color name="online">#89B38F</color>
+    <color name="queueColor">#F7636A</color>
+    <color name="hardErrorRed">#cc0000</color>
+    <color name="colorButtonText">#437eab</color>
+    <color name="mainPurpleTurnedOff">#77437eab</color>
+    <color name="chatBoxSplitterElevation">#e0e0e0</color>
 
-	<color name="androidStockMessagesNewBlue">#0B57D0</color>
+    <color name="nextPage">#ff5A595B</color>
+    <color name="currentPage">#ff0C9DCE</color>
+    <color name="prevPage">#ffC1E1ED</color>
 
+    <color name="subTextColor">#ff757575</color>
+    <color name="slightTint">#18000000</color>
 
+    <color name="dialog_background">#ffffffff</color>
+    
+    <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
+    <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 
-	<color name="defaultTextColor">#ff737373</color>
+    <color name="chipSeparatorColor">#ff606060</color>
 
+    <color name="absoluteBackColor1">#ff000000</color>
+    <color name="absoluteBackColor2">#ff303030</color>
+    <color name="absoluteBackColor3">#ffffff</color>
 
-	<color name="offline">#F7636A</color>
-	<color name="away">#FFCD87</color>
-	<color name="online">#89B38F</color>
-	<color name="queueColor">#F7636A</color>
-  <color name="hardErrorRed">#cc0000</color>
-  <color name="colorButtonText">#437eab</color>
-  <color name="mainPurpleTurnedOff">#77437eab</color>
-  <color name="chatBoxSplitterElevation">#e0e0e0</color>
-  
-  
-	
-	<color name="nextPage">#ff5A595B</color>
-	<color name="currentPage">#ff0C9DCE</color>
-	<color name="prevPage">#ffC1E1ED</color>
-	
-	<color name="subTextColor">#ff757575</color>
-	<color name="slightTint">#18000000</color>
-	
-	<color name="dialog_background">#ffffffff</color>
-
-
-	<color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
-  <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
-	
-	
-  <color name="chipSeparatorColor">#ff606060</color>
-
-
-  <color name="absoluteBackColor1">#ff000000</color>
-  <color name="absoluteBackColor2">#ff303030</color>
-  <color name="absoluteBackColor3">#ffffff</color>
-
-  
-  
-  
+    <color name="ic_launcher_background">#2C3E50</color>
 </resources>
