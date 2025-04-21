@@ -8,11 +8,11 @@
             android:title="@string/preference_category_downloads"
             app:iconSpaceReserved="false">
         
-        <Preference
+        <Seeker.Components.TwoIconPreference
             app:key="@string/key_data_directory_uri"
             app:title="@string/preference_download_folder"
-            app:iconSpaceReserved="false"
-            android:widgetLayout="@layout/preference_widget_edit_folder"/>
+            app:secondaryIcon="@drawable/icons8_edit_folder_96"
+            app:iconSpaceReserved="false"/>
         
         <SwitchPreferenceCompat
                 app:key="@string/key_create_complete_and_incomplete_folders"
@@ -42,12 +42,12 @@
             android:defaultValue="false"
             app:iconSpaceReserved="false"/>
 
-        <Preference
+        <Seeker.Components.TwoIconPreference
                 android:dependency="@string/key_use_manual_incomplete_directory_uri"
                 app:key="@string/key_manual_incomplete_directory_uri"
                 app:title="@string/preference_incomplete_folder"
-                app:iconSpaceReserved="false"
-                android:widgetLayout="@layout/preference_widget_edit_folder"/>
+                app:secondaryIcon="@drawable/icons8_edit_folder_96"
+                app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 

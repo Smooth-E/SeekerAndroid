@@ -76,4 +76,8 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    
+    <style name="Seeker.TwoIconPreference" parent="Preference">
+        <item name="android:widgetLayout">@layout/preference_two_icon_widget</item>
+    </style>
 </resources>

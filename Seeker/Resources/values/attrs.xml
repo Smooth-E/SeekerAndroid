@@ -53,5 +53,6 @@
 
     <attr name="show_progress_size" format="boolean"/>
 
+    <attr name="twoIconPreferenceStyle" format="reference"/>
     <attr name="secondaryIcon" format="reference"/>
 </resources>

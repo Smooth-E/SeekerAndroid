@@ -4,8 +4,8 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:id="@+id/secondary_icon"
         android:focusable="false"
         android:clickable="false"
         android:background="@null"
-        app:tint="?attr/secondaryColor"
-        android:src="@drawable/icons8_edit_folder_96"/>
+        app:tint="?attr/secondaryColor"/>
