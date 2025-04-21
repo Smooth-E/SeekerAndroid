@@ -3148,7 +3148,6 @@ public class SettingsActivity : ThemeableActivity
             SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_use_manual_incomplete_directory_uri, false);
             SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_username_subfolders, false);
             SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_manual_incomplete_directory_uri, string.Empty);
-            SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
         }
     }
 
@@ -3162,7 +3161,6 @@ public class SettingsActivity : ThemeableActivity
                 .PutBoolean(ResourceConstant.String.key_create_username_subfolders, SeekerState.CreateUsernameSubfolders)!
                 .PutBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, SeekerState.NoSubfolderForSingle)!
                 .PutString(ResourceConstant.String.key_manual_incomplete_directory_uri, SeekerState.ManualIncompleteDataDirectoryUri)!
-                .PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)!
                 .Commit();
         }
     }

@@ -114,10 +114,7 @@ namespace Seeker
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";
         public const string M_UserNotes = "Momento_UserNotes_v2";
         public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts_v2";
-
-        public const string M_ManualIncompleteDirectoryUriIsFromTree = "Momento_ManualIncompleteDirectoryUriIsFromTree";
-        // public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
-
+        
         public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
 
         public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
