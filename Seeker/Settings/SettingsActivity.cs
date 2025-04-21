@@ -79,12 +79,6 @@ public class SettingsActivity : ThemeableActivity
     private readonly List<Tuple<int, int>> positionNumberPairs = [];
     private CheckBox allowPrivateRoomInvitations;
 
-    private CheckBox createCompleteAndIncompleteFoldersView;
-    private TextView currentIncompleteFolderView;
-
-    private ViewGroup incompleteFolderViewLayout;
-    private Button changeIncompleteDirectory;
-
     private ViewGroup sharingSubLayout1;
     private ViewGroup sharingSubLayout2;
 
@@ -485,17 +479,10 @@ public class SettingsActivity : ThemeableActivity
          **NOTE**
          */
         
-        currentIncompleteFolderView = this.FindViewById<TextView>(Resource.Id.incompleteFolderPath);
-
-        changeIncompleteDirectory = this.FindViewById<Button>(Resource.Id.changeIncompleteDirSettings);
-        changeIncompleteDirectory.Click += ChangeIncompleteDirectory;
-        incompleteFolderViewLayout = this.FindViewById<ViewGroup>(Resource.Id.incompleteDirectoryLayout);
-
         Button cleanUpIncompleteDirectory = this.FindViewById<Button>(Resource.Id.clearIncompleteFolder);
         cleanUpIncompleteDirectory.Click += CleanUpIncompleteDirectory_Click;
 
         SetIncompleteDirectoryState();
-        SetIncompleteFolderView();
         SetSharedFolderView();
         
         showSmartFilters = this.FindViewById<CheckBox>(Resource.Id.smartFilterEnable);
@@ -617,7 +604,10 @@ public class SettingsActivity : ThemeableActivity
 
     private void UpdateDirectoryViews()
     {
-        SetIncompleteFolderView();
+        // TODO: Track down this use case of removed method
+        
+        // SetIncompleteFolderView();
+        
         SetSharedFolderView();
     }
 
@@ -1003,7 +993,7 @@ public class SettingsActivity : ThemeableActivity
     private void ConfigSmartFilters_Click(object sender, EventArgs e)
     {
         Logger.FirebaseInfo("ConfigSmartFilters_Click");
-        AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
         builder.SetTitle(Resource.String.ConfigureSmartFilters);
         View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
         // Set up the input
@@ -1023,11 +1013,11 @@ public class SettingsActivity : ThemeableActivity
         mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
         adapter.ItemTouchHelper = mItemTouchHelper;
 
-        EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+        EventHandler<DialogClickEventArgs> eventHandler = (_, _) =>
         {
             SeekerState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
             SeekerApplication.SaveSmartFilterState();
-        });
+        };
 
         EventHandler<DialogClickEventArgs> cancelHandler = (_, _) => { };
 
@@ -1111,64 +1101,14 @@ public class SettingsActivity : ThemeableActivity
 
     public static bool UseIncompleteManualFolder()
     {
-        return (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null);
-    }
-
-    private static string GetFriendlyIncompleteDirectoryName()
-    {
-        if (SeekerState.MemoryBackedDownload)
-        {
-            return SeekerApplication.ApplicationContext.GetString(Resource.String.NotInUse);
-        }
-        if (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
-        {
-            return SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
-        }
-        else
-        {
-            if (!SeekerState.CreateCompleteAndIncompleteFolders)
-            {
-                return SeekerApplication.ApplicationContext.GetString(Resource.String.AppLocalStorage);
-            }
-            //if not override then its whatever the download directory is...
-            if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
-            {
-                if (SeekerState.UseLegacyStorage())
-                {
-                    //if not set and legacy storage, then the directory is simple the default music
-                    string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment; //this is to prevent line breaks.
-                }
-                else
-                {
-                    //if not set and not legacy storage, then that is bad.  user must set it.
-                    return SeekerApplication.ApplicationContext.GetString(Resource.String.NotSet);
-                }
-            }
-            else
-            {
-                return SeekerState.RootDocumentFile.Uri.LastPathSegment;
-            }
-        }
+        return SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null;
     }
     
     public void SetIncompleteDirectoryState()
     {
         // TODO: These will be handled with preference dependency
         var overrideDefault = SeekerState.OverrideDefaultIncompleteLocations;
-        incompleteFolderViewLayout.Enabled = overrideDefault;
-        changeIncompleteDirectory.Enabled = overrideDefault;
-        incompleteFolderViewLayout.Alpha = overrideDefault ? 1.0f : 0.5f;
-        changeIncompleteDirectory.Alpha = overrideDefault ? 1.0f : 0.5f;
-        changeIncompleteDirectory.Clickable = overrideDefault;
         recyclerViewFolders.Clickable = overrideDefault;
-    }
-
-    public void SetIncompleteFolderView()
-    {
-        string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
-        currentIncompleteFolderView.Text = friendlyName;
-        CommonHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
     }
 
     private void SetSharedFolderView()
@@ -2023,7 +1963,7 @@ public class SettingsActivity : ThemeableActivity
     private void MemoryFileDownloadSwitchCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         SeekerState.MemoryBackedDownload = !e.IsChecked;
-        SetIncompleteFolderView();
+        // TODO: SetIncompleteFolderView();
     }
 
     private void ShowDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -2612,11 +2552,6 @@ public class SettingsActivity : ThemeableActivity
         {
             ShowDirSettings(null, DirectoryType.Upload);
         }
-    }
-
-    private void ChangeIncompleteDirectory(object sender, EventArgs e)
-    {
-        ShowDirSettings(SeekerState.ManualIncompleteDataDirectoryUri, DirectoryType.Incomplete);
     }
 
     private void UseInternalFilePicker(int requestCode)
@@ -3385,9 +3320,9 @@ public class SettingsActivity : ThemeableActivity
         lock (SeekerApplication.SharedPrefLock)
         {
             SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, true);
-            SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
+            SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_use_manual_incomplete_directory_uri, false);
             SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_username_subfolders, false);
-            SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_use_manual_incomplete_directory_uri, string.Empty);
+            SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_manual_incomplete_directory_uri, string.Empty);
             SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
         }
     }
@@ -3398,10 +3333,10 @@ public class SettingsActivity : ThemeableActivity
         {
             SeekerState.SharedPreferences.Edit()!
                 .PutBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, SeekerState.CreateCompleteAndIncompleteFolders)!
-                .PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, SeekerState.OverrideDefaultIncompleteLocations)!
+                .PutBoolean(ResourceConstant.String.key_use_manual_incomplete_directory_uri, SeekerState.OverrideDefaultIncompleteLocations)!
                 .PutBoolean(ResourceConstant.String.key_create_username_subfolders, SeekerState.CreateUsernameSubfolders)!
                 .PutBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, SeekerState.NoSubfolderForSingle)!
-                .PutString(ResourceConstant.String.key_use_manual_incomplete_directory_uri, SeekerState.ManualIncompleteDataDirectoryUri)!
+                .PutString(ResourceConstant.String.key_manual_incomplete_directory_uri, SeekerState.ManualIncompleteDataDirectoryUri)!
                 .PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)!
                 .Commit();
         }

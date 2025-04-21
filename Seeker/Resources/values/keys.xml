@@ -4,4 +4,5 @@
     <string translatable="false" name="key_create_subfolders_for_single_downloads">create_subfolders_for_single_downloads</string>
     <string translatable="false" name="key_data_directory_uri">data_directory_uri</string>
     <string translatable="false" name="key_use_manual_incomplete_directory_uri">use_manual_incomplete_directory_uri</string>
+    <string translatable="false" name="key_manual_incomplete_directory_uri">manual_incomplete_directory_uri</string>
 </resources>
