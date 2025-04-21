@@ -48,6 +48,13 @@
                 app:title="@string/preference_incomplete_folder"
                 app:secondaryIcon="@drawable/icons8_edit_folder_96"
                 app:iconSpaceReserved="false"/>
+        
+        <Seeker.Components.TwoIconPreference
+            app:key="@string/key_clear_incomplete_folder"
+            app:title="@string/preference_clear_incomplete_folder"
+            android:summary="@string/preference_clear_incomplete_folder_summary"
+            app:iconSpaceReserved="false"
+            app:secondaryIcon="@drawable/phosphor_broom"/>
 
     </PreferenceCategory>
 

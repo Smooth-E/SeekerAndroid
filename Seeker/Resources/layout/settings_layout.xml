@@ -52,61 +52,6 @@
                         android:id="@+id/preference_fragment_holder"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
-                
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginTop="6dp"
-                        android:layout_marginBottom="6dp"
-                        android:layout_marginEnd="10dp"
-                        android:id="@+id/incompleteFolderLayout"
-                        android:background="@drawable/border_group_box"
-                        android:orientation="vertical">
-
-                    <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="0dp"
-                            android:layout_gravity="center"
-                            android:layout_marginBottom="12dp"
-                            android:id="@+id/clearIncompleteSubLayout"
-                            android:orientation="horizontal">
-
-                        <Button
-                                android:layout_centerHorizontal="true"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/ClearFolder"
-                                android:minHeight="16dp"
-                                android:textSize="12dp"
-                                android:paddingTop="8dp"
-                                android:paddingBottom="8dp"
-                                android:paddingStart="7dp"
-                                android:gravity="center_vertical"
-                                android:paddingEnd="7dp"
-                                android:textAllCaps="false"
-                                android:layout_marginTop="6dp"
-                                android:layout_marginBottom="6dp"
-                                style="@style/SeekerButtonStyle"
-                                android:foreground="@drawable/button"
-                                android:id="@+id/clearIncompleteFolder"/>
-
-                        <ImageView
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:gravity="center_vertical"
-                                android:layout_gravity="center_vertical"
-                                android:layout_marginTop="6dp"
-                                android:layout_marginStart="10dp"
-                                android:layout_marginBottom="6dp"
-                                android:id="@+id/moreInfoButtonClearIncomplete"
-                                app:srcCompat="@drawable/help_circle_outline"
-                                android:tint="?attr/mainTextColor"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
 
             </LinearLayout>
 

@@ -629,11 +629,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
-    <string name="concurrent_dialog">Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
-    </string>
-
-    <string name="clear_incomplete_dialog">This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
-    </string>
+    <string name="concurrent_dialog">Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.</string>
 
     <string name="diagnostics_more_info">
         This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
@@ -916,4 +912,9 @@ The standard way of requesting folder access does not always persist permissions
     <string name="CurrentIncompleteFolder">Current incomplete downloads folder:</string>
 
     <string name="ClearFolder">Clear Folder</string>
+    <string name="preference_clear_incomplete_folder">Clear Incomplete Folder</string>
+    <string name="preference_clear_incomplete_folder_summary">Remove unneeded items from the \"Incomplete\" folder. Use this option if Seeker fails to do this automatically.</string>
+
+    <string name="message_cleared_single_folder">Folder cleared</string>
+    <string name="message_cleared_several_folders">Cleared %1 folders</string>
 </resources>
