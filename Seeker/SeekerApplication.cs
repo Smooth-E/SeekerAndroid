@@ -1253,35 +1253,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             ResourceConstant.Layout.autoSuggestionRow, 
             recentUsers);
     }
-
-    public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
-    {
-        SeekerState.SmartFilterOptions = new SeekerState.SmartFilterState
-        {
-            KeywordsEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true),
-            KeywordsOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0),
-            FileTypesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true),
-            FileTypesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1),
-            NumFilesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true),
-            NumFilesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2)
-        };
-    }
-
-    public static void SaveSmartFilterState()
-    {
-        lock (SharedPrefLock)
-        {
-            SeekerState.SharedPreferences.Edit()!
-                .PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled)!
-                .PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, SeekerState.SmartFilterOptions.FileTypesEnabled)!
-                .PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, SeekerState.SmartFilterOptions.NumFilesEnabled)!
-                .PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, SeekerState.SmartFilterOptions.KeywordsOrder)!
-                .PutInt(KeyConsts.M_SmartFilter_TypesOrder, SeekerState.SmartFilterOptions.FileTypesOrder)!
-                .PutInt(KeyConsts.M_SmartFilter_CountsOrder, SeekerState.SmartFilterOptions.NumFilesOrder)!
-                .Commit();
-        }
-    }
-        
+    
     /// <summary>This is from the server after sending it a UserData request.</summary>
     private void SoulseekClient_UserDataReceived(object sender, UserData e)
     {

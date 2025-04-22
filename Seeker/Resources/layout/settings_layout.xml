@@ -33,7 +33,7 @@
             android:layout_below="@id/appbarLayout"
             android:layout_height="fill_parent">
 
-        <RelativeLayout
+        <LinearLayout
                 android:orientation="vertical"
                 android:padding="4dip"
                 android:layout_width="match_parent"
@@ -44,57 +44,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/preference_fragment_holder"
-                    android:layout_marginTop="4dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/smartFilterLayout"
-                    android:orientation="horizontal">
-
-                <CheckBox
-                        android:theme="@style/checkBoxStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_below="@+id/smartFilterLayout"
-                        android:text="@string/ShowSmartFilters"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop="10dp"
-                        android:id="@+id/smartFilterEnable"
-                        android:layout_marginBottom="10dp"/>
-
-                <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/Configure"
-                        android:textSize="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:textAllCaps="false"
-                        android:minHeight="16dp"
-                        android:foreground="@drawable/button"
-                        style="@style/SeekerButtonStyle"
-                        android:paddingStart="7dp"
-                        android:paddingEnd="7dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:id="@+id/configureSmartFilters"/>
-
-            </LinearLayout>
-
             <CheckBox
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_below="@+id/smartFilterLayout"
                     android:text="@string/only_show_free_slots"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
@@ -1463,7 +1417,7 @@
                     android:layout_marginBottom="10dp"
                     android:id="@+id/restoreDefaults"/>
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </ScrollView>
 

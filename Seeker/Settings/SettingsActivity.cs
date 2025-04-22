@@ -116,7 +116,6 @@ public class SettingsActivity : ThemeableActivity
     private Button changePort;
     
     private CheckBox useUPnPCheckBox;
-    private CheckBox showSmartFilters;
     
     private static UploadDirectoryInfo ContextMenuItem;
     
@@ -455,13 +454,6 @@ public class SettingsActivity : ThemeableActivity
 
         SetIncompleteDirectoryState();
         SetSharedFolderView();
-        
-        showSmartFilters = this.FindViewById<CheckBox>(Resource.Id.smartFilterEnable);
-        showSmartFilters.Checked = SeekerState.ShowSmartFilters;
-        showSmartFilters.CheckedChange += ShowSmartFilters_CheckedChange;
-
-        Button configSmartFilters = FindViewById<Button>(Resource.Id.configureSmartFilters);
-        configSmartFilters.Click += ConfigSmartFilters_Click;
 
         mainScrollView = FindViewById<ScrollView>(Resource.Id.mainScrollView);
         sharingLayoutParent = FindViewById<ViewGroup>(Resource.Id.sharingLayoutParent);
@@ -947,56 +939,6 @@ public class SettingsActivity : ThemeableActivity
     private void ShowLockedSearch_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         SeekerState.HideLockedResultsInSearch = !e.IsChecked;
-    }
-
-    private void ConfigSmartFilters_Click(object sender, EventArgs e)
-    {
-        Logger.FirebaseInfo("ConfigSmartFilters_Click");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-        builder.SetTitle(Resource.String.ConfigureSmartFilters);
-        View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
-        // Set up the input
-        RecyclerView recyclerViewFiltersConfig = (RecyclerView)viewInflated.FindViewById<RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
-        builder.SetView(viewInflated);
-
-
-
-        RecyclerListAdapter adapter = new RecyclerListAdapter(this, null, SeekerState.SmartFilterOptions.GetAdapterItems());
-
-        recyclerViewFiltersConfig.HasFixedSize = (true);
-        recyclerViewFiltersConfig.SetAdapter(adapter);
-        recyclerViewFiltersConfig.SetLayoutManager(new LinearLayoutManager(this));
-
-        ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
-        var mItemTouchHelper = new ItemTouchHelper(callback);
-        mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
-        adapter.ItemTouchHelper = mItemTouchHelper;
-
-        EventHandler<DialogClickEventArgs> eventHandler = (_, _) =>
-        {
-            SeekerState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
-            SeekerApplication.SaveSmartFilterState();
-        };
-
-        EventHandler<DialogClickEventArgs> cancelHandler = (_, _) => { };
-
-        builder.SetPositiveButton(Resource.String.okay, eventHandler);
-        builder.SetNegativeButton(Resource.String.cancel, cancelHandler);
-
-        AndroidX.AppCompat.App.AlertDialog diag = builder.Create();
-        diag.Show();
-
-    }
-
-    private void ShowSmartFilters_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.ShowSmartFilters = e.IsChecked;
-        lock (SeekerApplication.SharedPrefLock)
-        {
-            var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-            editor.PutBoolean(KeyConsts.M_ShowSmartFilters, SeekerState.ShowSmartFilters);
-            bool success = editor.Commit();
-        }
     }
 
     private void ImportData_Click(object sender, EventArgs e)

@@ -72,6 +72,20 @@
             app:min="10"
             android:max="1000"
             app:showSeekBarValue="true"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_show_smart_filters"
+                app:title="@string/ShowSmartFilters"
+                android:summary="@string/preference_show_smart_filters_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                app:key="@string/key_configure_smart_filters"
+                app:title="@string/preference_configure_smart_filters"
+                android:summary="@string/preference_configure_smart_filters_summary"
+                app:iconSpaceReserved="false"
+                app:secondaryIcon="@drawable/auto_awesome"/>
         
     </PreferenceCategory>
     

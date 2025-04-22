@@ -73,8 +73,8 @@ public static class SharedPreferencesUtils
         SeekerState.StartServiceOnStartup = prefs.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
         SeekerState.NoSubfolderForSingle = prefs.GetBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, false);
 
-        SeekerState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
-        SeekerApplication.RestoreSmartFilterState(prefs);
+        SeekerState.ShowSmartFilters = prefs.GetBoolean(ResourceConstant.String.key_show_smart_filters, false);
+        SeekerState.RestoreSmartFilterState(prefs);
 
         SeekerState.UserInfoBio = prefs.GetString(KeyConsts.M_UserInfoBio, string.Empty);
         SeekerState.UserInfoPictureName = prefs.GetString(KeyConsts.M_UserInfoPicture, string.Empty);

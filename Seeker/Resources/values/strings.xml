@@ -753,7 +753,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="NoUsersFound">No Users Found</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
-    <string name="ShowSmartFilters">Show Smart Filters</string>
     <string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
     <string name="ShowPrivateLockedBrowse">Show Private (Locked) Files in Browse Response</string>
     <string name="RememberRecent">Remember Recent Users</string>
@@ -918,6 +917,13 @@ The standard way of requesting folder access does not always persist permissions
     <string name="message_cleared_several_folders">Cleared %1 folders</string>
     
     <string name="preference_category_search">Search</string>
+    
     <string name="max_search_results">Max Search Results</string>
     <string name="preference_max_search_results_summary">Maximum number of search results</string>
+
+    <string name="ShowSmartFilters">Show Smart Filters</string>
+    <string name="preference_show_smart_filters_summary">Display smart filters (experimental)</string>
+    
+    <string name="preference_configure_smart_filters">Configure smart filters</string>
+    <string name="preference_configure_smart_filters_summary">Select which filters are displayed and in what order</string>
 </resources>

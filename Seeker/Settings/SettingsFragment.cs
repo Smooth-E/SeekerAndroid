@@ -1,8 +1,11 @@
 ﻿using System;
 using _Microsoft.Android.Resource.Designer;
 using Android.OS;
+using Android.Views;
+using AndroidX.AppCompat.App;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
+using AndroidX.RecyclerView.Widget;
 using Seeker.Utils;
 using Environment = Android.OS.Environment;
 
@@ -11,6 +14,7 @@ namespace Seeker.Settings;
 public class SettingsFragment : PreferenceFragmentCompat
 {
     private SettingsActivity settingsActivity;
+    
     private Preference dataDirectoryUriPreference;
     private SwitchPreferenceCompat createCompleteIncompleteFolders;
     private SwitchPreferenceCompat createUsernameSubfolders;
@@ -18,7 +22,10 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat useManualIncompleteDirectory;
     private Preference incompleteDirectoryUriPreference;
     private Preference clearIncompleteFolder;
+    
     private SeekBarPreference maxSearchResults;
+    private SwitchPreferenceCompat showSmartFilters;
+    private Preference configureSmartFilters;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -54,8 +61,6 @@ public class SettingsFragment : PreferenceFragmentCompat
             ResourceConstant.String.key_use_manual_incomplete_directory_uri);
         useManualIncompleteDirectory.PreferenceChange += (_, args) =>
         {
-            Logger.Debug($"useManualIncompleteDirectory: {Convert.ToBoolean(args.NewValue)}");
-            
             SeekerState.OverrideDefaultIncompleteLocations = Convert.ToBoolean(args.NewValue);
             settingsActivity.SetIncompleteDirectoryState();
             UpdateIncompleteDirectoryUriPreferenceSummary();
@@ -75,6 +80,13 @@ public class SettingsFragment : PreferenceFragmentCompat
         maxSearchResults = FindPreference<SeekBarPreference>(ResourceConstant.String.key_max_search_results);
         maxSearchResults.PreferenceChange += (_, args) =>
             SeekerState.NumberSearchResults = Convert.ToInt32(args.NewValue);
+        
+        showSmartFilters = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_show_smart_filters);
+        showSmartFilters.PreferenceChange += (_, args) =>
+            SeekerState.ShowSmartFilters = Convert.ToBoolean(args.NewValue);
+        
+        configureSmartFilters = FindPreference<Preference>(ResourceConstant.String.key_configure_smart_filters);
+        configureSmartFilters.PreferenceClick += (_, _) => ShowSmartFiltersConfigurationDialog();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -253,5 +265,44 @@ public class SettingsFragment : PreferenceFragmentCompat
                         folderCount);
         
         Context.ShowLongToast(messageString);
+    }
+    
+    private void ShowSmartFiltersConfigurationDialog()
+    {
+        Logger.FirebaseInfo("ConfigSmartFilters_Click");
+        
+        var builder = new AlertDialog.Builder(RequireActivity(), ResourceConstant.Style.MyAlertDialogTheme)
+            .SetTitle(ResourceConstant.String.ConfigureSmartFilters)!;
+        
+        var viewInflated = LayoutInflater.From(RequireActivity())!
+            .Inflate(ResourceConstant.Layout.smart_filter_config_layout, null, false)!;
+        
+        var recyclerViewFiltersConfig = 
+            viewInflated.FindViewById<RecyclerView>(ResourceConstant.Id.recyclerViewFiltersConfig)!;
+        
+        builder.SetView(viewInflated);
+        
+        var adapterItems = SeekerState.SmartFilterOptions.GetAdapterItems();
+        var adapter = new RecyclerListAdapter(RequireActivity(), null, adapterItems);
+
+        recyclerViewFiltersConfig.HasFixedSize = true;
+        recyclerViewFiltersConfig.SetAdapter(adapter);
+        recyclerViewFiltersConfig.SetLayoutManager(new LinearLayoutManager(RequireActivity()));
+
+        var callback = new DragDropItemTouchHelper(adapter);
+        var mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
+        adapter.ItemTouchHelper = mItemTouchHelper;
+
+        builder.SetPositiveButton(ResourceConstant.String.okay, (_, _) => SaveSmartFilters(adapter));
+        builder.SetNegativeButton(ResourceConstant.String.cancel, (_, _) => { });
+
+        builder.Show();
+    }
+    
+    private static void SaveSmartFilters(RecyclerListAdapter adapter)
+    {
+        SeekerState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
+        SeekerState.SaveSmartFilterState();
     }
 }

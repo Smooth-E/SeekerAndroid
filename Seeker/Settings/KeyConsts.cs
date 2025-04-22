@@ -68,7 +68,6 @@ namespace Seeker
         public const string M_AutoJoinRooms = "Cache_JoinedRooms_v2";
         public const string M_AllowPrivateRooomInvitations = "Momento_AllowPrivateRoomInvitations";
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
-        public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify_v2";
         public const string M_SearchTabsState_Headers = "Momento_SearchTabsState_Headers_v2";
 
@@ -115,13 +114,6 @@ namespace Seeker
         public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts_v2";
         
         public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
-
-        public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
-        public const string M_SmartFilter_CountsEnabled = "Momento_SmartFilterCountsEnabled";
-        public const string M_SmartFilter_TypesEnabled = "Momento_SmartFilterTypesEnabled";
-        public const string M_SmartFilter_KeywordsOrder = "Momento_SmartFilterKeywordsOrder";
-        public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
-        public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
 
         public const string M_wishlist_tab = "_wishlist_tab_v2";
         public const string M_wishlist_tab_legacy = "_wishlist_tab";

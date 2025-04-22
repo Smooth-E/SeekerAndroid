@@ -7,4 +7,12 @@
     <string translatable="false" name="key_manual_incomplete_directory_uri">manual_incomplete_directory_uri</string>
     <string translatable="false" name="key_clear_incomplete_folder">clear_incomplete_folder</string>
     <string translatable="false" name="key_max_search_results">max_search_results</string>
+    <string translatable="false" name="key_show_smart_filters">show_smart_filters</string>
+    <string translatable="false" name="key_configure_smart_filters">configure_smart_filters</string>
+    <string translatable="false" name="key_smart_filters_keywords_enabled">smart_filters_keywords_enabled</string>
+    <string translatable="false" name="key_smart_filters_file_types_enabled">smart_filters_file_types_enabled</string>
+    <string translatable="false" name="key_smart_filters_file_count_enabled">smart_filters_file_count_enabled</string>
+    <string translatable="false" name="key_smart_filters_keywords_order">smart_filters_keywords_order</string>
+    <string translatable="false" name="key_smart_filters_file_types_order">smart_filters_file_types_order</string>
+    <string translatable="false" name="key_smart_filters_file_count_order">smart_filters_file_count_order</string>
 </resources>

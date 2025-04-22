@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
@@ -332,8 +333,7 @@ namespace Seeker
                 NumberParsed = 0; //reset
             }
         }
-
-
+        
         public static int NumberParsed = 0;
 
         // TODO utils
@@ -366,41 +366,21 @@ namespace Seeker
 
 
 
+        // previously this was on the loginfragment but
+        // it would get recreated every time so there were lost instances with threads waiting forever....
         // TODO hack?
-        public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
-                                                                                       //it would get recreated every time so there were lost instances with threads waiting forever....
-
-        //public static void OnDownloadAdded(DownloadInfo dlInfo)
-        //{
-        //    DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
-        //}
-
+        public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); 
+        
         public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
         public static AndroidX.DocumentFile.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
+        
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
             BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
-        }
-        public static void ClearOnBrowseResponseReceivedEventsFromTarget(object target)
-        {
-            if (BrowseResponseReceived == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in BrowseResponseReceived.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        BrowseResponseReceived -= (EventHandler<BrowseResponseEvent>)d;
-                    }
-                }
-            }
         }
         
         // TODO: Move this into ConnectionManager
@@ -409,6 +389,34 @@ namespace Seeker
             return currentlyLoggedIn && 
                    (SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) 
                     || SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting));
+        }
+        
+        public static void SaveSmartFilterState()
+        {
+            lock (SeekerApplication.SharedPrefLock)
+            {
+                SharedPreferences.Edit()!
+                    .PutBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_keywords_enabled), SmartFilterOptions.KeywordsEnabled)!
+                    .PutBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_types_enabled), SmartFilterOptions.FileTypesEnabled)!
+                    .PutBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_count_enabled), SmartFilterOptions.NumFilesEnabled)!
+                    .PutInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_keywords_order), SmartFilterOptions.KeywordsOrder)!
+                    .PutInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_types_order), SmartFilterOptions.FileTypesOrder)!
+                    .PutInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_count_order), SmartFilterOptions.NumFilesOrder)!
+                    .Commit();
+            }
+        }
+        
+        public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
+        {
+            SmartFilterOptions = new SmartFilterState
+            {
+                KeywordsEnabled = sharedPreferences.GetBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_keywords_enabled), true),
+                FileTypesEnabled = sharedPreferences.GetBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_types_enabled), true),
+                NumFilesEnabled = sharedPreferences.GetBoolean(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_count_enabled), true),
+                KeywordsOrder = sharedPreferences.GetInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_keywords_order), 0),
+                FileTypesOrder = sharedPreferences.GetInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_types_order), 1),
+                NumFilesOrder = sharedPreferences.GetInt(SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.key_smart_filters_file_count_order), 2)
+            };
         }
     }
 }
