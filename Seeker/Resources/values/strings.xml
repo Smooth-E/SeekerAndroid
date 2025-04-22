@@ -159,7 +159,6 @@
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">Max Search Results: </string>
     <string name="only_show_free_slots">Only Show Results of Users with Free Slots</string>
     <string name="start_service_on_startup">Start Service on Startup</string>
     <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
@@ -917,4 +916,8 @@ The standard way of requesting folder access does not always persist permissions
 
     <string name="message_cleared_single_folder">Folder cleared</string>
     <string name="message_cleared_several_folders">Cleared %1 folders</string>
+    
+    <string name="preference_category_search">Search</string>
+    <string name="max_search_results">Max Search Results</string>
+    <string name="preference_max_search_results_summary">Maximum number of search results</string>
 </resources>

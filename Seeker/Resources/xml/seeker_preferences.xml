@@ -58,4 +58,21 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/preference_category_search"
+        app:iconSpaceReserved="false">
+        
+        <SeekBarPreference
+            app:key="@string/key_max_search_results"
+            app:title="@string/max_search_results"
+            android:summary="@string/preference_max_search_results_summary"
+            app:defaultValue="5"
+            app:seekBarIncrement="100"
+            app:iconSpaceReserved="false"
+            app:min="10"
+            android:max="1000"
+            app:showSeekBarValue="true"/>
+        
+    </PreferenceCategory>
+    
 </PreferenceScreen>

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using _Microsoft.Android.Resource.Designer;
 using Android.OS;
-using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
 using Seeker.Utils;
@@ -20,6 +18,7 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat useManualIncompleteDirectory;
     private Preference incompleteDirectoryUriPreference;
     private Preference clearIncompleteFolder;
+    private SeekBarPreference maxSearchResults;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -72,6 +71,10 @@ public class SettingsFragment : PreferenceFragmentCompat
         
         clearIncompleteFolder = FindPreference<Preference>(ResourceConstant.String.key_clear_incomplete_folder);
         clearIncompleteFolder.PreferenceClick += (_, _) => ClearIncompleteFolder();
+
+        maxSearchResults = FindPreference<SeekBarPreference>(ResourceConstant.String.key_max_search_results);
+        maxSearchResults.PreferenceChange += (_, args) =>
+            SeekerState.NumberSearchResults = Convert.ToInt32(args.NewValue);
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -89,8 +92,8 @@ public class SettingsFragment : PreferenceFragmentCompat
             }
             else
             {
-                // if not set and not legacy storage, then that is bad.  user must set it.
-                summary = SeekerApplication.ApplicationContext.GetString(Resource.String.NotSet);
+                // if not set and not legacy storage, then that is bad. user must set it.
+                summary = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.NotSet);
             }
         }
         else
@@ -121,7 +124,7 @@ public class SettingsFragment : PreferenceFragmentCompat
             {
                 summary = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.AppLocalStorage);
             }
-            //if not override then its whatever the download directory is...
+            // if not override then it's whatever the download directory is...
             else if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
             {
                 if (SeekerState.UseLegacyStorage())
@@ -194,7 +197,7 @@ public class SettingsFragment : PreferenceFragmentCompat
         }
         else
         {
-            DocumentFile rootdir = null;
+            DocumentFile rootDir = null;
             if (useDownloadDir)
             {
                 if (SeekerState.RootDocumentFile == null)
@@ -202,22 +205,22 @@ public class SettingsFragment : PreferenceFragmentCompat
                     Context.ShowLongToast(ResourceConstant.String.ErrorDownloadDirNotProperlySet);
                     return;
                 }
-                rootdir = SeekerState.RootDocumentFile;
-                Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
+                rootDir = SeekerState.RootDocumentFile;
+                Logger.Debug("using download dir" + rootDir.Uri.LastPathSegment);
             }
             else if (useTempDir)
             {
                 var appPrivateExternal = SeekerState.ActiveActivityRef.GetExternalFilesDir(null)!;
-                rootdir = DocumentFile.FromFile(appPrivateExternal);
+                rootDir = DocumentFile.FromFile(appPrivateExternal);
                 Logger.Debug("using temp incomplete dir");
             }
             else if (useCustomDir)
             {
-                rootdir = SeekerState.RootIncompleteDocumentFile;
-                Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                rootDir = SeekerState.RootIncompleteDocumentFile;
+                Logger.Debug("using custom incomplete dir" + rootDir.Uri.LastPathSegment);
             }
 
-            var incompleteDirectory = rootdir!.FindFile("Soulseek Incomplete");
+            var incompleteDirectory = rootDir!.FindFile("Soulseek Incomplete");
             folderExists = incompleteDirectory != null && incompleteDirectory.Exists();
             if (folderExists)
             {

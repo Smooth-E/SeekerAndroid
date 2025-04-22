@@ -31,7 +31,7 @@ public static class SharedPreferencesUtils
         SeekerState.Password = prefs.GetString(KeyConsts.M_Password, string.Empty);
         SeekerState.SaveDataDirectoryUri = prefs.GetString(ResourceConstant.String.key_data_directory_uri, string.Empty);
         SeekerState.SaveDataDirectoryUriIsFromTree = prefs.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
-        SeekerState.NumberSearchResults = prefs.GetInt(KeyConsts.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
+        SeekerState.NumberSearchResults = prefs.GetInt(ResourceConstant.String.key_max_search_results, MainActivity.DEFAULT_SEARCH_RESULTS);
         SeekerState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, AppCompatDelegate.ModeNightFollowSystem);
         SeekerState.Language = prefs.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
         SeekerState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
@@ -177,5 +177,17 @@ public static class SharedPreferencesUtils
     {
         var key = SeekerApplication.ApplicationContext.GetString(keyId);
         return preferencesEditor.PutString(key, value);
+    }
+
+    public static int GetInt(this ISharedPreferences preferences, int keyId, int defaultValue)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferences.GetInt(key, defaultValue);
+    }
+
+    public static ISharedPreferencesEditor PutInt(this ISharedPreferencesEditor preferencesEditor, int keyId, int value)
+    {
+        var key = SeekerApplication.ApplicationContext.GetString(keyId);
+        return preferencesEditor.PutInt(key, value);
     }
 }

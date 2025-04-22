@@ -232,29 +232,6 @@ public class SettingsActivity : ThemeableActivity
         enableDiagnostics.Checked = DiagnosticFile.Enabled;
         enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
         
-        Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
-        positionNumberPairs.Add(new Tuple<int, int>(0, 5));
-        positionNumberPairs.Add(new Tuple<int, int>(1, 10));
-        positionNumberPairs.Add(new Tuple<int, int>(2, 15));
-        positionNumberPairs.Add(new Tuple<int, int>(3, 30));
-        positionNumberPairs.Add(new Tuple<int, int>(4, 50));
-        positionNumberPairs.Add(new Tuple<int, int>(5, 100));
-        positionNumberPairs.Add(new Tuple<int, int>(6, 250));
-        positionNumberPairs.Add(new Tuple<int, int>(7, 1000));
-        String[] options = new String[]{ positionNumberPairs[0].Item2.ToString(),
-            positionNumberPairs[1].Item2.ToString(),
-            positionNumberPairs[2].Item2.ToString(),
-            positionNumberPairs[3].Item2.ToString(),
-            positionNumberPairs[4].Item2.ToString(),
-            positionNumberPairs[5].Item2.ToString(),
-            positionNumberPairs[6].Item2.ToString(),
-            positionNumberPairs[7].Item2.ToString(),
-        };
-        ArrayAdapter<String> searchNumOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, options);
-        searchNumSpinner.Adapter = searchNumOptions;
-        SetSpinnerPosition(searchNumSpinner);
-        searchNumSpinner.ItemSelected += SearchNumSpinner_ItemSelected;
-
         Spinner dayNightMode = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
         dayNightMode.ItemSelected -= DayNightMode_ItemSelected;
         String[] dayNightOptionsStrings = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
@@ -2183,19 +2160,6 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.AutoClearCompleteDownloads = e.IsChecked;
     }
 
-    private void SetSpinnerPosition(Spinner s)
-    {
-        int selectionIndex = 3;
-        foreach (var pair in positionNumberPairs)
-        {
-            if (pair.Item2 == SeekerState.NumberSearchResults)
-            {
-                selectionIndex = pair.Item1;
-            }
-        }
-        s.SetSelection(selectionIndex);
-    }
-
     private void SetSpinnerPositionDayNight(Spinner s)
     {
         s.SetSelection(Math.Max(SeekerState.DayNightMode, 0)); //-1 -> 0
@@ -2290,10 +2254,6 @@ public class SettingsActivity : ThemeableActivity
         }
 
     }
-    private void CloseButton_Click(object sender, EventArgs e)
-    {
-        this.Finish();
-    }
 
     private void RestoreDefaults_Click(object sender, EventArgs e)
     {
@@ -2319,20 +2279,10 @@ public class SettingsActivity : ThemeableActivity
         (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
         (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
         (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
-        Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
-        SetSpinnerPosition(searchNumSpinner);
+        // Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
+        // TODO: SetSpinnerPosition(searchNumSpinner);
         Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
         SetSpinnerPositionDayNight(daynightSpinner);
-    }
-
-    private void SearchNumSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
-    {
-        SeekerState.NumberSearchResults = positionNumberPairs[e.Position].Item2;
-    }
-
-    private void ChangeDownloadDirectory(object sender, EventArgs e)
-    {
-        ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
     }
 
     private bool needsMediaStorePermission()

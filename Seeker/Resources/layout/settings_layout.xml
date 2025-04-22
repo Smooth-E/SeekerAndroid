@@ -39,64 +39,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            <LinearLayout
+            <FrameLayout
+                    android:id="@+id/preference_fragment_holder"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_horizontal"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/directoryLayout"
-                    android:orientation="vertical">
-
-                <FrameLayout
-                        android:id="@+id/preference_fragment_holder"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-            </LinearLayout>
+                    android:layout_height="wrap_content"/>
 
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/directoryLayout"
-                    android:layout_marginTop="10dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/searchResLayout"
-                    android:orientation="horizontal">
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/max_search_results"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="0.4"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginBottom="10dp"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:textColor="?attr/normalTextColorNonTinted"
-                        android:id="@+id/searchResults"/>
-
-                <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="10dp"
-                        android:layout_weight="0.4"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:layout_toEndOf="@+id/searchResults"
-                        android:id="@+id/searchNumberSpinner"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/searchResLayout"
+                    android:layout_below="@id/preference_fragment_holder"
                     android:layout_marginTop="4dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/smartFilterLayout"
