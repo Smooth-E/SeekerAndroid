@@ -87,6 +87,27 @@
                 app:iconSpaceReserved="false"
                 app:secondaryIcon="@drawable/auto_awesome"/>
         
+        <SwitchPreferenceCompat
+            app:key="@string/key_free_upload_slots_only"
+            app:title="@string/preference_free_upload_slots_only"
+            android:summary="@string/preference_free_upload_slots_only_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_hide_locked_in_search"
+                app:title="@string/preference_hide_locked_in_search"
+                android:summary="@string/preference_hide_locked_in_search_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_hide_locked_in_browse"
+                app:title="@string/preference_hide_locked_in_browse"
+                android:summary="@string/preference_hide_locked_in_browse_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+        
     </PreferenceCategory>
     
 </PreferenceScreen>

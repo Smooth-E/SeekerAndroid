@@ -41,9 +41,9 @@ public static class SharedPreferencesUtils
         SeekerState.AutoClearCompleteUploads = prefs.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
         SeekerState.RememberSearchHistory = prefs.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
         SeekerState.ShowRecentUsers = prefs.GetBoolean(KeyConsts.M_RememberUserHistory, true);
-        SeekerState.FreeUploadSlotsOnly = prefs.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
+        SeekerState.FreeUploadSlotsOnly = prefs.GetBoolean(ResourceConstant.String.key_free_upload_slots_only, true);
         SeekerState.HideLockedResultsInBrowse = prefs.GetBoolean(KeyConsts.M_HideLockedBrowse, true);
-        SeekerState.HideLockedResultsInSearch = prefs.GetBoolean(KeyConsts.M_HideLockedSearch, true);
+        SeekerState.HideLockedResultsInSearch = prefs.GetBoolean(ResourceConstant.String.key_hide_locked_in_search, true);
 
         SeekerState.TransferViewShowSizes = prefs.GetBoolean(KeyConsts.M_TransfersShowSizes, true);
         SeekerState.TransferViewShowSpeed = prefs.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);

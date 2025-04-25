@@ -15,4 +15,7 @@
     <string translatable="false" name="key_smart_filters_keywords_order">smart_filters_keywords_order</string>
     <string translatable="false" name="key_smart_filters_file_types_order">smart_filters_file_types_order</string>
     <string translatable="false" name="key_smart_filters_file_count_order">smart_filters_file_count_order</string>
+    <string translatable="false" name="key_free_upload_slots_only">free_upload_slots_only</string>
+    <string translatable="false" name="key_hide_locked_in_search">hide_locked_in_search</string>
+    <string translatable="false" name="key_hide_locked_in_browse">hide_locked_in_browse</string>
 </resources>

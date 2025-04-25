@@ -2235,8 +2235,8 @@ public class MainActivity : ThemeableActivity
                 .PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers)!
                 .PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes)!
                 .PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed)!
-                .PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly)!
-                .PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch)!
+                .PutBoolean(ResourceConstant.String.key_free_upload_slots_only, SeekerState.FreeUploadSlotsOnly)!
+                .PutBoolean(ResourceConstant.String.key_hide_locked_in_search, SeekerState.HideLockedResultsInSearch)!
                 .PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse)!
                 .PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky)!
                 .PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString)!
@@ -2272,8 +2272,8 @@ public class MainActivity : ThemeableActivity
         outState.PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers);
         outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
         outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
-        outState.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly);
-        outState.PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch);
+        outState.PutBoolean(GetString(ResourceConstant.String.key_free_upload_slots_only), SeekerState.FreeUploadSlotsOnly);
+        outState.PutBoolean(GetString(ResourceConstant.String.key_hide_locked_in_search), SeekerState.HideLockedResultsInSearch);
         outState.PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse);
         outState.PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification);
         outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));

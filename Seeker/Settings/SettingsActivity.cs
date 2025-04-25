@@ -161,18 +161,6 @@ public class SettingsActivity : ThemeableActivity
         autoClearCompleteUploads.Checked = SeekerState.AutoClearCompleteUploads;
         autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
 
-        CheckBox freeUploadSlotsOnly = FindViewById<CheckBox>(Resource.Id.freeUploadSlots);
-        freeUploadSlotsOnly.Checked = SeekerState.FreeUploadSlotsOnly;
-        freeUploadSlotsOnly.CheckedChange += FreeUploadSlotsOnly_CheckedChange;
-
-        CheckBox showLockedSearch = FindViewById<CheckBox>(Resource.Id.showLockedInSearch);
-        showLockedSearch.Checked = !SeekerState.HideLockedResultsInSearch;
-        showLockedSearch.CheckedChange += ShowLockedSearch_CheckedChange;
-
-        CheckBox showLockedBrowse = FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse);
-        showLockedBrowse.Checked = !SeekerState.HideLockedResultsInBrowse;
-        showLockedBrowse.CheckedChange += ShowLockedBrowse_CheckedChange;
-
         allowPrivateRoomInvitations = FindViewById<CheckBox>(Resource.Id.allowPrivateRoomInvitations);
         allowPrivateRoomInvitations.Checked = SeekerState.AllowPrivateRoomInvitations;
         allowPrivateRoomInvitations.CheckedChange += AllowPrivateRoomInvitations_CheckedChange;
@@ -192,8 +180,7 @@ public class SettingsActivity : ThemeableActivity
         CheckBox memoryFileDownloadSwitchCheckBox = FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox);
         memoryFileDownloadSwitchCheckBox.Checked = !SeekerState.MemoryBackedDownload;
         memoryFileDownloadSwitchCheckBox.CheckedChange += MemoryFileDownloadSwitchCheckBox_CheckedChange;
-
-
+        
         CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
         autoRetryBackOnline.Checked = SeekerState.AutoRetryBackOnline;
         autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange;
@@ -387,11 +374,9 @@ public class SettingsActivity : ThemeableActivity
         forceFilesystemPermission.Click += ForceFilesystemPermission_Click;
 
 #if !IzzySoft
-
         forceFilesystemPermission.Enabled = false;
         forceFilesystemPermission.Alpha = 0.5f;
         forceFilesystemPermission.Clickable = false;
-
 #endif
 
         ImageView moreInfoForceFilesystem = FindViewById<ImageView>(Resource.Id.moreInfoButtonForceFilesystemPermission);
@@ -929,16 +914,6 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.SpeedLimitUploadOn = e.IsChecked;
         UpdateSpeedLimitsState();
         SharedPreferencesUtils.SaveSpeedLimitState();
-    }
-
-    private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.HideLockedResultsInBrowse = !e.IsChecked;
-    }
-
-    private void ShowLockedSearch_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.HideLockedResultsInSearch = !e.IsChecked;
     }
 
     private void ImportData_Click(object sender, EventArgs e)
@@ -1715,11 +1690,6 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.DisableDownloadToastNotification = !e.IsChecked;
     }
 
-    private void FreeUploadSlotsOnly_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.FreeUploadSlotsOnly = e.IsChecked;
-    }
-
     private void MoreInfoButton_Click(object sender, EventArgs e)
     {
         var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -2216,9 +2186,9 @@ public class SettingsActivity : ThemeableActivity
         (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
         (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
         (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
-        (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;
-        (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
-        (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
         (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
         (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
         // Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);

@@ -26,6 +26,9 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SeekBarPreference maxSearchResults;
     private SwitchPreferenceCompat showSmartFilters;
     private Preference configureSmartFilters;
+    private SwitchPreferenceCompat freeUploadSlotsOnly;
+    private SwitchPreferenceCompat hideLockedWhenSearching;
+    private SwitchPreferenceCompat hideLockedWhenBrowsing;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -87,6 +90,21 @@ public class SettingsFragment : PreferenceFragmentCompat
         
         configureSmartFilters = FindPreference<Preference>(ResourceConstant.String.key_configure_smart_filters);
         configureSmartFilters.PreferenceClick += (_, _) => ShowSmartFiltersConfigurationDialog();
+
+        freeUploadSlotsOnly = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_free_upload_slots_only);
+        freeUploadSlotsOnly.PreferenceChange += (_, args) => 
+            SeekerState.FreeUploadSlotsOnly = Convert.ToBoolean(args.NewValue);
+
+        hideLockedWhenSearching = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_hide_locked_in_search);
+        hideLockedWhenSearching.PreferenceChange += (_, args) =>
+            SeekerState.HideLockedResultsInSearch = Convert.ToBoolean(args.NewValue);
+
+        hideLockedWhenBrowsing = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_hide_locked_in_browse);
+        hideLockedWhenBrowsing.PreferenceChange += (_, args) =>
+            SeekerState.HideLockedResultsInBrowse = Convert.ToBoolean(args.NewValue);
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;

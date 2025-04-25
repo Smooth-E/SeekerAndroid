@@ -52,9 +52,7 @@ namespace Seeker
         public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";
         public const string M_RememberUserHistory = "Momento_RememberUserHistory";
-        public const string M_OnlyFreeUploadSlots = "Momento_FreeUploadSlots";
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
-        public const string M_HideLockedSearch = "Momento_HideLockedSearch";
         public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";
         public const string M_TransfersShowSpeed = "Momento_TransfersShowSpeed";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
