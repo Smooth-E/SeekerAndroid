@@ -1,12 +1,15 @@
 ﻿using System;
 using _Microsoft.Android.Resource.Designer;
+using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Views;
-using AndroidX.AppCompat.App;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
 using AndroidX.RecyclerView.Widget;
+using Seeker.Components;
 using Seeker.Utils;
+using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 using Environment = Android.OS.Environment;
 
 namespace Seeker.Settings;
@@ -31,6 +34,10 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat hideLockedWhenBrowsing;
     private SwitchPreferenceCompat rememberSearchHistory;
     private Preference clearSearchHistory;
+
+    private SwitchPreferenceCompat startServiceOnStartup;
+    private TwoIconPreference startStopService;
+    private Preference aboutService;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -115,6 +122,19 @@ public class SettingsFragment : PreferenceFragmentCompat
         
         clearSearchHistory = FindPreference<Preference>(ResourceConstant.String.key_clear_search_history);
         clearSearchHistory.PreferenceClick += (_, _) => SeekerState.ClearSearchHistoryInvoke();
+
+        startServiceOnStartup = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_start_seeker_service_on_startup);
+        startServiceOnStartup.PreferenceChange += (_, args) =>
+            SeekerState.StartServiceOnStartup = Convert.ToBoolean(args.NewValue);
+
+        startStopService = FindPreference<TwoIconPreference>(
+            ResourceConstant.String.key_start_stop_seeker_service);
+        startStopService.PreferenceClick += (_, _) => OnStartStopPreferenceClicked();
+        UpdateStartStopServicePreference();
+
+        aboutService = FindPreference<Preference>(ResourceConstant.String.key_about_seeker_service);
+        aboutService.PreferenceClick += (_, _) => OnAboutSeekerServicePreferenceClicked();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -332,5 +352,45 @@ public class SettingsFragment : PreferenceFragmentCompat
     {
         SeekerState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
         SeekerState.SaveSmartFilterState();
+    }
+
+    private void UpdateStartStopServicePreference()
+    {
+        var isRunning = SeekerState.IsStartUpServiceCurrentlyRunning;
+        startStopService.Title = isRunning
+            ? GetString(ResourceConstant.String.preference_stop_seeker_service)
+            : GetString(ResourceConstant.String.preference_start_seeker_service);
+        startStopService.Summary = isRunning
+            ? GetString(ResourceConstant.String.preference_stop_seeker_service_summary)
+            : GetString(ResourceConstant.String.preference_start_seeker_service_summary);
+        startStopService.SecondaryIcon = isRunning
+            ? Resources.GetDrawable(ResourceConstant.Drawable.baseline_stop_circle)
+            : Resources.GetDrawable(ResourceConstant.Drawable.baseline_play_circle);
+    }
+
+    private void OnStartStopPreferenceClicked()
+    {
+        var activity = RequireActivity();
+        var intent = new Intent(activity, typeof(SeekerKeepAliveService));
+        if (SeekerState.IsStartUpServiceCurrentlyRunning)
+        {
+            activity.StopService(intent);
+        }
+        else
+        {
+            activity.StartService(intent);
+        }
+        
+        SeekerState.IsStartUpServiceCurrentlyRunning = !SeekerState.IsStartUpServiceCurrentlyRunning;
+        UpdateStartStopServicePreference();
+    }
+
+    private void OnAboutSeekerServicePreferenceClicked()
+    {
+        new AlertDialog.Builder(RequireActivity()!, ResourceConstant.Style.MyAlertDialogTheme)
+            .SetTitle(ResourceConstant.String.preference_about_seeker_service_dialog_title)!
+            .SetMessage(ResourceConstant.String.keep_alive_service)!
+            .SetPositiveButton(ResourceConstant.String.okay, (sender, _) => (sender as Dialog)!.Dismiss())
+            .Show();
     }
 }

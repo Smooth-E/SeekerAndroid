@@ -25,10 +25,6 @@
     <string name="memory_file_backed">Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
         \n\nThis allows (1) the ability to pause and resume downloads where you left off (2) the ability to download large files without getting out of memory errors (and less RAM intensive in general).
         \n\nTurning this off, the partial download results are stored in memory until they are finished then they are saved to disk.</string>
-    <string name="keep_alive_service">This service allows Seeker to run in the background.
-        \n\nThis is necessary to respond to search requests (if sharing), receive chat messages, and receive wishlist results while in the background.
-        \n\nIt is not needed for downloading or uploading in background (there is already a service for that which will always run).
-        \n\nThe only downside is that this can use up more battery. In which case one can turn it off by default and only run it as needed.</string>
     <string name="listening">This setting allows Seeker to accept incoming connections, so that we can connect to clients without open ports.
         \n\nWhat this means in practice is that as long as we are successfully listening (indicated via \"Check Status\") we will recieve more search results, be able to download from more people, upload to more people, etc.
         \n\nSeeker will attempt to automatically forward ports via UPnP (this is what the official desktop client does).  If you are NOT on Wifi it will not work, if you are on a VPN please search how to port forward for your specific VPN, if your router is not UPnP enabled then you must manually forward port.</string>
@@ -158,7 +154,6 @@
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="start_service_on_startup">Start Service on Startup</string>
     <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
 
     <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
@@ -856,56 +851,57 @@ The standard way of requesting folder access does not always persist permissions
     <string name="password_successfully_updated">Password successfully updated</string>
     <string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
 
+    <!-- Preferences -->
+    
     <string name="preference_category_downloads">Downloads</string>
-
     <string name="preference_download_folder">Download Folder</string>
     <string name="CurrentDownloadFolder_">Current download folder: </string>
-
     <string name="preference_create_complete_and_incomplete_folders">Complete and Incomplete folders</string>
     <string name="CreateCompleteAndIncomplete">Create \"Soulseek Complete\" and \"Soulseek Incomplete\" directories</string>
-
     <string name="preference_create_username_subfolders">Username Subfolders</string>
     <string name="CreateUsernameSubfolders">Create username subdirectories</string>
-
     <string name="preference_create_subfolders_for_single_downloads">Single Download Subfolders</string>
     <string name="preference_create_subfolders_for_single_downloads_description">Create subfolders for single-file downloads</string>
-
     <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
     <string name="preference_use_manual_incomplete_folder_summary">Use manually selected folder for incomplete downloads</string>
-
     <string name="preference_incomplete_folder">Incomplete Downloads Folder</string>
     <string name="CurrentIncompleteFolder">Current incomplete downloads folder:</string>
-
     <string name="ClearFolder">Clear Folder</string>
     <string name="preference_clear_incomplete_folder">Clear Incomplete Folder</string>
     <string name="preference_clear_incomplete_folder_summary">Remove unneeded items from the \"Incomplete\" folder. Use this option if Seeker fails to do this automatically.</string>
-
     <string name="message_cleared_single_folder">Folder cleared</string>
     <string name="message_cleared_several_folders">Cleared %1 folders</string>
     
-    <string name="preference_category_search_and_browsing">Search and browsing</string>
-    
+    <string name="preference_category_search_and_browsing">Searching and browsing</string>
     <string name="max_search_results">Max Search Results</string>
     <string name="preference_max_search_results_summary">Maximum number of search results</string>
-
     <string name="ShowSmartFilters">Show Smart Filters</string>
     <string name="preference_show_smart_filters_summary">Display smart filters (experimental)</string>
-    
     <string name="preference_configure_smart_filters">Configure smart filters</string>
     <string name="preference_configure_smart_filters_summary">Select which filters are displayed and in what order</string>
-
     <string name="preference_free_upload_slots_only">Free slots only</string>
     <string name="preference_free_upload_slots_only_summary">If enabled, users with non-free slots will not appear in search results</string>
-
     <string name="preference_hide_locked_in_search">No private files when searching</string>
     <string name="preference_hide_locked_in_search_summary">Private (locked) files will be hidden from search results</string>
-    
     <string name="preference_hide_locked_in_browse">No private files when browsing</string>
     <string name="preference_hide_locked_in_browse_summary">Private (locked) files will be hidden from browsing responses</string>
-
     <string name="remember_search_history">Remember Search History</string>
     <string name="preference_remember_search_history_summary">Keep the history of your searches</string>
-    
     <string name="clear_search_history">Clear Search History</string>
     <string name="preference_clear_search_history_summary">Remove saved data about your searches</string>
+    
+    <string name="preference_category_background_service">Seeker background service</string>
+    <string name="start_service_on_startup">Start Service on Startup</string>
+    <string name="preference_start_seeker_service_on_startup_summary">Start Seeker background service when you open the app</string>
+    <string name="preference_start_seeker_service">Start service</string>
+    <string name="preference_start_seeker_service_summary">Start Seeker background service</string>
+    <string name="preference_stop_seeker_service">Stop service</string>
+    <string name="preference_stop_seeker_service_summary">Stop Seeker background service</string>
+    <string name="preference_about_seeker_service">About service</string>
+    <string name="preference_about_seeker_service_summary">Read more about what the Seeker background service is</string>
+    <string name="preference_about_seeker_service_dialog_title">Seeker background service</string>
+    <string name="keep_alive_service">This service allows Seeker to run in the background.
+        \n\nThis is necessary to respond to search requests (if sharing), receive chat messages, and receive wishlist results while in the background.
+        \n\nIt is not needed for downloading or uploading in background (there is already a service for that which will always run).
+        \n\nThe only downside is that this can use up more battery. In which case one can turn it off by default and only run it as needed.</string>
 </resources>

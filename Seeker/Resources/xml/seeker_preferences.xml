@@ -124,4 +124,31 @@
         
     </PreferenceCategory>
     
+    <PreferenceCategory
+        android:title="@string/preference_category_background_service"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_start_seeker_service_on_startup"
+                app:title="@string/start_service_on_startup"
+                android:summary="@string/preference_start_seeker_service_on_startup_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                app:key="@string/key_start_stop_seeker_service"
+                app:title="@string/preference_start_seeker_service"
+                android:summary="@string/preference_start_seeker_service_summary"
+                app:iconSpaceReserved="false"
+                app:secondaryIcon="@drawable/baseline_play_circle"/>
+
+        <Seeker.Components.TwoIconPreference
+                app:key="@string/key_about_seeker_service"
+                app:title="@string/preference_about_seeker_service"
+                android:summary="@string/preference_about_seeker_service_summary"
+                app:iconSpaceReserved="false"
+                app:secondaryIcon="@drawable/help_circle_outline"/>
+        
+    </PreferenceCategory>
+    
 </PreferenceScreen>

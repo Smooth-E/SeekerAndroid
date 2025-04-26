@@ -63,7 +63,6 @@ namespace Seeker
         public const string M_IgnoreUserList = "Cache_IgnoreUserList_v2";
         public const string M_AutoJoinRooms = "Cache_JoinedRooms_v2";
         public const string M_AllowPrivateRooomInvitations = "Momento_AllowPrivateRoomInvitations";
-        public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify_v2";
         public const string M_SearchTabsState_Headers = "Momento_SearchTabsState_Headers_v2";
 

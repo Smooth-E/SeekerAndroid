@@ -21,4 +21,7 @@
     <string translatable="false" name="key_search_history">search_history</string>
     <string translatable="false" name="key_remember_search_history">remember_search_history</string>
     <string translatable="false" name="key_clear_search_history">clear_search_history</string>
+    <string translatable="false" name="key_start_seeker_service_on_startup">start_seeker_service_on_startup</string>
+    <string translatable="false" name="key_start_stop_seeker_service">start_stop_seeker_service</string>
+    <string translatable="false" name="key_about_seeker_service">about_seeker_service</string>
 </resources>

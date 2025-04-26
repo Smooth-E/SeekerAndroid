@@ -16,7 +16,17 @@ namespace Seeker.Components;
 public class TwoIconPreference : Preference
 {
     private ImageView secondaryIconView;
-    private readonly Drawable secondaryIcon;
+    private Drawable mSecondaryIcon;
+
+    public Drawable SecondaryIcon
+    {
+        get => mSecondaryIcon;
+        set
+        {
+            mSecondaryIcon = value;
+            secondaryIconView?.SetImageDrawable(value);
+        }
+    }
 
     public TwoIconPreference([NotNull] Context context, IAttributeSet attrs, int defStyleAttr, int defStyleRes) 
         : base(context, attrs, defStyleAttr, defStyleRes)
@@ -27,7 +37,7 @@ public class TwoIconPreference : Preference
         var obtainedAttributes = context.ObtainStyledAttributes(attrs, styleable, defStyleAttr, defStyleRes);
 
         const int index = ResourceConstant.Styleable.TwoIconPreference_secondaryIcon;
-        secondaryIcon = obtainedAttributes.GetDrawable(index);
+        mSecondaryIcon = obtainedAttributes.GetDrawable(index);
         
         obtainedAttributes.Recycle();
     }
@@ -54,6 +64,6 @@ public class TwoIconPreference : Preference
         base.OnBindViewHolder(holder);
         
         secondaryIconView = holder.FindViewById(ResourceConstant.Id.secondary_icon) as ImageView;
-        secondaryIconView?.SetImageDrawable(secondaryIcon);
+        secondaryIconView?.SetImageDrawable(mSecondaryIcon);
     }
 }

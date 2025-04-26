@@ -278,17 +278,6 @@ public class SettingsActivity : ThemeableActivity
         rescanSharesButton = FindViewById<Button>(Resource.Id.rescanShares);
         rescanSharesButton.Click += RescanSharesButton_Click;
 
-        ImageView startupServiceMoreInfo = FindViewById<ImageView>(Resource.Id.helpServiceOnStartup);
-        startupServiceMoreInfo.Click += StartupServiceMoreInfo_Click;
-
-        CheckBox startServiceOnStartupCheckBox = FindViewById<CheckBox>(Resource.Id.startServiceOnStartupCheckBox);
-        startServiceOnStartupCheckBox.Checked = SeekerState.StartServiceOnStartup;
-        startServiceOnStartupCheckBox.CheckedChange += StartServiceOnStartupCheckBox_CheckedChange;
-
-        Button startupServiceButton = FindViewById<Button>(Resource.Id.startServiceOnStartupButton);
-        startupServiceButton.Click += StartupServiceButton_Click;
-        SetButtonText(startupServiceButton);
-
         CheckBox enableListening = FindViewById<CheckBox>(Resource.Id.enableListening);
         enableListening.Checked = SeekerState.ListenerEnabled;
         enableListening.CheckedChange += EnableListening_CheckedChange;
@@ -397,7 +386,7 @@ public class SettingsActivity : ThemeableActivity
         listeningSubLayout3 = FindViewById<ViewGroup>(Resource.Id.listeningRow3);
         UpdateListeningViewState();
 
-        Button importData = this.FindViewById<Button>(Resource.Id.importDataButton);
+        Button importData = FindViewById<Button>(Resource.Id.importDataButton);
         importData.Click += ImportData_Click;
 
         /*
@@ -433,11 +422,11 @@ public class SettingsActivity : ThemeableActivity
         SetIncompleteDirectoryState();
         SetSharedFolderView();
 
-        mainScrollView = FindViewById<ScrollView>(Resource.Id.mainScrollView);
-        sharingLayoutParent = FindViewById<ViewGroup>(Resource.Id.sharingLayoutParent);
-        if (Intent != null && Intent.GetIntExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
+        mainScrollView = FindViewById<ScrollView>(ResourceConstant.Id.mainScrollView);
+        sharingLayoutParent = FindViewById<ViewGroup>(ResourceConstant.Id.sharingLayoutParent);
+        if (Intent != null && Intent.GetIntExtra(SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
         {
-            mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, sharingLayoutParent.Top - 14); }));
+            mainScrollView?.Post(() => mainScrollView.SmoothScrollTo(0, sharingLayoutParent.Top - 14));
         }
 
         UpdateLayoutParametersForScreenSize();
@@ -1502,53 +1491,6 @@ public class SettingsActivity : ThemeableActivity
         this.StartActivity(intent);
     }
 
-    private void SetButtonText(Button btn)
-    {
-        if (SeekerState.IsStartUpServiceCurrentlyRunning)
-        {
-            btn.Text = this.GetString(Resource.String.stop);
-        }
-        else
-        {
-            btn.Text = this.GetString(Resource.String.start);
-        }
-    }
-
-    private void StartupServiceButton_Click(object sender, EventArgs e)
-    {
-        if (SeekerState.IsStartUpServiceCurrentlyRunning)
-        {
-            Intent seekerKeepAliveService = new Intent(this, typeof(SeekerKeepAliveService));
-            this.StopService(seekerKeepAliveService);
-            SeekerState.IsStartUpServiceCurrentlyRunning = false;
-        }
-        else
-        {
-            Intent seekerKeepAliveService = new Intent(this, typeof(SeekerKeepAliveService));
-            this.StartService(seekerKeepAliveService);
-            SeekerState.IsStartUpServiceCurrentlyRunning = true;
-        }
-        SetButtonText(FindViewById<Button>(Resource.Id.startServiceOnStartupButton));
-    }
-
-    private void StartServiceOnStartupCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.StartServiceOnStartup = e.IsChecked;
-        lock (SeekerApplication.SharedPrefLock)
-        {
-            var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-            editor.PutBoolean(KeyConsts.M_ServiceOnStartup, SeekerState.StartServiceOnStartup);
-            bool success = editor.Commit();
-        }
-    }
-
-    private void StartupServiceMoreInfo_Click(object sender, EventArgs e)
-    {
-        var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        var diag = builder.SetMessage(Resource.String.keep_alive_service).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-        diag.Show();
-    }
-
     private void AllowPrivateRoomInvitations_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         if (e.IsChecked == SeekerState.AllowPrivateRoomInvitations)
@@ -2147,7 +2089,6 @@ public class SettingsActivity : ThemeableActivity
                 s.SetSelection((int)(SeekerState.NightModeVarient));
                 break;
         }
-
     }
 
     private void RestoreDefaults_Click(object sender, EventArgs e)
