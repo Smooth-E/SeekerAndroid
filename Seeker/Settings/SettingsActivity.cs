@@ -194,18 +194,11 @@ public class SettingsActivity : ThemeableActivity
         Button restoreDefaultsButton = FindViewById<Button>(Resource.Id.restoreDefaults);
         restoreDefaultsButton.Click += RestoreDefaults_Click;
 
-        Button clearHistory = FindViewById<Button>(Resource.Id.clearHistory);
-        clearHistory.Click += ClearHistory_Click;
-
         Button exportClientData = FindViewById<Button>(Resource.Id.exportDataButton);
         exportClientData.Click += ExportClientData_Click;
 
         ImageView moreInfoExport = FindViewById<ImageView>(Resource.Id.moreInfoExport);
         moreInfoExport.Click += MoreInfoExport_Click;
-
-        CheckBox rememberSearchHistory = FindViewById<CheckBox>(Resource.Id.searchHistoryRemember);
-        rememberSearchHistory.Checked = SeekerState.RememberSearchHistory;
-        rememberSearchHistory.CheckedChange += RememberSearchHistory_CheckedChange;
 
         Button clearRecentUserHistory = FindViewById<Button>(Resource.Id.clearRecentUsers);
         clearRecentUserHistory.Click += ClearRecentUserHistory_Click;
@@ -2052,16 +2045,6 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-    private void RememberSearchHistory_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.RememberSearchHistory = e.IsChecked;
-    }
-
-    private void ClearHistory_Click(object sender, EventArgs e)
-    {
-        SeekerState.ClearSearchHistoryInvoke();
-    }
-
     private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         SeekerState.AutoClearCompleteUploads = e.IsChecked;
@@ -2183,7 +2166,7 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.HideLockedResultsInSearch = true;
         (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SeekerState.AutoClearCompleteDownloads;
         (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
-        (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
         (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
         (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
         // TODO: (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;

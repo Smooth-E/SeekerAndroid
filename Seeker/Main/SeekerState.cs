@@ -305,13 +305,6 @@ namespace Seeker
             ClearSearchHistory?.Invoke(null, null);
         }
 
-
-
-        //public static event EventHandler<DownloadAddedEventArgs> DownloadAdded;
-        /// <summary>
-        /// Occurs after we set up the DownloadAdded transfer item.
-        /// </summary>
-
         public static event EventHandler<EventArgs> ClearSearchHistory;
         public static List<DownloadInfo> downloadInfoList;
         /// <summary>

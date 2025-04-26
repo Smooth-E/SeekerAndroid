@@ -39,7 +39,7 @@ public static class SharedPreferencesUtils
         SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)prefs.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple);
         SeekerState.AutoClearCompleteDownloads = prefs.GetBoolean(KeyConsts.M_AutoClearComplete, false);
         SeekerState.AutoClearCompleteUploads = prefs.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
-        SeekerState.RememberSearchHistory = prefs.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
+        SeekerState.RememberSearchHistory = prefs.GetBoolean(ResourceConstant.String.key_remember_search_history, true);
         SeekerState.ShowRecentUsers = prefs.GetBoolean(KeyConsts.M_RememberUserHistory, true);
         SeekerState.FreeUploadSlotsOnly = prefs.GetBoolean(ResourceConstant.String.key_free_upload_slots_only, true);
         SeekerState.HideLockedResultsInBrowse = prefs.GetBoolean(KeyConsts.M_HideLockedBrowse, true);

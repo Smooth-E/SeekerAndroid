@@ -29,6 +29,8 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat freeUploadSlotsOnly;
     private SwitchPreferenceCompat hideLockedWhenSearching;
     private SwitchPreferenceCompat hideLockedWhenBrowsing;
+    private SwitchPreferenceCompat rememberSearchHistory;
+    private Preference clearSearchHistory;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -105,6 +107,14 @@ public class SettingsFragment : PreferenceFragmentCompat
             ResourceConstant.String.key_hide_locked_in_browse);
         hideLockedWhenBrowsing.PreferenceChange += (_, args) =>
             SeekerState.HideLockedResultsInBrowse = Convert.ToBoolean(args.NewValue);
+
+        rememberSearchHistory = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_remember_search_history);
+        rememberSearchHistory.PreferenceChange += (_, args) => 
+            SeekerState.RememberSearchHistory = Convert.ToBoolean(args.NewValue);
+        
+        clearSearchHistory = FindPreference<Preference>(ResourceConstant.String.key_clear_search_history);
+        clearSearchHistory.PreferenceClick += (_, _) => SeekerState.ClearSearchHistoryInvoke();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;

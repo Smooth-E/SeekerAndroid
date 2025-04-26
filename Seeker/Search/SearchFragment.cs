@@ -568,7 +568,7 @@ namespace Seeker
             iv.Click += Iv_Click;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
-            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
+            string searchHistoryXML = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_search_history, string.Empty);
             if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
             {
                 if (searchHistoryXML == string.Empty)
@@ -870,7 +870,7 @@ namespace Seeker
             //Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
             //clearFilter.Click += ClearFilter_Click;
 
-            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
+            string searchHistoryXML = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_search_history, string.Empty);
             if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
             {
                 if (searchHistoryXML == string.Empty)
@@ -2128,20 +2128,8 @@ namespace Seeker
                 }
                 ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
-
-
-                // DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(SearchTabHelper.UI_SearchResponses, SearchTabHelper.SearchResponses), true);
-
-
                 SearchTabHelper.UI_SearchResponses.Clear();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
-                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
-                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
-
-                //res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
-
-
-
 
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
                 //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
@@ -2169,43 +2157,29 @@ namespace Seeker
                 SearchTabHelper.FilteredResults = true;
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
-                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-
                 recyclerSearchAdapter.NotifyDataSetChanged();
                 bool refSame = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.UI_SearchResponses);
                 bool refSame2 = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].UI_SearchResponses);
-                //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
-                //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                //lv.Adapter = (customAdapter);
             }
             else
             {
                 SearchTabHelper.FilteredResults = false;
-                SearchTabHelper.UI_SearchResponses.Clear();// = SearchTabHelper.SearchResponses.ToList();
-                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);// = SearchTabHelper.SearchResponses.ToList();
-                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                SearchTabHelper.UI_SearchResponses.Clear();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
                 recyclerSearchAdapter.NotifyDataSetChanged();
             }
         }
-
-        //private void Actv_Click(object sender, EventArgs e)
-        //{
-        //    Android.Views.InputMethods.InputMethodManager im = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-        //    im.ShowSoftInput(sender as View, 0);
-        //    (sender as View).RequestFocus();
-        //}
 
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
             searchHistory = new List<string>();
             lock (SeekerApplication.SharedPrefLock)
             {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
-                editor.Commit();
+                SeekerState.SharedPreferences.Edit()!
+                    .PutString(ResourceConstant.String.key_search_history, string.Empty)!
+                    .Commit();
             }
+            
             if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
                 AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
@@ -2241,13 +2215,15 @@ namespace Seeker
             }
             lock (SeekerApplication.SharedPrefLock)
             {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, listOfSearchItems);
+                var editor = SeekerState.SharedPreferences.Edit()!;
+                editor.PutString(ResourceConstant.String.key_search_history, listOfSearchItems);
+                
                 if (FilterSticky)
                 {
                     editor.PutBoolean(KeyConsts.M_FilterSticky, FilterSticky);
                     editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
                 }
+                
                 editor.PutInt(KeyConsts.M_SearchResultStyle, (int)SearchResultStyle);
                 editor.Commit();
             }

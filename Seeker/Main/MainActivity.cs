@@ -2231,7 +2231,7 @@ public class MainActivity : ThemeableActivity
                 .PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode)!
                 .PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads)!
                 .PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads)!
-                .PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory)!
+                .PutBoolean(ResourceConstant.String.key_remember_search_history, SeekerState.RememberSearchHistory)!
                 .PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers)!
                 .PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes)!
                 .PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed)!
@@ -2268,7 +2268,7 @@ public class MainActivity : ThemeableActivity
         outState.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
         outState.PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads);
         outState.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads);
-        outState.PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory);
+        outState.PutBoolean(GetString(ResourceConstant.String.key_remember_search_history), SeekerState.RememberSearchHistory);
         outState.PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers);
         outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
         outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);

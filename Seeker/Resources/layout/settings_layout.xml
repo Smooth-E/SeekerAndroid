@@ -184,50 +184,6 @@
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/showToastNotificationOnDownload"
-                    android:layout_marginTop="10dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/searchHistoryLayout"
-                    android:orientation="horizontal">
-
-                <CheckBox
-                        android:theme="@style/checkBoxStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/remember_search_history"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:id="@+id/searchHistoryRemember"/>
-
-                <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/clear_search_history"
-                        android:layout_gravity="center_vertical"
-                        android:textSize="12dp"
-                        android:paddingTop="6dp"
-                        android:paddingBottom="6dp"
-                        android:textAllCaps="false"
-                        android:minHeight="16dp"
-                        android:foreground="@drawable/button"
-                        style="@style/SeekerButtonStyle"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:id="@+id/clearHistory"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/searchHistoryLayout"
                     android:layout_marginTop="10dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/recentUserHistoryLayout"

@@ -20,7 +20,6 @@ namespace Seeker
         public const string M_TransferListUpload = "Momento_Upload_List";
         public const string M_Messages = "Momento_Messages_v2";
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames_v2";
-        public const string M_SearchHistory = "Momento_SearchHistoryArray";
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
@@ -50,7 +49,6 @@ namespace Seeker
         public const string M_DayVarient = "Momento_DayModeVarient";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
         public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
-        public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";
         public const string M_RememberUserHistory = "Momento_RememberUserHistory";
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
         public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";

@@ -163,8 +163,6 @@
 
     <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
     <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
-    <string name="remember_search_history">Remember Search History</string>
-    <string name="clear_search_history">Clear Search History</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
     <string name="night_mode_options">Night Mode Option: </string>
     <string name="enable_sharing">Enable Sharing</string>
@@ -885,7 +883,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="message_cleared_single_folder">Folder cleared</string>
     <string name="message_cleared_several_folders">Cleared %1 folders</string>
     
-    <string name="preference_category_search">Search</string>
+    <string name="preference_category_search_and_browsing">Search and browsing</string>
     
     <string name="max_search_results">Max Search Results</string>
     <string name="preference_max_search_results_summary">Maximum number of search results</string>
@@ -904,4 +902,10 @@ The standard way of requesting folder access does not always persist permissions
     
     <string name="preference_hide_locked_in_browse">No private files when browsing</string>
     <string name="preference_hide_locked_in_browse_summary">Private (locked) files will be hidden from browsing responses</string>
+
+    <string name="remember_search_history">Remember Search History</string>
+    <string name="preference_remember_search_history_summary">Keep the history of your searches</string>
+    
+    <string name="clear_search_history">Clear Search History</string>
+    <string name="preference_clear_search_history_summary">Remove saved data about your searches</string>
 </resources>

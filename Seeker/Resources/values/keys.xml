@@ -18,4 +18,7 @@
     <string translatable="false" name="key_free_upload_slots_only">free_upload_slots_only</string>
     <string translatable="false" name="key_hide_locked_in_search">hide_locked_in_search</string>
     <string translatable="false" name="key_hide_locked_in_browse">hide_locked_in_browse</string>
+    <string translatable="false" name="key_search_history">search_history</string>
+    <string translatable="false" name="key_remember_search_history">remember_search_history</string>
+    <string translatable="false" name="key_clear_search_history">clear_search_history</string>
 </resources>
