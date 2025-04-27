@@ -154,25 +154,9 @@ public class SettingsActivity : ThemeableActivity
         progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
         progBar.Click += ImageView_Click;
 
-        var autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
-        autoClearComplete.Checked = SeekerState.AutoClearCompleteDownloads;
-        autoClearComplete.CheckedChange += AutoClearComplete_CheckedChange;
-
-        CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads);
-        autoClearCompleteUploads.Checked = SeekerState.AutoClearCompleteUploads;
-        autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
-
         CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
         autoSetAwayStatusOnInactivity.Checked = SeekerState.AutoAwayOnInactivity;
         autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
-
-        CheckBox showDownloadNotification = FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload);
-        showDownloadNotification.Checked = !SeekerState.DisableDownloadToastNotification;
-        showDownloadNotification.CheckedChange += ShowDownloadNotification_CheckedChange;
-
-        CheckBox showFolderDownloadNotification = FindViewById<CheckBox>(Resource.Id.showNotificationOnFolderDownload);
-        showFolderDownloadNotification.Checked = SeekerState.NotifyOnFolderCompleted;
-        showFolderDownloadNotification.CheckedChange += ShowFolderDownloadNotification_CheckedChange;
 
         CheckBox memoryFileDownloadSwitchCheckBox = FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox);
         memoryFileDownloadSwitchCheckBox.Checked = !SeekerState.MemoryBackedDownload;
@@ -196,13 +180,6 @@ public class SettingsActivity : ThemeableActivity
 
         ImageView moreInfoExport = FindViewById<ImageView>(Resource.Id.moreInfoExport);
         moreInfoExport.Click += MoreInfoExport_Click;
-
-        Button clearRecentUserHistory = FindViewById<Button>(Resource.Id.clearRecentUsers);
-        clearRecentUserHistory.Click += ClearRecentUserHistory_Click;
-
-        CheckBox rememberRecentUsers = FindViewById<CheckBox>(Resource.Id.rememberRecentUsers);
-        rememberRecentUsers.Checked = SeekerState.ShowRecentUsers;
-        rememberRecentUsers.CheckedChange += RememberRecentUsers_CheckedChange;
         
         CheckBox enableDiagnostics = FindViewById<CheckBox>(Resource.Id.enableDiagnostics);
         enableDiagnostics.Checked = DiagnosticFile.Enabled;
@@ -764,21 +741,6 @@ public class SettingsActivity : ThemeableActivity
         this.UpdateShareImageView();
     }
 
-    private void ShowFolderDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        bool changed = SeekerState.NotifyOnFolderCompleted != e.IsChecked;
-        SeekerState.NotifyOnFolderCompleted = e.IsChecked;
-        if (changed)
-        {
-            lock (SeekerApplication.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, SeekerState.NotifyOnFolderCompleted);
-                bool success = editor.Commit();
-            }
-        }
-    }
-
     private void AutoRetryBackOnline_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         bool changed = SeekerState.AutoRetryBackOnline != e.IsChecked;
@@ -906,24 +868,6 @@ public class SettingsActivity : ThemeableActivity
         StartActivity(intent);
     }
 
-    private void ClearRecentUserHistory_Click(object sender, EventArgs e)
-    {
-        //set to just the added users....
-        int count = UserListManager.UserList?.Count ?? 0;
-        if (count > 0)
-        {
-            lock (UserListManager.UserList)
-            {
-                SeekerState.RecentUsersManager.SetRecentUserList(UserListManager.UserList.Select(uli => uli.Username).ToList());
-            }
-        }
-        else
-        {
-            SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
-        }
-        SeekerState.RecentUsersManager.SaveRecentUsers();
-    }
-
     private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
     {
         if (DiagnosticFile.Enabled != e.IsChecked)
@@ -938,11 +882,6 @@ public class SettingsActivity : ThemeableActivity
                 bool success = editor.Commit();
             }
         }
-    }
-
-    private void RememberRecentUsers_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.ShowRecentUsers = e.IsChecked;
     }
 
     private void RescanSharesButton_Click(object sender, EventArgs e)
@@ -1242,7 +1181,6 @@ public class SettingsActivity : ThemeableActivity
             {
                 changeDialog.Dismiss();
             }
-
         });
 
 
@@ -1621,11 +1559,6 @@ public class SettingsActivity : ThemeableActivity
         // TODO: SetIncompleteFolderView();
     }
 
-    private void ShowDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.DisableDownloadToastNotification = !e.IsChecked;
-    }
-
     private void MoreInfoButton_Click(object sender, EventArgs e)
     {
         var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -1988,16 +1921,6 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-    private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.AutoClearCompleteUploads = e.IsChecked;
-    }
-
-    private void AutoClearComplete_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.AutoClearCompleteDownloads = e.IsChecked;
-    }
-
     private void SetSpinnerPositionDayNight(Spinner s)
     {
         s.SetSelection(Math.Max(SeekerState.DayNightMode, 0)); //-1 -> 0
@@ -2106,17 +2029,16 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
         SeekerState.HideLockedResultsInBrowse = true;
         SeekerState.HideLockedResultsInSearch = true;
-        (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SeekerState.AutoClearCompleteDownloads;
-        (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SeekerState.AutoClearCompleteDownloads;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
         // TODO: (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
-        (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
         (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
         // TODO: (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
-        (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
         (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
-        // Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
         // TODO: SetSpinnerPosition(searchNumSpinner);
         Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
         SetSpinnerPositionDayNight(daynightSpinner);

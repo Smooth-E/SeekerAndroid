@@ -490,7 +490,7 @@
     <string name="successfully_changed_incomplete_dir">Diretório incompleto alterado com sucesso para \"{0}\"</string>
     <string name="no_uploads_yet">Não há uploads no momento, à medida que você fizer upload de arquivos, eles aparecerão aqui</string>
     <string name="no_uploads_yet_not_sharing">Nenhum upload no momento, você não está compartilhando nenhum arquivo</string>
-    <string name="auto_clear_complete">Limpar automaticamente transferências completas</string>
+    <string name="auto_clear_complete_downloads">Limpar automaticamente transferências completas</string>
     <string name="auto_clear_complete_uploads">Limpar automaticamente uploads completos</string>
     <string name="download_remaining">{0} download restante</string>
     <string name="downloads_remaining">{0} downloads restantes</string>
@@ -600,8 +600,8 @@
     <string name="ShowSmartFilters">Mostrar filtros inteligentes</string>
     <string name="ShowPrivateLockedSearch">Mostrar arquivos particulares (bloqueados) nos resultados da pesquisa</string>
     <string name="ShowPrivateLockedBrowse">Mostrar arquivos privados (bloqueados) na resposta de navegação</string>
-    <string name="RememberRecent">Lembrar usuários recentes</string>
-    <string name="ClearRecentUsers">Limpar usuários recentes</string>
+    <string name="preference_remember_recent_users">Lembrar usuários recentes</string>
+    <string name="preference_clear_recent_users">Limpar usuários recentes</string>
     <string name="AutoRetryFailedOfflineOnline">Falha na repetição automática de transferências quando o usuário volta a ficar on-line</string>
     <string name="AwayOnInactivity">Definir automaticamente o status como ausente em inatividade</string>
     <string name="DayVarient_">Variante do dia: </string>

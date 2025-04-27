@@ -26,7 +26,6 @@ namespace Seeker
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
         public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
-        public const string M_NotifyFolderComplete = "Momento_NotifyFolderComplete";
 
         public const string M_AllowUploadsOnMetered = "Momento_AllowUploadsOnMetered";
 
@@ -47,13 +46,9 @@ namespace Seeker
         public const string M_LegacyLanguageMigrated = "Momento_LegacyLanugageMigrated";
         public const string M_NightVarient = "Momento_NightModeVarient";
         public const string M_DayVarient = "Momento_DayModeVarient";
-        public const string M_AutoClearComplete = "Momento_AutoClearComplete";
-        public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
-        public const string M_RememberUserHistory = "Momento_RememberUserHistory";
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
         public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";
         public const string M_TransfersShowSpeed = "Momento_TransfersShowSpeed";
-        public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
         public const string M_FilterStickyString = "Momento_FilterStickyString";

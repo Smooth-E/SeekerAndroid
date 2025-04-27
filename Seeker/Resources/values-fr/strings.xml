@@ -490,7 +490,7 @@ Nombre de dossiers : {5}</string>
     <string name="successfully_changed_incomplete_dir">Changement du dossier Incomplet vers \"{0}\" réussi</string>
     <string name="no_uploads_yet">Aucun téléversement en cours, vos téléversements apparaîtront ici</string>
     <string name="no_uploads_yet_not_sharing">Aucun téléversement en cours, vous n\'avez partagé aucun fichier</string>
-    <string name="auto_clear_complete">Efface automatiquement les téléchargements Complets</string>
+    <string name="auto_clear_complete_downloads">Efface automatiquement les téléchargements Complets</string>
     <string name="auto_clear_complete_uploads">Auto Nettoyage du Téléversement Complets</string>
     <string name="download_remaining">{0} téléchargements restants</string>
     <string name="downloads_remaining">{0} téléchargements restants</string>
@@ -600,8 +600,8 @@ Nombre de dossiers : {5}</string>
     <string name="ShowSmartFilters">Affiche les Filtres Intelligents</string>
     <string name="ShowPrivateLockedSearch">Affiche les Fichiers Privés (Verrouillés) dans les Résultats de Recherche</string>
     <string name="ShowPrivateLockedBrowse">Affiche les Fichiers Privés (Verrouillés) dans les Réponses Parcouru</string>
-    <string name="RememberRecent">Conserve les Utilisateurs Récent</string>
-    <string name="ClearRecentUsers">Efface les Utilisateurs Récent</string>
+    <string name="preference_remember_recent_users">Conserve les Utilisateurs Récent</string>
+    <string name="preference_clear_recent_users">Efface les Utilisateurs Récent</string>
     <string name="AutoRetryFailedOfflineOnline">Relancer les Téléchargements Échoués lorsque l\'Utilisateur se Reconnecte</string>
     <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
     <string name="DayVarient_">Thème de Jour: </string>

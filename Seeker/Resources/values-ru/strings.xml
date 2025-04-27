@@ -493,7 +493,7 @@
     <string name="successfully_changed_incomplete_dir">Неполный каталог успешно изменен на \"{0}\"</string>
     <string name="no_uploads_yet">Пока здесь нет раздач. Если вы чем-нибудь поделитесь, оно появится здесь</string>
     <string name="no_uploads_yet_not_sharing">Пока здесь нет раздач. Вы не делитесь файлами</string>
-    <string name="auto_clear_complete">Автоматически очищать завершенные загрузки</string>
+    <string name="auto_clear_complete_downloads">Автоматически очищать завершенные загрузки</string>
     <string name="auto_clear_complete_uploads">Автоматически очищать завершенные загрузки</string>
     <string name="download_remaining">{0} Осталась загрузка</string>
     <string name="downloads_remaining">{0} Остались загрузки</string>
@@ -604,8 +604,8 @@
     <string name="ShowSmartFilters">Показать умные фильтры</string>
     <string name="ShowPrivateLockedSearch">Показывать приватные (закрытые) файлы в результатах поиска</string>
     <string name="ShowPrivateLockedBrowse">Показать приватные (закрытые) файлы при просмотре ответа</string>
-    <string name="RememberRecent">Запоминать последних пользователей</string>
-    <string name="ClearRecentUsers">Очистить недавних пользователей</string>
+    <string name="preference_remember_recent_users">Запоминать последних пользователей</string>
+    <string name="preference_clear_recent_users">Очистить недавних пользователей</string>
     <string name="AutoRetryFailedOfflineOnline">Автоповтор неудачных загрузок, когда пользователь возвращается в онлайн</string>
     <string name="AwayOnInactivity">Автоматически переводить статус в режим \"Отсутствие\"</string>
     <string name="DayVarient_">Дневной скин: </string>

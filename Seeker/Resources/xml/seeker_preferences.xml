@@ -161,7 +161,49 @@
                 android:summary="@string/preference_allow_private_room_invites_summary"
                 android:defaultValue="false"
                 app:iconSpaceReserved="false"/>
-    
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_auto_clear_complete_downloads"
+                app:title="@string/auto_clear_complete_downloads"
+                android:summary="@string/preference_auto_clear_complete_downloads_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_auto_clear_complete_uploads"
+                app:title="@string/auto_clear_complete_uploads"
+                android:summary="@string/preference_auto_clear_complete_uploads_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_notify_on_folder_complete"
+                app:title="@string/preference_notify_on_folder_complete"
+                android:summary="@string/preference_notify_on_folder_complete_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_notify_on_file_complete"
+                app:title="@string/preference_notify_on_file_complete"
+                android:summary="@string/preference_notify_on_file_complete_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_remember_recent_users"
+                app:title="@string/preference_remember_recent_users"
+                android:summary="@string/preference_remember_recent_users_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                app:key="@string/key_clear_recent_users"
+                app:title="@string/preference_clear_recent_users"
+                android:summary="@string/preference_clear_recent_users_summary"
+                app:iconSpaceReserved="false"
+                app:secondaryIcon="@drawable/phosphor_broom"/>
+        
     </PreferenceCategory>
     
 </PreferenceScreen>

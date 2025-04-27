@@ -493,7 +493,7 @@ Ranuras de subida: {0}
     <string name="successfully_changed_incomplete_dir">Directorio de descargas incompletas cambiado con éxito a \"{0}\"</string>
     <string name="no_uploads_yet">No hay subidas actualmente, a medida que subas archivos aparecerán aquí</string>
     <string name="no_uploads_yet_not_sharing">No hay subidas actualmente, no estás compartiendo ningún archivo</string>
-    <string name="auto_clear_complete">Borrar descargas completas automáticamente</string>
+    <string name="auto_clear_complete_downloads">Borrar descargas completas automáticamente</string>
     <string name="auto_clear_complete_uploads">Borrar cargas completas automáticamente</string>
     <string name="download_remaining">{0} descarga restante</string>
     <string name="downloads_remaining">{0} descargas restantes</string>
@@ -603,8 +603,8 @@ Ranuras de subida: {0}
     <string name="ShowSmartFilters">Mostrar filtros inteligentes</string>
     <string name="ShowPrivateLockedSearch">Mostrar archivos privados (bloqueados) en los resultados de búsqueda</string>
     <string name="ShowPrivateLockedBrowse">Mostrar archivos privados (bloqueados) en los resultados de búsqueda</string>
-    <string name="RememberRecent">Recordar usuarios recientes</string>
-    <string name="ClearRecentUsers">Borrar usuarios recientes</string>
+    <string name="preference_remember_recent_users">Recordar usuarios recientes</string>
+    <string name="preference_clear_recent_users">Borrar usuarios recientes</string>
     <string name="AutoRetryFailedOfflineOnline">Auto-reintentar descargas fallidas cuando el usuario vuelve en línea</string>
     <string name="AwayOnInactivity">Establecer automáticamente el estado ausente en inactividad</string>
     <string name="DayVarient_">Variante diurna: </string>

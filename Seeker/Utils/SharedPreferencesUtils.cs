@@ -37,10 +37,10 @@ public static class SharedPreferencesUtils
         SeekerState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
         SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)prefs.GetInt(KeyConsts.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple);
         SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)prefs.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple);
-        SeekerState.AutoClearCompleteDownloads = prefs.GetBoolean(KeyConsts.M_AutoClearComplete, false);
-        SeekerState.AutoClearCompleteUploads = prefs.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
+        SeekerState.AutoClearCompleteDownloads = prefs.GetBoolean(ResourceConstant.String.key_auto_clear_complete_downloads, false);
+        SeekerState.AutoClearCompleteUploads = prefs.GetBoolean(ResourceConstant.String.key_auto_clear_complete_uploads, false);
         SeekerState.RememberSearchHistory = prefs.GetBoolean(ResourceConstant.String.key_remember_search_history, true);
-        SeekerState.ShowRecentUsers = prefs.GetBoolean(KeyConsts.M_RememberUserHistory, true);
+        SeekerState.ShowRecentUsers = prefs.GetBoolean(ResourceConstant.String.key_remember_recent_users, true);
         SeekerState.FreeUploadSlotsOnly = prefs.GetBoolean(ResourceConstant.String.key_free_upload_slots_only, true);
         SeekerState.HideLockedResultsInBrowse = prefs.GetBoolean(KeyConsts.M_HideLockedBrowse, true);
         SeekerState.HideLockedResultsInSearch = prefs.GetBoolean(ResourceConstant.String.key_hide_locked_in_search, true);
@@ -55,7 +55,7 @@ public static class SharedPreferencesUtils
         SeekerState.SpeedLimitUploadBytesSec = prefs.GetInt(KeyConsts.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
         SeekerState.SpeedLimitDownloadBytesSec = prefs.GetInt(KeyConsts.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
 
-        SeekerState.DisableDownloadToastNotification = prefs.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
+        SeekerState.DisableDownloadToastNotification = !prefs.GetBoolean(ResourceConstant.String.key_notify_on_file_complete, false);
         SeekerState.MemoryBackedDownload = prefs.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
         SearchFragment.FilterSticky = prefs.GetBoolean(KeyConsts.M_FilterSticky, false);
         SearchFragment.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
@@ -85,7 +85,7 @@ public static class SharedPreferencesUtils
         SeekerState.AutoAwayOnInactivity = prefs.GetBoolean(KeyConsts.M_AutoSetAwayOnInactivity, false);
         SeekerState.AutoRetryBackOnline = prefs.GetBoolean(KeyConsts.M_AutoRetryBackOnline, true);
 
-        SeekerState.NotifyOnFolderCompleted = prefs.GetBoolean(KeyConsts.M_NotifyFolderComplete, true);
+        SeekerState.NotifyOnFolderCompleted = prefs.GetBoolean(ResourceConstant.String.key_notify_on_folder_complete, true);
         SeekerState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
 
         UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(prefs.GetInt(KeyConsts.M_UserListSortOrder, 0));

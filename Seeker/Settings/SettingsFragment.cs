@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using _Microsoft.Android.Resource.Designer;
 using Android.App;
 using Android.Content;
@@ -8,6 +10,7 @@ using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
 using AndroidX.RecyclerView.Widget;
 using Seeker.Components;
+using Seeker.Managers;
 using Seeker.Utils;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 using Environment = Android.OS.Environment;
@@ -40,6 +43,12 @@ public class SettingsFragment : PreferenceFragmentCompat
     private Preference aboutService;
 
     private SwitchPreferenceCompat allowPrivateRoomInvites;
+    private SwitchPreferenceCompat autoClearCompleteDownloads;
+    private SwitchPreferenceCompat autoClearCompleteUploads;
+    private SwitchPreferenceCompat folderCompleteNotifications;
+    private SwitchPreferenceCompat fileCompleteNotifications;
+    private SwitchPreferenceCompat rememberRecentUsers;
+    private Preference clearRecentUsers;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -141,6 +150,34 @@ public class SettingsFragment : PreferenceFragmentCompat
         allowPrivateRoomInvites = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_allow_private_room_invites);
         allowPrivateRoomInvites.PreferenceClick += (_, _) => OnAllowPrivateRoomInvitationsClicked();
+
+        autoClearCompleteDownloads = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_auto_clear_complete_downloads);
+        autoClearCompleteDownloads.PreferenceChange += (_, args) => 
+            SeekerState.AutoClearCompleteDownloads = Convert.ToBoolean(args.NewValue);
+        
+        autoClearCompleteUploads = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_auto_clear_complete_uploads);
+        autoClearCompleteUploads.PreferenceChange += (_, args) => 
+            SeekerState.AutoClearCompleteUploads = Convert.ToBoolean(args.NewValue);
+
+        folderCompleteNotifications = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_notify_on_folder_complete);
+        folderCompleteNotifications.PreferenceChange += (_, args) =>
+            SeekerState.NotifyOnFolderCompleted = Convert.ToBoolean(args.NewValue);
+        
+        fileCompleteNotifications = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_notify_on_file_complete);
+        fileCompleteNotifications.PreferenceChange += (_, args) =>
+            SeekerState.DisableDownloadToastNotification = !Convert.ToBoolean(args.NewValue);
+        
+        rememberRecentUsers = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_remember_recent_users);
+        rememberRecentUsers.PreferenceChange += (_, args) =>
+            SeekerState.ShowRecentUsers = Convert.ToBoolean(args.NewValue);
+        
+        clearRecentUsers = FindPreference<Preference>(ResourceConstant.String.key_clear_recent_users);
+        clearRecentUsers.PreferenceClick += (_, _) => ClearRecentUsers();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -422,5 +459,25 @@ public class SettingsFragment : PreferenceFragmentCompat
     public void SetAllowPrivateRoomInvitations(bool value)
     {
         allowPrivateRoomInvites.Checked = value;
+    }
+
+    private static void ClearRecentUsers()
+    {
+        // set to just the added users....
+        var count = UserListManager.UserList?.Count ?? 0;
+        if (count > 0)
+        {
+            lock (UserListManager.UserList!)
+            {
+                var list = UserListManager.UserList.Select(uli => uli.Username).ToList();
+                SeekerState.RecentUsersManager.SetRecentUserList(list);
+            }
+        }
+        else
+        {
+            SeekerState.RecentUsersManager.SetRecentUserList([]);
+        }
+        
+        SeekerState.RecentUsersManager.SaveRecentUsers();
     }
 }

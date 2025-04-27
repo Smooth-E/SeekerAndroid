@@ -491,7 +491,7 @@
     <string name="successfully_changed_incomplete_dir">Неповний каталог успішно змінено на «{0}»</string>
     <string name="no_uploads_yet">Наразі немає передавань, коли ви передаватимете файли, вони з\'являтимуться тут</string>
     <string name="no_uploads_yet_not_sharing">Зараз немає передавань, ви не ділитеся файлами</string>
-    <string name="auto_clear_complete">Авто очищення завершених завантажень</string>
+    <string name="auto_clear_complete_downloads">Авто очищення завершених завантажень</string>
     <string name="auto_clear_complete_uploads">Авто очищення завершених передавань</string>
     <string name="download_remaining">Залишилося завантажити: {0}</string>
     <string name="downloads_remaining">Залишилося завантажень: {0}</string>
@@ -602,8 +602,8 @@
     <string name="ShowSmartFilters">Показати розумні фільтри</string>
     <string name="ShowPrivateLockedSearch">Показати приватні (заблоковані) файли в результатах пошуку</string>
     <string name="ShowPrivateLockedBrowse">Показати приватні (заблоковані) файли у відповіді на перегляд</string>
-    <string name="RememberRecent">Запам\'ятати останніх користувачів</string>
-    <string name="ClearRecentUsers">Очистити останніх користувачів</string>
+    <string name="preference_remember_recent_users">Запам\'ятати останніх користувачів</string>
+    <string name="preference_clear_recent_users">Очистити останніх користувачів</string>
     <string name="AutoRetryFailedOfflineOnline">Авто повторювати невдалі завантаження, коли користувач повертається в мережу</string>
     <string name="AwayOnInactivity">Автоматично встановлювати для статусу значення «Пішов» у разі бездіяльності</string>
     <string name="DayVarient_">Денний варіант: </string>

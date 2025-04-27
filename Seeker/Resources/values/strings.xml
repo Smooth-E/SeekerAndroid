@@ -154,9 +154,7 @@
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-
-    <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
-    <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
+    
     <string name="file_backed_downloads">File Backed Downloads</string>
     <string name="night_mode_options">Night Mode Option: </string>
     <string name="enable_sharing">Enable Sharing</string>
@@ -577,9 +575,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
     <string name="no_uploads_yet_failed_to_set_up_shared_files">No uploads currently, failed to set up shares</string>
 
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
-    <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
-
     <string name="download_remaining">{0} download remaining</string>
     <string name="downloads_remaining">{0} downloads remaining</string>
 
@@ -720,8 +715,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="NoUsersFound">No Users Found</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
-    <string name="RememberRecent">Remember Recent Users</string>
-    <string name="ClearRecentUsers">Clear Recent Users</string>
     <string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
     <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
     <string name="DayVarient_">Day Varient: </string>
@@ -907,4 +900,16 @@ The standard way of requesting folder access does not always persist permissions
     <string name="preference_category_communication">Communication</string>
     <string name="preference_allow_private_room_invites">Private room invitations</string>
     <string name="preference_allow_private_room_invites_summary">Allow invitations to private rooms</string>
+    <string name="auto_clear_complete_downloads">Auto Clear Complete Downloads</string>
+    <string name="preference_auto_clear_complete_downloads_summary">Automatically remove complete downloads from the list</string>
+    <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
+    <string name="preference_auto_clear_complete_uploads_summary">Automatically remove complete uploads from the list</string>
+    <string name="preference_notify_on_folder_complete">Folder complete notifications</string>
+    <string name="preference_notify_on_folder_complete_summary">Display an in-app notification when a folder has finished downloading</string>
+    <string name="preference_notify_on_file_complete">File complete notifications</string>
+    <string name="preference_notify_on_file_complete_summary">Display an in-app notification when a file has finished downloading</string>
+    <string name="preference_remember_recent_users">Remember recent users</string>
+    <string name="preference_remember_recent_users_summary">Remember the list of users you searched for</string>
+    <string name="preference_clear_recent_users">Clear recent users</string>
+    <string name="preference_clear_recent_users_summary">Clear the list of users you searched for</string>
 </resources>
