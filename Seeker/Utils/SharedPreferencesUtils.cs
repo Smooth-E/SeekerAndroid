@@ -69,7 +69,7 @@ public static class SharedPreferencesUtils
 
         SeekerState.RecentUsersManager = RecentUserManager.FromXmlString(prefs.GetString(KeyConsts.M_RecentUsersList, string.Empty));
         SeekerState.IgnoreUserList = UserListManager.FromString(prefs.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
-        SeekerState.AllowPrivateRoomInvitations = prefs.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
+        SeekerState.AllowPrivateRoomInvitations = prefs.GetBoolean(ResourceConstant.String.key_allow_private_room_invites, false);
         SeekerState.StartServiceOnStartup = prefs.GetBoolean(ResourceConstant.String.key_start_seeker_service_on_startup, true);
         SeekerState.NoSubfolderForSingle = prefs.GetBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, false);
 

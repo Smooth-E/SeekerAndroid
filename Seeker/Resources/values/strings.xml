@@ -154,7 +154,6 @@
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
 
     <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
     <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
@@ -904,4 +903,8 @@ The standard way of requesting folder access does not always persist permissions
         \n\nThis is necessary to respond to search requests (if sharing), receive chat messages, and receive wishlist results while in the background.
         \n\nIt is not needed for downloading or uploading in background (there is already a service for that which will always run).
         \n\nThe only downside is that this can use up more battery. In which case one can turn it off by default and only run it as needed.</string>
+    
+    <string name="preference_category_communication">Communication</string>
+    <string name="preference_allow_private_room_invites">Private room invitations</string>
+    <string name="preference_allow_private_room_invites_summary">Allow invitations to private rooms</string>
 </resources>

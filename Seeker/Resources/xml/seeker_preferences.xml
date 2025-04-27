@@ -150,5 +150,18 @@
                 app:secondaryIcon="@drawable/help_circle_outline"/>
         
     </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/preference_category_communication"
+            app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_allow_private_room_invites"
+                app:title="@string/preference_allow_private_room_invites"
+                android:summary="@string/preference_allow_private_room_invites_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+    
+    </PreferenceCategory>
     
 </PreferenceScreen>

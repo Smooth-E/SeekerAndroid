@@ -73,11 +73,11 @@ public class SettingsActivity : ThemeableActivity
 
     public const int SCROLL_TO_SHARING_SECTION = 10;
     public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
-
+    
     private Toolbar toolbar;
+    private SettingsFragment settingsFragment;
     
     private readonly List<Tuple<int, int>> positionNumberPairs = [];
-    private CheckBox allowPrivateRoomInvitations;
 
     private ViewGroup sharingSubLayout1;
     private ViewGroup sharingSubLayout2;
@@ -145,8 +145,9 @@ public class SettingsActivity : ThemeableActivity
         SetSupportActionBar(toolbar);
         SupportActionBar!.SetDisplayHomeAsUpEnabled(true);
 
+        settingsFragment = new SettingsFragment();
         SupportFragmentManager.BeginTransaction()
-            .Replace(ResourceConstant.Id.preference_fragment_holder, new SettingsFragment())
+            .Replace(ResourceConstant.Id.preference_fragment_holder, settingsFragment)
             .Commit();
         
         var progBar = FindViewById<ProgressBar>(ResourceConstant.Id.progressBarSharedStatus)!;
@@ -160,10 +161,6 @@ public class SettingsActivity : ThemeableActivity
         CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads);
         autoClearCompleteUploads.Checked = SeekerState.AutoClearCompleteUploads;
         autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
-
-        allowPrivateRoomInvitations = FindViewById<CheckBox>(Resource.Id.allowPrivateRoomInvitations);
-        allowPrivateRoomInvitations.Checked = SeekerState.AllowPrivateRoomInvitations;
-        allowPrivateRoomInvitations.CheckedChange += AllowPrivateRoomInvitations_CheckedChange;
 
         CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
         autoSetAwayStatusOnInactivity.Checked = SeekerState.AutoAwayOnInactivity;
@@ -1097,7 +1094,7 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.ListenerEnabled = e.IsChecked;
         UpdateListeningViewState();
         SharedPreferencesUtils.SaveListeningState();
-        ReconfigureOptionsAPI(null, e.IsChecked, null);
+        ReconfigureOptionsApi(null, e.IsChecked, null);
         if (e.IsChecked)
         {
             UPnpManager.Instance.Feedback = true;
@@ -1176,7 +1173,7 @@ public class SettingsActivity : ThemeableActivity
                     Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
                     return;
                 }
-                ReconfigureOptionsAPI(null, null, portNum);
+                ReconfigureOptionsApi(null, null, portNum);
                 SeekerState.ListenerPort = portNum;
                 UPnpManager.Instance.Feedback = true;
                 UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -1491,120 +1488,124 @@ public class SettingsActivity : ThemeableActivity
         this.StartActivity(intent);
     }
 
-    private void AllowPrivateRoomInvitations_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+    public void ReconfigureOptionsApi(bool? allowPrivateInvites, bool? enableListener, int? newPort)
     {
-        if (e.IsChecked == SeekerState.AllowPrivateRoomInvitations)
+        var requiresConnection = allowPrivateInvites.HasValue;
+        
+        // note: you CAN in fact change listening and port without being logged in...
+        if (!SeekerState.currentlyLoggedIn && requiresConnection)
         {
-            Logger.Debug("allow private: nothing to do");
-        }
-        else
-        {
-            string newstate = e.IsChecked ? this.GetString(Resource.String.allowed) : this.GetString(Resource.String.denied);
-            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short).Show();
-            ReconfigureOptionsAPI(e.IsChecked, null, null);
-
-        }
-    }
-
-    private void ReconfigureOptionsAPI(bool? allowPrivateInvites, bool? enableListener, int? newPort)
-    {
-        bool requiresConnection = allowPrivateInvites.HasValue;
-        if (!SeekerState.currentlyLoggedIn && requiresConnection) //note: you CAN in fact change listening and port without being logged in...
-        {
-            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
+            this.ShowShortToast(ResourceConstant.String.must_be_logged_to_toggle_priv_invites);
             return;
         }
+        
         if (SeekerState.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
         {
-            //we disconnected. login then do the rest.
-            //this is due to temp lost connection
-            Task t;
-            if (!SoulseekConnection.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+            // We disconnected. login then do the rest. This is due to temp lost connection
+            var shouldContinue = SoulseekConnection
+                .ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out var reconnectTask);
+            if (!shouldContinue)
             {
                 return;
             }
-            t.ContinueWith(new Action<Task>((Task t) =>
+            
+            reconnectTask.ContinueWith(previousTask =>
             {
-                if (t.IsFaulted)
+                if (previousTask.IsFaulted)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                    this.ShowShortToast(ResourceConstant.String.failed_to_connect);
                     return;
                 }
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
-            }));
+                
+                RunOnUiThread(() => ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
+            });
+
+            return;
         }
-        else
-        {
-            ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
-        }
+
+        ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
     }
 
-    private static void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
+    private void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
     {
-        //Toast.MakeText(this.Context, "Contacting user for directory list. Will appear in browse tab when complete", ToastLength.Short).Show();
-        Task<bool> reconfigTask = null;
+        Task<bool> reconfigurationTask;
         try
         {
-            Soulseek.SoulseekClientOptionsPatch patch = new Soulseek.SoulseekClientOptionsPatch(acceptPrivateRoomInvitations: allowPrivateInvites, enableListener: enableTheListener, listenPort: listenerPort);
+            var patch = new Soulseek.SoulseekClientOptionsPatch(
+                acceptPrivateRoomInvitations: allowPrivateInvites,
+                enableListener: enableTheListener,
+                listenPort: listenerPort);
 
-            reconfigTask = SeekerState.SoulseekClient.ReconfigureOptionsAsync(patch);
+            reconfigurationTask = SeekerState.SoulseekClient.ReconfigureOptionsAsync(patch);
         }
         catch (Exception e)
-        {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
+        {   
+            // this can still happen on ReqFiles_Click...
+            // maybe for the first check we were logged in but for the second we somehow were not...
+            
             Logger.FirebaseDebug("reconfigure options: " + e.Message + e.StackTrace);
             Logger.Debug("reconfigure options FAILED" + e.Message + e.StackTrace);
             return;
         }
-        Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) =>
+        
+        Action<Task<bool>> continueWithAction = reconfigureTask =>
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                if (reconfigTask.IsFaulted)
+                if (reconfigureTask.IsFaulted)
                 {
                     Logger.Debug("reconfigure options FAILED");
                     if (allowPrivateInvites.HasValue)
                     {
-                        string enabledDisabled = allowPrivateInvites.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long).Show();
+                        var rawString = GetString(ResourceConstant.String.failed_setting_priv_invites);
+                        var enabledDisabled = allowPrivateInvites.Value 
+                            ? SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.allowed)
+                            : SeekerState.ActiveActivityRef.GetString(ResourceConstant.String.denied);
+                        this.ShowLongToast(string.Format(rawString, enabledDisabled));
+                        
                         if (SeekerState.ActiveActivityRef is SettingsActivity settingsActivity)
                         {
-                            //set the check to false
-                            settingsActivity.allowPrivateRoomInvitations.Checked = SeekerState.AllowPrivateRoomInvitations; //old value
+                            // set the check to false
+                            // TODO: Move this to the settings fragment itself
+                            settingsFragment.SetAllowPrivateRoomInvitations(SeekerState.AllowPrivateRoomInvitations);
                         }
                     }
 
                     if (enableTheListener.HasValue)
                     {
-                        string enabledDisabled = enableTheListener.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long).Show();
+                        var rawString = GetString(ResourceConstant.String.network_error_setting_listener);
+                        var enabledDisabled = enableTheListener.Value 
+                            ? GetString(ResourceConstant.String.allowed) 
+                            : GetString(ResourceConstant.String.denied);
+                        this.ShowLongToast(string.Format(rawString, enabledDisabled));
                     }
 
-                    if (listenerPort.HasValue)
+                    if (!listenerPort.HasValue)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long).Show();
+                        return;
                     }
 
-
-
+                    var baseMessage = GetString(ResourceConstant.String.network_error_setting_listener_port);
+                    this.ShowLongToast(string.Format(baseMessage, listenerPort.Value));
                 }
-                else
+                else if (allowPrivateInvites.HasValue)
                 {
-                    if (allowPrivateInvites.HasValue)
+                    Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigureTask.Result);
+                    SeekerState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
+                    
+                    // set shared prefs...
+                    lock (SeekerApplication.SharedPrefLock)
                     {
-                        Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
-                        SeekerState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
-                        //set shared prefs...
-                        lock (SeekerApplication.SharedPrefLock)
-                        {
-                            var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                            editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, allowPrivateInvites.Value);
-                            bool success = editor.Commit();
-                        }
+                        GetSharedPreferences("SoulSeekPrefs", 0)!.Edit()!
+                            .PutBoolean(ResourceConstant.String.key_allow_private_room_invites, 
+                                allowPrivateInvites.Value)!
+                            .Commit();
                     }
                 }
             });
-        });
-        reconfigTask.ContinueWith(continueWithAction);
+        };
+        
+        reconfigurationTask.ContinueWith(continueWithAction);
     }
 
     private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)

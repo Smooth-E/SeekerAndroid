@@ -24,4 +24,5 @@
     <string translatable="false" name="key_start_seeker_service_on_startup">start_seeker_service_on_startup</string>
     <string translatable="false" name="key_start_stop_seeker_service">start_stop_seeker_service</string>
     <string translatable="false" name="key_about_seeker_service">about_seeker_service</string>
+    <string translatable="false" name="key_allow_private_room_invites">allow_private_room_invites</string>
 </resources>

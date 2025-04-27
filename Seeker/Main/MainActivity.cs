@@ -2245,7 +2245,7 @@ public class MainActivity : ThemeableActivity
                 .PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification)!
                 .PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed)!
                 .PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn)!
-                .PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations)!;
+                .PutBoolean(ResourceConstant.String.key_allow_private_room_invites, SeekerState.AllowPrivateRoomInvitations)!;
 
             if (UserListManager.UserList != null)
             {
@@ -2279,7 +2279,7 @@ public class MainActivity : ThemeableActivity
         outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
         outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
         outState.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
-        outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
+        outState.PutBoolean(GetString(ResourceConstant.String.key_allow_private_room_invites), SeekerState.AllowPrivateRoomInvitations);
         outState.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
         
         if (UserListManager.UserList != null)

@@ -39,6 +39,8 @@ public class SettingsFragment : PreferenceFragmentCompat
     private TwoIconPreference startStopService;
     private Preference aboutService;
 
+    private SwitchPreferenceCompat allowPrivateRoomInvites;
+
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
         settingsActivity = RequireActivity() as SettingsActivity;
@@ -135,6 +137,10 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         aboutService = FindPreference<Preference>(ResourceConstant.String.key_about_seeker_service);
         aboutService.PreferenceClick += (_, _) => OnAboutSeekerServicePreferenceClicked();
+
+        allowPrivateRoomInvites = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_allow_private_room_invites);
+        allowPrivateRoomInvites.PreferenceClick += (_, _) => OnAllowPrivateRoomInvitationsClicked();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -392,5 +398,29 @@ public class SettingsFragment : PreferenceFragmentCompat
             .SetMessage(ResourceConstant.String.keep_alive_service)!
             .SetPositiveButton(ResourceConstant.String.okay, (sender, _) => (sender as Dialog)!.Dismiss())
             .Show();
+    }
+
+    private void OnAllowPrivateRoomInvitationsClicked()
+    {
+        var isChecked = allowPrivateRoomInvites.Checked;
+        if (isChecked == SeekerState.AllowPrivateRoomInvitations)
+        {
+            Logger.Debug("allow private: nothing to do");
+            return;
+        }
+
+        var newState = isChecked 
+            ? GetString(ResourceConstant.String.allowed) 
+            : GetString(ResourceConstant.String.denied);
+
+        var message = string.Format(GetString(ResourceConstant.String.setting_priv_invites), newState);
+        RequireActivity().ShowShortToast(message);
+        
+        settingsActivity.ReconfigureOptionsApi(isChecked, null, null);
+    }
+
+    public void SetAllowPrivateRoomInvitations(bool value)
+    {
+        allowPrivateRoomInvites.Checked = value;
     }
 }

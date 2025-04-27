@@ -49,22 +49,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_below="@+id/keepAliveLayout"
-                    android:text="@string/allow_private_room_invitations"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="10dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="10dp"
-                    android:id="@+id/allowPrivateRoomInvitations"
-                    android:layout_marginBottom="10dp"/>
-
-            <CheckBox
-                    android:theme="@style/checkBoxStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_below="@+id/allowPrivateRoomInvitations"
                     android:text="@string/auto_clear_complete"
                     android:layout_marginStart="10dp"
