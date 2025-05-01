@@ -82,8 +82,8 @@ public static class SharedPreferencesUtils
         SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(prefs.GetString(KeyConsts.M_UserNotes, string.Empty));
         SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(prefs.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
 
-        SeekerState.AutoAwayOnInactivity = prefs.GetBoolean(KeyConsts.M_AutoSetAwayOnInactivity, false);
-        SeekerState.AutoRetryBackOnline = prefs.GetBoolean(KeyConsts.M_AutoRetryBackOnline, true);
+        SeekerState.AutoAwayOnInactivity = prefs.GetBoolean(ResourceConstant.String.key_away_on_inactivity, false);
+        SeekerState.AutoRetryBackOnline = prefs.GetBoolean(ResourceConstant.String.key_auto_retry_failed_downloads, true);
 
         SeekerState.NotifyOnFolderCompleted = prefs.GetBoolean(ResourceConstant.String.key_notify_on_folder_complete, true);
         SeekerState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);

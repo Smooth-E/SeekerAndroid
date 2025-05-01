@@ -1,15 +1,4 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Seeker
+﻿namespace Seeker
 {
     public class KeyConsts
     {
@@ -23,10 +12,7 @@ namespace Seeker
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
-
-        public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
-        public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
-
+        
         public const string M_AllowUploadsOnMetered = "Momento_AllowUploadsOnMetered";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";

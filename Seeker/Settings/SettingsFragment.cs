@@ -51,6 +51,8 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat fileCompleteNotifications;
     private SwitchPreferenceCompat rememberRecentUsers;
     private Preference clearRecentUsers;
+    private SwitchPreferenceCompat autoRetryFailedDownloads;
+    private SwitchPreferenceCompat awayOnInactivity;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -192,6 +194,15 @@ public class SettingsFragment : PreferenceFragmentCompat
         
         clearRecentUsers = FindPreference<Preference>(ResourceConstant.String.key_clear_recent_users);
         clearRecentUsers.PreferenceClick += (_, _) => ClearRecentUsers();
+
+        autoRetryFailedDownloads = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_auto_retry_failed_downloads);
+        autoRetryFailedDownloads.PreferenceChange += (_, args) =>
+            SeekerState.AutoRetryBackOnline = Convert.ToBoolean(args.NewValue);
+        
+        awayOnInactivity = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_away_on_inactivity);
+        awayOnInactivity.PreferenceChange += (_, args) =>
+            SeekerState.AutoAwayOnInactivity = Convert.ToBoolean(args.NewValue);
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;

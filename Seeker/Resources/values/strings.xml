@@ -711,8 +711,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="NoUsersFound">No Users Found</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
-    <string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
-    <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
     <string name="DayVarient_">Day Varient: </string>
     <string name="NightVarient_">Night Varient: </string>
     <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
@@ -916,4 +914,8 @@ The standard way of requesting folder access does not always persist permissions
     <string name="preference_remember_recent_users_summary">Remember the list of users you searched for</string>
     <string name="preference_clear_recent_users">Clear recent users</string>
     <string name="preference_clear_recent_users_summary">Clear the list of users you searched for</string>
+    <string name="AutoRetryFailedOfflineOnline">Auto-retry failed downloads</string>
+    <string name="preference_auto_retry_failed_downloads_summary">Automatically retry failed downloads when the user goes back online</string>
+    <string name="AwayOnInactivity">Away on inactivity</string>
+    <string name="preference_away_on_inactivity_summary">Automatically set your status to \"Away\" on inactivity</string>
 </resources>

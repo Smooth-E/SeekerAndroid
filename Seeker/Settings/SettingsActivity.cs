@@ -154,14 +154,6 @@ public class SettingsActivity : ThemeableActivity
         progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
         progBar.Click += ImageView_Click;
 
-        CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
-        autoSetAwayStatusOnInactivity.Checked = SeekerState.AutoAwayOnInactivity;
-        autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
-        
-        CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
-        autoRetryBackOnline.Checked = SeekerState.AutoRetryBackOnline;
-        autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange;
-
         ImageView moreInfoDiagnostics = FindViewById<ImageView>(Resource.Id.moreInfoDiagnostics);
         moreInfoDiagnostics.Click += MoreInfoDiagnostics_Click;
 
@@ -732,36 +724,6 @@ public class SettingsActivity : ThemeableActivity
         SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
         SharedCacheManager.SharedFileCache_Refreshed(null, (0, 0));
         this.UpdateShareImageView();
-    }
-
-    private void AutoRetryBackOnline_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        bool changed = SeekerState.AutoRetryBackOnline != e.IsChecked;
-        SeekerState.AutoRetryBackOnline = e.IsChecked;
-        if (changed)
-        {
-            lock (SeekerApplication.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, SeekerState.AutoRetryBackOnline);
-                bool success = editor.Commit();
-            }
-        }
-    }
-
-    private void AutoSetAwayStatusOnInactivity_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        bool changed = SeekerState.AutoAwayOnInactivity != e.IsChecked;
-        SeekerState.AutoAwayOnInactivity = e.IsChecked;
-        if (changed)
-        {
-            lock (SeekerApplication.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, SeekerState.AutoAwayOnInactivity);
-                bool success = editor.Commit();
-            }
-        }
     }
 
     private void MoreInfoDiagnostics_Click(object sender, EventArgs e)

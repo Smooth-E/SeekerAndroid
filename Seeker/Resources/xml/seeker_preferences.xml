@@ -217,6 +217,20 @@
                 android:summary="@string/preference_clear_recent_users_summary"
                 app:iconSpaceReserved="false"
                 app:secondaryIcon="@drawable/phosphor_broom"/>
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_auto_retry_failed_downloads"
+                app:title="@string/AutoRetryFailedOfflineOnline"
+                android:summary="@string/preference_auto_retry_failed_downloads_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
+        
+        <SwitchPreferenceCompat
+                app:key="@string/key_away_on_inactivity"
+                app:title="@string/AwayOnInactivity"
+                android:summary="@string/preference_away_on_inactivity_summary"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
         
     </PreferenceCategory>
     
