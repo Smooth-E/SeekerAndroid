@@ -56,7 +56,7 @@ public static class SharedPreferencesUtils
         SeekerState.SpeedLimitDownloadBytesSec = prefs.GetInt(KeyConsts.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
 
         SeekerState.DisableDownloadToastNotification = !prefs.GetBoolean(ResourceConstant.String.key_notify_on_file_complete, false);
-        SeekerState.MemoryBackedDownload = prefs.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
+        SeekerState.MemoryBackedDownload = !prefs.GetBoolean(ResourceConstant.String.key_file_backed_downloads, true);
         SearchFragment.FilterSticky = prefs.GetBoolean(KeyConsts.M_FilterSticky, false);
         SearchFragment.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
         SearchFragment.SetSearchResultStyle(prefs.GetInt(KeyConsts.M_SearchResultStyle, 1));

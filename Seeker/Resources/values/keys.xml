@@ -6,6 +6,8 @@
     <string translatable="false" name="key_use_manual_incomplete_directory_uri">use_manual_incomplete_directory_uri</string>
     <string translatable="false" name="key_manual_incomplete_directory_uri">manual_incomplete_directory_uri</string>
     <string translatable="false" name="key_clear_incomplete_folder">clear_incomplete_folder</string>
+    <string translatable="false" name="key_file_backed_downloads">file_backed_downloads</string>
+    <string translatable="false" name="key_about_file_backed_downloads">about_file_backed_downloads</string>
     <string translatable="false" name="key_max_search_results">max_search_results</string>
     <string translatable="false" name="key_show_smart_filters">show_smart_filters</string>
     <string translatable="false" name="key_configure_smart_filters">configure_smart_filters</string>

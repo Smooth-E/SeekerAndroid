@@ -157,17 +157,10 @@ public class SettingsActivity : ThemeableActivity
         CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
         autoSetAwayStatusOnInactivity.Checked = SeekerState.AutoAwayOnInactivity;
         autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
-
-        CheckBox memoryFileDownloadSwitchCheckBox = FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox);
-        memoryFileDownloadSwitchCheckBox.Checked = !SeekerState.MemoryBackedDownload;
-        memoryFileDownloadSwitchCheckBox.CheckedChange += MemoryFileDownloadSwitchCheckBox_CheckedChange;
         
         CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
         autoRetryBackOnline.Checked = SeekerState.AutoRetryBackOnline;
         autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange;
-
-        ImageView memoryFileDownloadSwitchIcon = FindViewById<ImageView>(Resource.Id.memoryFileDownloadSwitchIcon);
-        memoryFileDownloadSwitchIcon.Click += MemoryFileDownloadSwitchIcon_Click;
 
         ImageView moreInfoDiagnostics = FindViewById<ImageView>(Resource.Id.moreInfoDiagnostics);
         moreInfoDiagnostics.Click += MoreInfoDiagnostics_Click;
@@ -1314,7 +1307,6 @@ public class SettingsActivity : ThemeableActivity
     public void MoreInfoForceFilesystem_Click(object sender, EventArgs e)
     {
         var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
         var diag = builder.SetMessage(Resource.String.force_filesystem_message).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
         diag.Show();
         var origString = SeekerState.ActiveActivityRef.GetString(Resource.String.force_filesystem_message); //this is a literal CDATA string.
@@ -1544,19 +1536,6 @@ public class SettingsActivity : ThemeableActivity
         };
         
         reconfigurationTask.ContinueWith(continueWithAction);
-    }
-
-    private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)
-    {
-        var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        var diag = builder.SetMessage(Resource.String.memory_file_backed).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-        diag.Show();
-    }
-
-    private void MemoryFileDownloadSwitchCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.MemoryBackedDownload = !e.IsChecked;
-        // TODO: SetIncompleteFolderView();
     }
 
     private void MoreInfoButton_Click(object sender, EventArgs e)
@@ -2038,7 +2017,7 @@ public class SettingsActivity : ThemeableActivity
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
-        (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
         // TODO: SetSpinnerPosition(searchNumSpinner);
         Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
         SetSpinnerPositionDayNight(daynightSpinner);

@@ -2240,7 +2240,7 @@ public class MainActivity : ThemeableActivity
                 .PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse)!
                 .PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky)!
                 .PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString)!
-                .PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload)!
+                .PutBoolean(ResourceConstant.String.key_file_backed_downloads, !SeekerState.MemoryBackedDownload)!
                 .PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle))!
                 .PutBoolean(ResourceConstant.String.key_notify_on_file_complete, !SeekerState.DisableDownloadToastNotification)!
                 .PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed)!
@@ -2270,7 +2270,7 @@ public class MainActivity : ThemeableActivity
         outState.PutBoolean(GetString(ResourceConstant.String.key_auto_clear_complete_uploads), SeekerState.AutoClearCompleteUploads);
         outState.PutBoolean(GetString(ResourceConstant.String.key_remember_search_history), SeekerState.RememberSearchHistory);
         outState.PutBoolean(GetString(ResourceConstant.String.key_remember_recent_users), SeekerState.ShowRecentUsers);
-        outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
+        outState.PutBoolean(GetString(ResourceConstant.String.key_file_backed_downloads), !SeekerState.MemoryBackedDownload);
         outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
         outState.PutBoolean(GetString(ResourceConstant.String.key_free_upload_slots_only), SeekerState.FreeUploadSlotsOnly);
         outState.PutBoolean(GetString(ResourceConstant.String.key_hide_locked_in_search), SeekerState.HideLockedResultsInSearch);

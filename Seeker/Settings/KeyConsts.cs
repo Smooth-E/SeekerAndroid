@@ -49,7 +49,6 @@ namespace Seeker
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
         public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";
         public const string M_TransfersShowSpeed = "Momento_TransfersShowSpeed";
-        public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
         public const string M_FilterStickyString = "Momento_FilterStickyString";
         public const string M_SearchResultStyle = "Momento_SearchResStyle";

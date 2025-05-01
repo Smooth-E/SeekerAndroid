@@ -28,6 +28,8 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat useManualIncompleteDirectory;
     private Preference incompleteDirectoryUriPreference;
     private Preference clearIncompleteFolder;
+    private SwitchPreferenceCompat fileBackedDownloads;
+    private Preference aboutFileBackedDownloads;
     
     private SeekBarPreference maxSearchResults;
     private SwitchPreferenceCompat showSmartFilters;
@@ -100,6 +102,18 @@ public class SettingsFragment : PreferenceFragmentCompat
         clearIncompleteFolder = FindPreference<Preference>(ResourceConstant.String.key_clear_incomplete_folder);
         clearIncompleteFolder.PreferenceClick += (_, _) => ClearIncompleteFolder();
 
+        fileBackedDownloads = FindPreference<SwitchPreferenceCompat>(
+            ResourceConstant.String.key_file_backed_downloads);
+        fileBackedDownloads.PreferenceChange += (_, args) =>
+        {
+            SeekerState.MemoryBackedDownload = !Convert.ToBoolean(args.NewValue);
+            UpdateIncompleteDirectoryUriPreferenceSummary();
+        };
+
+        aboutFileBackedDownloads = FindPreference<Preference>(
+            ResourceConstant.String.key_about_file_backed_downloads);
+        aboutFileBackedDownloads.PreferenceClick += (_, _) => ShowAboutFileBackedDownloadsDialog();
+        
         maxSearchResults = FindPreference<SeekBarPreference>(ResourceConstant.String.key_max_search_results);
         maxSearchResults.PreferenceChange += (_, args) =>
             SeekerState.NumberSearchResults = Convert.ToInt32(args.NewValue);
@@ -356,6 +370,15 @@ public class SettingsFragment : PreferenceFragmentCompat
                         folderCount);
         
         Context.ShowLongToast(messageString);
+    }
+
+    private void ShowAboutFileBackedDownloadsDialog()
+    {
+        new AlertDialog.Builder(RequireActivity(), ResourceConstant.Style.MyAlertDialogTheme)
+            .SetTitle(ResourceConstant.String.preference_about_file_backed_downloads_dialog_title)
+            .SetMessage(ResourceConstant.String.memory_file_backed)
+            .SetPositiveButton(ResourceConstant.String.okay, (sender, _) => (sender as Dialog)!.Dismiss())
+            .Show();
     }
     
     private void ShowSmartFiltersConfigurationDialog()

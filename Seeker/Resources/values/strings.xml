@@ -22,9 +22,6 @@
     <string name="wishlist_search">Wishlist Search</string>
 
     <string name="no_account">Don\'t have an account?  Simply enter a unique username and one will be created for you.</string>
-    <string name="memory_file_backed">Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
-        \n\nThis allows (1) the ability to pause and resume downloads where you left off (2) the ability to download large files without getting out of memory errors (and less RAM intensive in general).
-        \n\nTurning this off, the partial download results are stored in memory until they are finished then they are saved to disk.</string>
     <string name="listening">This setting allows Seeker to accept incoming connections, so that we can connect to clients without open ports.
         \n\nWhat this means in practice is that as long as we are successfully listening (indicated via \"Check Status\") we will recieve more search results, be able to download from more people, upload to more people, etc.
         \n\nSeeker will attempt to automatically forward ports via UPnP (this is what the official desktop client does).  If you are NOT on Wifi it will not work, if you are on a VPN please search how to port forward for your specific VPN, if your router is not UPnP enabled then you must manually forward port.</string>
@@ -155,7 +152,6 @@
 
     <string name="change_download_folder">Change Download Folder</string>
     
-    <string name="file_backed_downloads">File Backed Downloads</string>
     <string name="night_mode_options">Night Mode Option: </string>
     <string name="enable_sharing">Enable Sharing</string>
     <string name="set_shared_folder">Set Shared Folder</string>
@@ -863,6 +859,14 @@ The standard way of requesting folder access does not always persist permissions
     <string name="preference_clear_incomplete_folder_summary">Remove unneeded items from the \"Incomplete\" folder. Use this option if Seeker fails to do this automatically.</string>
     <string name="message_cleared_single_folder">Folder cleared</string>
     <string name="message_cleared_several_folders">Cleared %1 folders</string>
+    <string name="file_backed_downloads">File-backed Downloads</string>
+    <string name="preference_file_backed_downloads_summary">Save partial download results in the \"Soulseeek Incomplete\" folder.</string>
+    <string name="preference_about_file_backed_downloads">About file-backed downloads</string>
+    <string name="preference_about_file_backed_downloads_summary">Read more about file-backed downloads and its benefits</string>
+    <string name="preference_about_file_backed_downloads_dialog_title">File-backed downloads</string>
+    <string name="memory_file_backed">Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
+        \n\nThis allows (1) the ability to pause and resume downloads where you left off (2) the ability to download large files without getting out of memory errors (and less RAM intensive in general).
+        \n\nTurning this off, the partial download results are stored in memory until they are finished then they are saved to disk.</string>
     
     <string name="preference_category_search_and_browsing">Searching and browsing</string>
     <string name="max_search_results">Max Search Results</string>

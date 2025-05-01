@@ -55,7 +55,21 @@
             android:summary="@string/preference_clear_incomplete_folder_summary"
             app:iconSpaceReserved="false"
             app:secondaryIcon="@drawable/phosphor_broom"/>
+        
+        <SwitchPreferenceCompat
+                app:key="@string/key_file_backed_downloads"
+                app:title="@string/file_backed_downloads"
+                android:summary="@string/preference_file_backed_downloads_summary"
+                android:defaultValue="true"
+                app:iconSpaceReserved="false"/>
 
+        <Seeker.Components.TwoIconPreference
+                app:key="@string/key_about_file_backed_downloads"
+                app:title="@string/preference_about_file_backed_downloads"
+                android:summary="@string/preference_about_file_backed_downloads_summary"
+                app:iconSpaceReserved="false"
+                app:secondaryIcon="@drawable/help_circle_outline"/>
+        
     </PreferenceCategory>
 
     <PreferenceCategory
