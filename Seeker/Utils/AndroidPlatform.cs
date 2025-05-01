@@ -3,7 +3,7 @@
 namespace Seeker.Utils;
 
 /// <summary>
-/// Check abilities of the Android platform the app is currently running on
+/// Check capabilities of the Android platform the app is currently running on
 /// </summary>
 public static class AndroidPlatform
 {
@@ -20,7 +20,7 @@ public static class AndroidPlatform
     // for both lossy and lossless - determining bit rate from file size and duration is a bit too imprecise.  
     //      for mp3 320kps cbr one will get 320.3, 314, 315, etc.
 
-    // for the pre-indexed media store (note: its possible for one to revoke the photos&media permission and for
+    // for the pre-indexed media store (note: it's possible for one to revoke the photos&media permission and for
     // seeker to work right in all places by querying mediastore)
     //  api 29+ we have duration
     //  api 30+ we have bit rate
@@ -30,20 +30,10 @@ public static class AndroidPlatform
     // with sample rate and bit depth for api31+
 
     // the library tag lib sharp can get us everything, tho it is 1 MB extra.
-
-
-    public static bool HasMediaStoreDurationColumn()
-    {
-        return (int)Build.VERSION.SdkInt >= 29;
-    }
-
-    public static bool HasMediaStoreBitRateColumn()
-    {
-        return (int)Build.VERSION.SdkInt >= 30;
-    }
     
-    public static bool HasProperPerAppLanguageSupport()
-    {
-        return (int)Build.VERSION.SdkInt >= 33;
-    }
+    public static bool HasMediaStoreDurationColumn() => Build.VERSION.SdkInt >= BuildVersionCodes.Q;
+
+    public static bool HasMediaStoreBitRateColumn() => Build.VERSION.SdkInt >= BuildVersionCodes.R;
+    
+    public static bool HasProperPerAppLanguageSupport() => Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu;
 }
