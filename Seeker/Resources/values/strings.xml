@@ -152,7 +152,6 @@
 
     <string name="change_download_folder">Change Download Folder</string>
     
-    <string name="night_mode_options">Night Mode Option: </string>
     <string name="enable_sharing">Enable Sharing</string>
     <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
@@ -253,10 +252,6 @@
     <string name="error_not_a_dir">Error: Not a Directory</string>
     <string name="successfully_changed_dl_dir">Successfully changed Download Directory to \"{0}\"</string>
     <string name="error_parsing_files_shared_dir">Error Parsing Files, could not set Shared Directory</string>
-    
-    <string name="follow_system">Follow System</string>
-    <string name="always_light">Always Light</string>
-    <string name="always_dark">Always Dark</string>
     
     <!-- info -->
     <string name="queue_length_">Queue Length: </string>
@@ -921,4 +916,8 @@ The standard way of requesting folder access does not always persist permissions
     <string name="preference_language">Language</string>
     <string name="language_auto">Automatic</string>
     <string name="preference_per_app_language_summary">Select app language in system settings</string>
+    <string name="preference_app_theme">Application theme</string>
+    <string name="app_theme_system">Follow system</string>
+    <string name="app_theme_light">Light</string>
+    <string name="app_theme_dark">Dark</string>
 </resources>

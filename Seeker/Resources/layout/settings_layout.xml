@@ -43,48 +43,10 @@
                     android:id="@+id/preference_fragment_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-
+            
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/nightModeOptionLayout"
-                    android:orientation="horizontal">
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/night_mode_options"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="0.4"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_gravity="center_vertical"
-                        android:paddingStart="10dp"
-                        android:textColor="?attr/normalTextColorNonTinted"
-                        android:paddingEnd="10dp"
-                        android:id="@+id/nightModeText"/>
-
-                <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="0.4"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_toEndOf="@+id/nightModeText"
-                        android:id="@+id/nightModeSpinner"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/nightModeOptionLayout"
                     android:layout_marginTop="2dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/dayModeVarientLayout"

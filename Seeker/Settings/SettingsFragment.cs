@@ -6,6 +6,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Views;
+using AndroidX.AppCompat.App;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
 using AndroidX.RecyclerView.Widget;
@@ -58,6 +59,7 @@ public class SettingsFragment : PreferenceFragmentCompat
 
     private TwoIconPreference perAppLanguage;
     private DropDownPreference appLanguage;
+    private DropDownPreference appTheme;
 
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
@@ -226,6 +228,14 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         appLanguage.PreferenceChange += (_, args) =>
             LanguageUtils.ApplyLanguageSettings(RequireActivity(), Convert.ToString(args.NewValue));
+
+        appTheme = FindPreference<DropDownPreference>(ResourceConstant.String.key_app_theme);
+        appTheme.PreferenceChange += (_, args) =>
+        {
+            var option = Convert.ToString(args.NewValue);
+            ThemeUtils.UpdateNightModePreference(RequireActivity(), option);
+            SeekerState.DayNightMode = AppCompatDelegate.DefaultNightMode;
+        };
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -237,9 +247,9 @@ public class SettingsFragment : PreferenceFragmentCompat
         {
             if (SeekerState.UseLegacyStorage())
             {
-                //if not set and legacy storage, then the directory is simple the default music
+                // if not set and legacy storage, then the directory is simple the default music
                 var path = Environment.GetExternalStoragePublicDirectory(Environment.DirectoryMusic)?.AbsolutePath;
-                summary = Android.Net.Uri.Parse(new Java.IO.File(path!).ToURI().ToString())?.LastPathSegment;
+                summary = Uri.Parse(new Java.IO.File(path!).ToURI().ToString())?.LastPathSegment;
             }
             else
             {

@@ -27,9 +27,7 @@
         public const string M_LOG_DIAGNOSTICS = "Momento_LOG_DIAGNOSTICS";
         
         public const string M_SaveDataDirectoryUriIsFromTree = "Momento_SaveDataDirectoryUriIsFromTree";
-        public const string M_DayNightMode = "Momento_DayNightMode";
         public const string M_Lanuage = "Momento_Lanuage";
-        public const string M_LegacyLanguageMigrated = "Momento_LegacyLanugageMigrated";
         public const string M_NightVarient = "Momento_NightModeVarient";
         public const string M_DayVarient = "Momento_DayModeVarient";
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";

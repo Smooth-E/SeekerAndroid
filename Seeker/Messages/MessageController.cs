@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AndroidX.AppCompat.App;
 using Seeker.Helpers;
 using Seeker.Settings;
 using Seeker.Utils;
@@ -351,27 +352,18 @@ namespace Seeker.Messages
         /// Because for notification colors only the system matters!!
         /// </summary>
         /// <returns></returns>
-        public static bool GetIfSystemIsInNightMode(Context contextToUse)
+        private static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if (SeekerState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (SeekerState.DayNightMode == AppCompatDelegate.ModeNightFollowSystem)
             {
-                //if we follow the system then we can just return whether our app is in night mode.
+                // if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
             }
-            else
-            {
-                //if we do not follow the system we have to use the UI Mode Service
-                UiModeManager uiModeManager = (UiModeManager)contextToUse.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
-                int mode = (int)(uiModeManager.NightMode);
-                if (mode == (int)UiNightMode.Yes)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+
+            // if we do not follow the system we have to use the UI Mode Service
+            var uiModeManager = (UiModeManager)contextToUse.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
+            var mode = (int)(uiModeManager.NightMode);
+            return mode == (int)UiNightMode.Yes;
         }
 
 

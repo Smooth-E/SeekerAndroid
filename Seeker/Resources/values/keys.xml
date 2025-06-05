@@ -37,4 +37,8 @@
     <string translatable="false" name="key_away_on_inactivity">away_on_inactivity</string>
     <string translatable="false" name="key_per_app_language">per_app_language</string>
     <string translatable="false" name="key_language">language</string>
+    <string translatable="false" name="key_app_theme">night_mode</string>
+    <string translatable="false" name="key_app_theme_system">system</string>
+    <string translatable="false" name="key_app_theme_light">light</string>
+    <string translatable="false" name="key_app_theme_dark">dark</string>
 </resources>

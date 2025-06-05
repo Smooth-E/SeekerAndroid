@@ -170,14 +170,6 @@ public class SettingsActivity : ThemeableActivity
         enableDiagnostics.Checked = DiagnosticFile.Enabled;
         enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
         
-        Spinner dayNightMode = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-        dayNightMode.ItemSelected -= DayNightMode_ItemSelected;
-        String[] dayNightOptionsStrings = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
-        ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayNightOptionsStrings);
-        dayNightMode.Adapter = dayNightOptions;
-        SetSpinnerPositionDayNight(dayNightMode);
-        dayNightMode.ItemSelected += DayNightMode_ItemSelected;
-        
         Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
         dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
         String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.CLASSIC_PURPLE, ThemeHelper.RED, ThemeHelper.BLUE };
@@ -1749,71 +1741,7 @@ public class SettingsActivity : ThemeableActivity
             }
         }
     }
-
-    private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
-    {
-
-        Logger.Debug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + SeekerState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
-
-        if (e.Position == 0)
-        {
-            SeekerState.DayNightMode = -1;
-        }
-        else
-        {
-            SeekerState.DayNightMode = e.Position;
-        }
-        lock (SeekerApplication.SharedPrefLock)
-        {
-            var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-            editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
-            bool success = editor.Commit();
-            int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(KeyConsts.M_DayNightMode, -1);
-            Logger.Debug("was commit successful: " + success);
-            Logger.Debug("after writing and immediately reading: " + x);
-        }
-        //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
-        switch (e.Position)
-        {
-            case 0:
-                if (AppCompatDelegate.DefaultNightMode == -1)
-                {
-                    return;
-                }
-                else
-                {
-                    AppCompatDelegate.DefaultNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
-                    //this.Recreate();
-                }
-                break;
-            case 1:
-                if (AppCompatDelegate.DefaultNightMode == 1)
-                {
-                    return;
-                }
-                else
-                {
-                    AppCompatDelegate.DefaultNightMode = (int)(AppCompatDelegate.ModeNightNo);
-                    //this.Recreate();
-                }
-                break;
-            case 2:
-                if (AppCompatDelegate.DefaultNightMode == 2)
-                {
-                    return;
-                }
-
-                AppCompatDelegate.DefaultNightMode = AppCompatDelegate.ModeNightYes;
-                break;
-            default:
-                return;
-        }
-    }
-
-    private void SetSpinnerPositionDayNight(Spinner s)
-    {
-        s.SetSelection(Math.Max(SeekerState.DayNightMode, 0)); //-1 -> 0
-    }
+    
     private void SetSpinnerPositionDayVarient(Spinner s)
     {
         s.SetSelection((int)(SeekerState.DayModeVarient));
@@ -1861,8 +1789,8 @@ public class SettingsActivity : ThemeableActivity
         // TODO: (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
         // TODO: (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
         // TODO: SetSpinnerPosition(searchNumSpinner);
-        Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-        SetSpinnerPositionDayNight(daynightSpinner);
+        // TODO: Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
+        // TODO: SetSpinnerPositionDayNight(daynightSpinner);
     }
 
     private bool needsMediaStorePermission()

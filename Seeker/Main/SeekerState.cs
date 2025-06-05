@@ -54,7 +54,7 @@ namespace Seeker
         public static bool AutoRequeueDownloadsAtStartup = true;
 
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
-        public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
+        public static int DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
         public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
         public static ThemeHelper.DayThemeType DayModeVarient = ThemeHelper.DayThemeType.ClassicPurple;
         public static bool RememberSearchHistory = true;

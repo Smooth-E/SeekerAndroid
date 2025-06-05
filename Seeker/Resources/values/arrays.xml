@@ -25,4 +25,16 @@
         <item>@string/language_key_cs</item>
         <item>@string/language_key_it</item>
     </string-array>
+    
+    <string-array name="app_theme_names">
+        <item>@string/app_theme_system</item>
+        <item>@string/app_theme_light</item>
+        <item>@string/app_theme_dark</item>
+    </string-array>
+    
+    <string-array name="app_theme_keys">
+        <item>@string/key_app_theme_system</item>
+        <item>@string/key_app_theme_light</item>
+        <item>@string/key_app_theme_dark</item>
+    </string-array>
 </resources>

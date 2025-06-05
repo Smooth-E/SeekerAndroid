@@ -86,7 +86,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
 
         SeekerState.SharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
             
-        SharedPreferencesUtils.RestoreSeekerState();
+        SharedPreferencesUtils.RestoreSeekerState(this);
         SharedPreferencesUtils.RestoreListeningState();
         UPnpManager.RestoreUpnpState();
 
@@ -94,13 +94,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         
         LanguageUtils.ApplyLanguageSettings(this);
 
-        // though setting it to -1 does not seem to recreate the activity or have any negative side effects...
-        // this does not restart Android.App.Application. so putting it here is a much better place...
-        // in MainActivity.OnCreate it would restart the activity every time.
-        if (AppCompatDelegate.DefaultNightMode != SeekerState.DayNightMode)
-        {
-            AppCompatDelegate.DefaultNightMode = SeekerState.DayNightMode;
-        }
+        ThemeUtils.UpdateNightModePreference(this);
             
         SeekerKeepAliveService.CpuKeepAlive_FullService ??=
             ((PowerManager)GetSystemService(PowerService))!.NewWakeLock(WakeLockFlags.Partial,

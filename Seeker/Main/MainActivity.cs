@@ -2223,7 +2223,7 @@ public class MainActivity : ThemeableActivity
                 .PutString(ResourceConstant.String.key_data_directory_uri, SeekerState.SaveDataDirectoryUri)!
                 .PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree)!
                 .PutInt(ResourceConstant.String.key_max_search_results, SeekerState.NumberSearchResults)!
-                .PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode)!
+                .PutInt(ResourceConstant.String.key_app_theme, SeekerState.DayNightMode)!
                 .PutBoolean(ResourceConstant.String.key_auto_clear_complete_downloads, SeekerState.AutoClearCompleteDownloads)!
                 .PutBoolean(ResourceConstant.String.key_auto_clear_complete_uploads, SeekerState.AutoClearCompleteUploads)!
                 .PutBoolean(ResourceConstant.String.key_remember_search_history, SeekerState.RememberSearchHistory)!
@@ -2260,7 +2260,7 @@ public class MainActivity : ThemeableActivity
         outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree);
         outState.PutString(GetString(ResourceConstant.String.key_data_directory_uri), SeekerState.SaveDataDirectoryUri);
         outState.PutInt(GetString(ResourceConstant.String.key_max_search_results), SeekerState.NumberSearchResults);
-        outState.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
+        outState.PutInt(GetString(ResourceConstant.String.key_app_theme), SeekerState.DayNightMode);
         outState.PutBoolean(GetString(ResourceConstant.String.key_auto_clear_complete_downloads), SeekerState.AutoClearCompleteDownloads);
         outState.PutBoolean(GetString(ResourceConstant.String.key_auto_clear_complete_uploads), SeekerState.AutoClearCompleteUploads);
         outState.PutBoolean(GetString(ResourceConstant.String.key_remember_search_history), SeekerState.RememberSearchHistory);

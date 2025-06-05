@@ -14,7 +14,7 @@ public static class SharedPreferencesUtils
 {
     // the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.
     // The best example being DAYNIGHTMODE
-    public static void RestoreSeekerState()
+    public static void RestoreSeekerState(Context context)
     {
         // day night mode sets the static, saves to shared preferences the new value,
         // sets appcompat value, which recreates everything and calls restoreSeekerState(bundle)
@@ -32,7 +32,7 @@ public static class SharedPreferencesUtils
         SeekerState.SaveDataDirectoryUri = prefs.GetString(ResourceConstant.String.key_data_directory_uri, string.Empty);
         SeekerState.SaveDataDirectoryUriIsFromTree = prefs.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
         SeekerState.NumberSearchResults = prefs.GetInt(ResourceConstant.String.key_max_search_results, MainActivity.DEFAULT_SEARCH_RESULTS);
-        SeekerState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, AppCompatDelegate.ModeNightFollowSystem);
+        SeekerState.DayNightMode = ThemeUtils.NightModeOptionToInt(context, prefs.GetString(ResourceConstant.String.key_app_theme, context.GetString(ResourceConstant.String.key_app_theme_system)));
         SeekerState.Language = prefs.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
         SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)prefs.GetInt(KeyConsts.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple);
         SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)prefs.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple);
