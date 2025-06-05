@@ -43,6 +43,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
 using AndroidX.Core.Net;
+using AndroidX.Preference;
 using Seeker.Main;
 using Seeker.Models;
 using Seeker.Settings;
@@ -82,19 +83,16 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             
         // TODO: This call is only reachable on Android 21
         RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityAction));
-            
-        SeekerState.SharedPreferences = GetSharedPreferences("SoulSeekPrefs", 0);;
+
+        SeekerState.SharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
             
         SharedPreferencesUtils.RestoreSeekerState();
         SharedPreferencesUtils.RestoreListeningState();
         UPnpManager.RestoreUpnpState();
 
         SeekerState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
-            
-        // TODO: This call is only reachable on Android 21
-        SeekerState.SystemLanguage = Resources!.Configuration!.Locale!.ToVariantAwareString();
-            
-        LanguageUtils.SetLanguageBasedOnPlatformSupport(this);
+        
+        LanguageUtils.ApplyLanguageSettings(this);
 
         // though setting it to -1 does not seem to recreate the activity or have any negative side effects...
         // this does not restart Android.App.Application. so putting it here is a much better place...

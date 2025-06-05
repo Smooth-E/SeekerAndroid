@@ -407,36 +407,6 @@ public class SettingsActivity : ThemeableActivity
         // however with the api<21 it is not paused and so an event is needed.
         SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
         SeekerState.SharingStatusChangedEvent += SharingStatusUpdated;
-
-        // moved to OnResume from OnCreate
-        // this fixes an issue where, when the settings activity is up but one 
-        // goes to system settings to change per app language, it triggers 
-        // ItemSelected with the old values (resetting the language preference)
-        // ("onItemSelected method is also invoked when the view is being build")
-        languageSpinner = FindViewById<Spinner>(ResourceConstant.Id.languageSpinner)!;
-        languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-        
-        // TODO: Use resource strings for language names
-        string[] languageSpinnerOptionsStrings = [
-            SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.Automatic),
-            "English", "Português (Brazil)", 
-            "Français",
-            "ру́сский язы́к", 
-            "Español",
-            "украї́нська мо́ва",
-            "Nederlands", 
-            "čeština", 
-            "italiano"
-        ];
-        
-        var languageSpinnerOptions = new ArrayAdapter<string>(
-            this,
-            ResourceConstant.Layout.support_simple_spinner_dropdown_item,
-            languageSpinnerOptionsStrings);
-        
-        languageSpinner.Adapter = languageSpinnerOptions;
-        SetSpinnerPositionLangauge(languageSpinner);
-        languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
     }
 
     protected override void OnPause()
@@ -632,25 +602,6 @@ public class SettingsActivity : ThemeableActivity
             intent.PutExtra(Android.Provider.DocumentsContract.ExtraInitialUri, Android.Net.Uri.Parse(DefaultDocumentsUri));
         }
         this.StartActivityForResult(intent, SAVE_SEEKER_SETTINGS);
-    }
-
-    private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
-    {
-        string selection = GetLanguageStringFromPosition(e.Position);
-        if (LanguageUtils.GetLegacyLanguageString(this) == selection)
-        {
-            return;
-        }
-
-        SeekerState.Language = selection;
-        lock (SeekerApplication.SharedPrefLock)
-        {
-            var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-            editor.PutString(KeyConsts.M_Lanuage, SeekerState.Language);
-            editor.Commit();
-        }
-
-        LanguageUtils.SetLanguage(ApplicationContext as Application, SeekerState.Language);
     }
 
     private void UpdateLayoutParametersForScreenSize()
@@ -1137,8 +1088,7 @@ public class SettingsActivity : ThemeableActivity
                 changeDialog.Dismiss();
             }
         });
-
-
+        
         System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
         {
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
@@ -1800,8 +1750,6 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-
-
     private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
     {
 
@@ -1870,75 +1818,7 @@ public class SettingsActivity : ThemeableActivity
     {
         s.SetSelection((int)(SeekerState.DayModeVarient));
     }
-
-    private void SetSpinnerPositionLangauge(Spinner s)
-    {
-        switch (LanguageUtils.GetLegacyLanguageString(this))
-        {
-            case SeekerState.FieldLangAuto:
-                s.SetSelection(0);
-                break;
-            case SeekerState.FieldLangEn:
-                s.SetSelection(1);
-                break;
-            case SeekerState.FieldLangPtBr:
-                s.SetSelection(2);
-                break;
-            case SeekerState.FieldLangFr:
-                s.SetSelection(3);
-                break;
-            case SeekerState.FieldLangRu:
-                s.SetSelection(4);
-                break;
-            case SeekerState.FieldLangEs:
-                s.SetSelection(5);
-                break;
-            case SeekerState.FieldLangUk:
-                s.SetSelection(6);
-                break;
-            case SeekerState.FieldLangNl:
-                s.SetSelection(7);
-                break;
-            case SeekerState.FieldLangCs:
-                s.SetSelection(8);
-                break;
-            case SeekerState.FieldLangIt:
-                s.SetSelection(9);
-                break;
-            default:
-                s.SetSelection(0);
-                break;
-        }
-    }
-
-    private string GetLanguageStringFromPosition(int pos)
-    {
-        switch (pos)
-        {
-            case 0:
-                return SeekerState.FieldLangAuto;
-            case 1:
-                return SeekerState.FieldLangEn;
-            case 2:
-                return SeekerState.FieldLangPtBr;
-            case 3:
-                return SeekerState.FieldLangFr;
-            case 4:
-                return SeekerState.FieldLangRu;
-            case 5:
-                return SeekerState.FieldLangEs;
-            case 6:
-                return SeekerState.FieldLangUk;
-            case 7:
-                return SeekerState.FieldLangNl;
-            case 8:
-                return SeekerState.FieldLangCs;
-            case 9:
-                return SeekerState.FieldLangIt;
-            default:
-                return SeekerState.FieldLangAuto;
-        }
-    }
+    
 
     private void SetSpinnerPositionNightVarient(Spinner s)
     {

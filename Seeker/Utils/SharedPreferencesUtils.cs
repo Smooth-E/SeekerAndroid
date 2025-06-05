@@ -34,7 +34,6 @@ public static class SharedPreferencesUtils
         SeekerState.NumberSearchResults = prefs.GetInt(ResourceConstant.String.key_max_search_results, MainActivity.DEFAULT_SEARCH_RESULTS);
         SeekerState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, AppCompatDelegate.ModeNightFollowSystem);
         SeekerState.Language = prefs.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
-        SeekerState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
         SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)prefs.GetInt(KeyConsts.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple);
         SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)prefs.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple);
         SeekerState.AutoClearCompleteDownloads = prefs.GetBoolean(ResourceConstant.String.key_auto_clear_complete_downloads, false);

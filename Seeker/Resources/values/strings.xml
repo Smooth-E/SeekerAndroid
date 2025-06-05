@@ -805,8 +805,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="Aborted">Aborted</string>
     <string name="Num_FilesRemaining">{0} files remaining</string>
     <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-    <string name="SetLanguage">Language:</string>
-    <string name="Automatic">Automatic</string>
 
     <string name="HideSize">Hide Size</string>
     <string name="HideSpeed">Hide Speed</string>
@@ -918,4 +916,9 @@ The standard way of requesting folder access does not always persist permissions
     <string name="preference_auto_retry_failed_downloads_summary">Automatically retry failed downloads when the user goes back online</string>
     <string name="AwayOnInactivity">Away on inactivity</string>
     <string name="preference_away_on_inactivity_summary">Automatically set your status to \"Away\" on inactivity</string>
+    
+    <string name="preference_category_application">Application</string>
+    <string name="preference_language">Language</string>
+    <string name="language_auto">Automatic</string>
+    <string name="preference_per_app_language_summary">Select app language in system settings</string>
 </resources>

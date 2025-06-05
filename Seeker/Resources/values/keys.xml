@@ -35,4 +35,6 @@
     <string translatable="false" name="key_clear_recent_users">clear_recent_users</string>
     <string translatable="false" name="key_auto_retry_failed_downloads">auto_retry_failed_downloads</string>
     <string translatable="false" name="key_away_on_inactivity">away_on_inactivity</string>
+    <string translatable="false" name="key_per_app_language">per_app_language</string>
+    <string translatable="false" name="key_language">language</string>
 </resources>

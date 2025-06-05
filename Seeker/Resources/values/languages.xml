@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string translatable="false" name="language_en">English</string>
+    <string translatable="false" name="language_pt_br">Português (Brazil)</string>
+    <string translatable="false" name="language_fr">Français</string>
+    <string translatable="false" name="language_ru">Русский</string>
+    <string translatable="false" name="language_es">Español</string>
+    <string translatable="false" name="language_uk">Украї́нська мо́ва</string>
+    <string translatable="false" name="language_nl">Dutch</string>
+    <string translatable="false" name="language_cs">čeština</string>
+    <string translatable="false" name="language_it">italiano</string>
+    
+    <!-- Language keys are ISO standard locale names used to set the locale -->
+    <!-- https://developer.android.com/guide/topics/resources/app-languages#api-implementation -->
+    
+    <string translatable="false" name="language_key_auto">auto</string>
+    <string translatable="false" name="language_key_en">en</string>
+    <string translatable="false" name="language_key_pt_br">pt-BR</string>
+    <string translatable="false" name="language_key_fr">fr</string>
+    <string translatable="false" name="language_key_ru">ru</string>
+    <string translatable="false" name="language_key_es">es</string>
+    <string translatable="false" name="language_key_uk">uk</string>
+    <string translatable="false" name="language_key_nl">nl</string>
+    <string translatable="false" name="language_key_cs">cs</string>
+    <string translatable="false" name="language_key_it">it</string>
+</resources>

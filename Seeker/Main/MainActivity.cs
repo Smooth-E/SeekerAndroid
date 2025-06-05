@@ -82,7 +82,6 @@ public class MainActivity : ThemeableActivity
     
     private const string DEFAULT_MUSIC_URI = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
     
-    private ISharedPreferences sharedPreferences;
     [NotNull] private ViewPager pager;
     [NotNull] private BottomNavigationView navigation;
     [NotNull] private Toolbar toolbar;
@@ -330,8 +329,6 @@ public class MainActivity : ThemeableActivity
         var backPressedCallback = new GenericOnBackPressedCallback(true, OnBackPressedAction);
         OnBackPressedDispatcher.AddCallback(backPressedCallback);
         
-        sharedPreferences = GetSharedPreferences("SoulSeekPrefs", FileCreationMode.Private);
-
         pager = FindViewById<ViewPager>(ResourceConstant.Id.pager)!;
         
         navigation = FindViewById<BottomNavigationView>(ResourceConstant.Id.navigation)!;
@@ -360,8 +357,6 @@ public class MainActivity : ThemeableActivity
             SharingManager.InformServerOfSharedFiles();
             SeekerState.AttemptedToSetUpSharing = true;
         }
-
-        SeekerState.SharedPreferences = sharedPreferences;
 
         UpdateForScreenSize();
         SetupStorage();
@@ -2218,10 +2213,10 @@ public class MainActivity : ThemeableActivity
     {
         base.OnPause();
 
-        TransfersFragment.SaveTransferItems(sharedPreferences);
+        TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences);
         lock (SeekerApplication.SharedPrefLock)
         {
-            var editor = sharedPreferences.Edit()!
+            var editor = SeekerState.SharedPreferences.Edit()!
                 .PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn)!
                 .PutString(KeyConsts.M_Username, SeekerState.Username)!
                 .PutString(KeyConsts.M_Password, SeekerState.Password)!

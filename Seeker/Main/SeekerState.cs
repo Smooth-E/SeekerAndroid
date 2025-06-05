@@ -13,7 +13,6 @@ using Seeker.Helpers;
 using Seeker.Main;
 using Seeker.Managers;
 using Seeker.Models;
-using Seeker.Settings;
 
 namespace Seeker
 {
@@ -79,26 +78,11 @@ namespace Seeker
 
         public static String SaveDataDirectoryUri = null;
         public static bool SaveDataDirectoryUriIsFromTree = true;
-
-        public static bool LegacyLanguageMigrated = false;
-        public static string SystemLanguage;
-
-
+        
         // Consts
         public static string Language = FieldLangAuto;
         public const string FieldLangAuto = "Auto";
-        public const string FieldLangEn = "en";
-        public const string FieldLangPtBr = "pt-rBR"; //language code -"r" region code
-        public const string FieldLangFr = "fr";
-        public const string FieldLangRu = "ru";
-        public const string FieldLangEs = "es";
-        public const string FieldLangUk = "uk"; //ukrainian
-        public const string FieldLangCs = "cs"; //czech
-        public const string FieldLangIt = "it";
-        public const string FieldLangNl = "nl"; //dutch
-
-
-
+        
         public static String ManualIncompleteDataDirectoryUri = null;
         public static bool ManualIncompleteDataDirectoryUriIsFromTree = true;
 
@@ -116,8 +100,7 @@ namespace Seeker
         public static volatile bool UploadKeepAliveServiceRunning = false;
 
         public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
-
-
+        
         public static SlskHelp.SharedFileCache SharedFileCache = null;
         public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;

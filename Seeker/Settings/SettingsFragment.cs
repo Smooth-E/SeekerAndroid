@@ -9,11 +9,13 @@ using Android.Views;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Preference;
 using AndroidX.RecyclerView.Widget;
+using Kotlin.Text;
 using Seeker.Components;
 using Seeker.Managers;
 using Seeker.Utils;
 using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 using Environment = Android.OS.Environment;
+using Uri = Android.Net.Uri;
 
 namespace Seeker.Settings;
 
@@ -54,6 +56,9 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SwitchPreferenceCompat autoRetryFailedDownloads;
     private SwitchPreferenceCompat awayOnInactivity;
 
+    private TwoIconPreference perAppLanguage;
+    private DropDownPreference appLanguage;
+
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
         settingsActivity = RequireActivity() as SettingsActivity;
@@ -62,7 +67,7 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         dataDirectoryUriPreference = FindPreference<Preference>(ResourceConstant.String.key_data_directory_uri);
         dataDirectoryUriPreference.PreferenceChange += (_, _) => UpdateDataDirectoryUriPreferenceSummary();
-        dataDirectoryUriPreference.PreferenceClick += (_, _) => 
+        dataDirectoryUriPreference.PreferenceClick += (_, _) =>
             settingsActivity.ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
         UpdateDataDirectoryUriPreferenceSummary();
 
@@ -100,7 +105,7 @@ public class SettingsFragment : PreferenceFragmentCompat
         incompleteDirectoryUriPreference.PreferenceChange += (_, _) =>
             UpdateIncompleteDirectoryUriPreferenceSummary();
         UpdateIncompleteDirectoryUriPreferenceSummary();
-        
+
         clearIncompleteFolder = FindPreference<Preference>(ResourceConstant.String.key_clear_incomplete_folder);
         clearIncompleteFolder.PreferenceClick += (_, _) => ClearIncompleteFolder();
 
@@ -115,21 +120,21 @@ public class SettingsFragment : PreferenceFragmentCompat
         aboutFileBackedDownloads = FindPreference<Preference>(
             ResourceConstant.String.key_about_file_backed_downloads);
         aboutFileBackedDownloads.PreferenceClick += (_, _) => ShowAboutFileBackedDownloadsDialog();
-        
+
         maxSearchResults = FindPreference<SeekBarPreference>(ResourceConstant.String.key_max_search_results);
         maxSearchResults.PreferenceChange += (_, args) =>
             SeekerState.NumberSearchResults = Convert.ToInt32(args.NewValue);
-        
+
         showSmartFilters = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_show_smart_filters);
         showSmartFilters.PreferenceChange += (_, args) =>
             SeekerState.ShowSmartFilters = Convert.ToBoolean(args.NewValue);
-        
+
         configureSmartFilters = FindPreference<Preference>(ResourceConstant.String.key_configure_smart_filters);
         configureSmartFilters.PreferenceClick += (_, _) => ShowSmartFiltersConfigurationDialog();
 
         freeUploadSlotsOnly = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_free_upload_slots_only);
-        freeUploadSlotsOnly.PreferenceChange += (_, args) => 
+        freeUploadSlotsOnly.PreferenceChange += (_, args) =>
             SeekerState.FreeUploadSlotsOnly = Convert.ToBoolean(args.NewValue);
 
         hideLockedWhenSearching = FindPreference<SwitchPreferenceCompat>(
@@ -144,9 +149,9 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         rememberSearchHistory = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_remember_search_history);
-        rememberSearchHistory.PreferenceChange += (_, args) => 
+        rememberSearchHistory.PreferenceChange += (_, args) =>
             SeekerState.RememberSearchHistory = Convert.ToBoolean(args.NewValue);
-        
+
         clearSearchHistory = FindPreference<Preference>(ResourceConstant.String.key_clear_search_history);
         clearSearchHistory.PreferenceClick += (_, _) => SeekerState.ClearSearchHistoryInvoke();
 
@@ -169,29 +174,29 @@ public class SettingsFragment : PreferenceFragmentCompat
 
         autoClearCompleteDownloads = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_auto_clear_complete_downloads);
-        autoClearCompleteDownloads.PreferenceChange += (_, args) => 
+        autoClearCompleteDownloads.PreferenceChange += (_, args) =>
             SeekerState.AutoClearCompleteDownloads = Convert.ToBoolean(args.NewValue);
-        
+
         autoClearCompleteUploads = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_auto_clear_complete_uploads);
-        autoClearCompleteUploads.PreferenceChange += (_, args) => 
+        autoClearCompleteUploads.PreferenceChange += (_, args) =>
             SeekerState.AutoClearCompleteUploads = Convert.ToBoolean(args.NewValue);
 
         folderCompleteNotifications = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_notify_on_folder_complete);
         folderCompleteNotifications.PreferenceChange += (_, args) =>
             SeekerState.NotifyOnFolderCompleted = Convert.ToBoolean(args.NewValue);
-        
+
         fileCompleteNotifications = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_notify_on_file_complete);
         fileCompleteNotifications.PreferenceChange += (_, args) =>
             SeekerState.DisableDownloadToastNotification = !Convert.ToBoolean(args.NewValue);
-        
+
         rememberRecentUsers = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_remember_recent_users);
         rememberRecentUsers.PreferenceChange += (_, args) =>
             SeekerState.ShowRecentUsers = Convert.ToBoolean(args.NewValue);
-        
+
         clearRecentUsers = FindPreference<Preference>(ResourceConstant.String.key_clear_recent_users);
         clearRecentUsers.PreferenceClick += (_, _) => ClearRecentUsers();
 
@@ -199,10 +204,28 @@ public class SettingsFragment : PreferenceFragmentCompat
             ResourceConstant.String.key_auto_retry_failed_downloads);
         autoRetryFailedDownloads.PreferenceChange += (_, args) =>
             SeekerState.AutoRetryBackOnline = Convert.ToBoolean(args.NewValue);
-        
+
         awayOnInactivity = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_away_on_inactivity);
         awayOnInactivity.PreferenceChange += (_, args) =>
             SeekerState.AutoAwayOnInactivity = Convert.ToBoolean(args.NewValue);
+
+        perAppLanguage = FindPreference<TwoIconPreference>(ResourceConstant.String.key_per_app_language);
+        appLanguage = FindPreference<DropDownPreference>(ResourceConstant.String.key_language);
+
+        var hasPerAppLanguageSupport = AndroidPlatform.HasProperPerAppLanguageSupport();
+        
+        perAppLanguage.Visible = hasPerAppLanguageSupport;
+        appLanguage.Visible = !hasPerAppLanguageSupport;
+        
+        perAppLanguage.PreferenceClick += (_, _) =>
+        {
+            var intent = new Intent(Android.Provider.Settings.ActionApplicationDetailsSettings)
+                .SetData(Uri.FromParts("package", RequireActivity().PackageName, null));
+            StartActivity(intent);
+        };
+
+        appLanguage.PreferenceChange += (_, args) =>
+            LanguageUtils.ApplyLanguageSettings(RequireActivity(), Convert.ToString(args.NewValue));
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
