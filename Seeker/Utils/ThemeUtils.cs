@@ -32,6 +32,22 @@ public static class ThemeUtils
         
         Logger.Debug($"Incorrect night mode preference: {option}");
         return AppCompatDelegate.ModeNightFollowSystem;   
-    
+    }
+
+    // TODO: SeekerState.NightModeOption is not really needed, remove it later
+    public static string IntToNightModeOption(Context context, int option)
+    {
+        switch (option)
+        {
+            case AppCompatDelegate.ModeNightFollowSystem:
+                return context.GetString(ResourceConstant.String.key_app_theme_system);
+            case AppCompatDelegate.ModeNightNo:
+                return context.GetString(ResourceConstant.String.key_app_theme_light);
+            case AppCompatDelegate.ModeNightYes:
+                return context.GetString(ResourceConstant.String.key_app_theme_dark);
+            default:
+                Logger.Debug($"Incorrect night mode preference int: {option}");
+                return context.GetString(ResourceConstant.String.key_app_theme_system);
+        }
     }
 }
