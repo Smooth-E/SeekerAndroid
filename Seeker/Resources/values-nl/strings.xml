@@ -28,7 +28,7 @@
     <string name="listening">Deze instelling staat Seeker toe inkomende verbindingen te accepteren, zodat we verbinding kunnen maken met clients zonder open poorten.
 \n\nWat dit in de praktijk betekent is dat zolang we succesvol luisteren (aangegeven via \"Controleer Status\") we meer zoekresultaten zullen ontvangen, kunnen downloaden van meer mensen, uploaden naar meer mensen, etc.
 \n\nSeeker probeert automatisch poorten door te sturen via UPnP (dit is wat de officiële desktop client doet). Als je GEEN Wifi hebt, zal het niet werken. Als u op een VPN bent, zoek dan hoe u doorstuurt naar uw specifieke VPN, als uw router niet UPnP ingeschakeld is, dan moet u de poort handmatig doorsturen.</string>
-    <string name="sharing_dialog">Belangrijke informatie over het delen van bestanden. Wanneer een upload map is ingesteld, zal de app de bestanden doorlezen en verwerken op een manier die eenvoudig is voor latere zoekopdrachten en verzoeken om te bladeren. Dit kan tot enkele minuten duren. Zorg ervoor dat de bestanden die u deelt geen privé- of gevoelige informatie bevatten (gebruik in principe hetzelfde oordeel als dat van de officiële cliënt).</string>
+    <string name="about_sharing_dialog">Belangrijke informatie over het delen van bestanden. Wanneer een upload map is ingesteld, zal de app de bestanden doorlezen en verwerken op een manier die eenvoudig is voor latere zoekopdrachten en verzoeken om te bladeren. Dit kan tot enkele minuten duren. Zorg ervoor dat de bestanden die u deelt geen privé- of gevoelige informatie bevatten (gebruik in principe hetzelfde oordeel als dat van de officiële cliënt).</string>
     <string name="privileges_more_info">Privileges staan toe om de maker van Soulseek (Nir) en de centrale server te ondersteunen waar deze app van afhangt.
 \n\nHet staat ook toe dat er iemand in de wachtrij staat voor niet-bevoorrechte gebruikers in de downloadwachtrij.
 \n\nOpmerking: alle donaties gaan niet naar de maker van deze onofficiële Android client Seeker. Ik accepteer momenteel geen donaties.</string>
@@ -147,9 +147,9 @@
     <string name="clear_search_history">Verwijder zoekgeschiedenis</string>
     <string name="file_backed_downloads">Bestandsondersteuning downloads</string>
     <string name="night_mode_options">Nachtmodus optie: </string>
-    <string name="enable_sharing">Delen inschakelen</string>
+    <string name="preference_enable_sharing">Delen inschakelen</string>
     <string name="set_shared_folder">Gedeelde map instellen</string>
-    <string name="browse_yourself">Zelf doorzoeken</string>
+    <string name="preference_browse_self">Zelf doorzoeken</string>
     <string name="enable_listening">Luisteren inschakelen</string>
     <string name="change_port">Poort wijzigen</string>
     <string name="port">Poort</string>
@@ -291,12 +291,12 @@
     <string name="added_to_wishlist">Added search query \"{0}\" to wishlist</string>
     <string name="wishlist_tab_target">Cannot change target for wishlist search</string>
     <string name="search_tab_error">Desired Search tab no longer exists</string>
-    <string name="error_sharing">Error Parsing Files, could not set Shared Directory</string>
-    <string name="success_sharing">Sharing successfully set up</string>
-    <string name="sharing_off">Sharing is off</string>
+    <string name="message_sharing_setup_error">Error Parsing Files, could not set Shared Directory</string>
+    <string name="message_sharing_setup_success">Sharing successfully set up</string>
+    <string name="preference_enable_sharing_summary_off">Sharing is off</string>
     <string name="sharing_currently_parsing">Currently parsing files...</string>
-    <string name="sharing_disabled_failure_parsing">Sharing disabled. Failed to parse shares.</string>
-    <string name="sharing_disabled_share_not_set">Sharing disabled. Share Directory is not set.</string>
+    <string name="preference_enable_sharing_summary_parsing_failed">Sharing disabled. Failed to parse shares.</string>
+    <string name="preference_enable_sharing_summary_no_dir">Sharing disabled. Share Directory is not set.</string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
     <string name="change_target">Change Target</string>
     <string name="change_result_style">Change Result Style</string>
@@ -609,9 +609,9 @@
     <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
     <string name="DayVarient_">Day Varient: </string>
     <string name="NightVarient_">Night Varient: </string>
-    <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
-    <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
+    <string name="preference_shared_folders_summary_none">No Shared Folders. Tap \'Add\' to get started.</string>
+    <string name="preference_rescan_shares">Rescan Shares</string>
+    <string name="preference_pause_sharing_on_metered_summary">Pause Sharing if on Metered (Mobile) Connection</string>
     <string name="LimitDownloadSpeed">Limit Download Speed</string>
     <string name="LimitUploadSpeed">Limit Upload Speed</string>
     <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>

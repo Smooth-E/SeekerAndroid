@@ -149,10 +149,6 @@ public class SettingsActivity : ThemeableActivity
         SupportFragmentManager.BeginTransaction()
             .Replace(ResourceConstant.Id.preference_fragment_holder, settingsFragment)
             .Commit();
-        
-        var progBar = FindViewById<ProgressBar>(ResourceConstant.Id.progressBarSharedStatus)!;
-        progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
-        progBar.Click += ImageView_Click;
 
         ImageView moreInfoDiagnostics = FindViewById<ImageView>(Resource.Id.moreInfoDiagnostics);
         moreInfoDiagnostics.Click += MoreInfoDiagnostics_Click;
@@ -169,10 +165,6 @@ public class SettingsActivity : ThemeableActivity
         CheckBox enableDiagnostics = FindViewById<CheckBox>(Resource.Id.enableDiagnostics);
         enableDiagnostics.Checked = DiagnosticFile.Enabled;
         enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
-        
-        ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
-        imageView.Click += ImageView_Click;
-        UpdateShareImageView();
 
         addFolderButton = FindViewById<Button>(Resource.Id.addUploadDirectory);
         addFolderButton.Click += AddUploadDirectory;
@@ -180,7 +172,6 @@ public class SettingsActivity : ThemeableActivity
         clearAllFoldersButton.Click += ClearAllFoldersButton_Click;
 
         noSharedFoldersView = FindViewById<TextView>(Resource.Id.noSharedFolders);
-        recyclerViewFolders = FindViewById<RecyclerView>(Resource.Id.uploadFoldersRecyclerView);
 
         uploadsRecyclerViewFoldersAdapter = new UploadsRecyclerViewAdapter(this, UploadDirectoryManager.UploadDirectories);
 
@@ -191,17 +182,10 @@ public class SettingsActivity : ThemeableActivity
 
         recyclerViewFolders.SetLayoutManager(llm);
         recyclerViewFolders.SetAdapter(uploadsRecyclerViewFoldersAdapter);
-        
-        CheckBox shareCheckBox = FindViewById<CheckBox>(Resource.Id.enableSharing);
-        shareCheckBox.Checked = SeekerState.SharingOn;
-        shareCheckBox.CheckedChange += ShareCheckBox_CheckedChange;
 
         CheckBox unmeteredConnectionsOnlyCheckBox = FindViewById<CheckBox>(Resource.Id.shareOnlyOnUnmetered);
         unmeteredConnectionsOnlyCheckBox.Checked = !SeekerState.AllowUploadsOnMetered;
         unmeteredConnectionsOnlyCheckBox.CheckedChange += UnmeteredConnectionsOnlyCheckBox_CheckedChange;
-
-        ImageView moreInfoButton = FindViewById<ImageView>(Resource.Id.moreInfoButton);
-        moreInfoButton.Click += MoreInfoButton_Click;
         
         ImageView moreInfoConcurrent = FindViewById<ImageView>(Resource.Id.moreInfoConcurrent);
         moreInfoConcurrent.Click += MoreInfoConcurrent_Click;
@@ -282,7 +266,7 @@ public class SettingsActivity : ThemeableActivity
         checkPriv.Click += CheckPriv_Click;
 
         TextView privStatus = FindViewById<TextView>(Resource.Id.privStatusView);
-        SetPrivStatusView(privStatus);
+        SetPrivilegesStatusView(privStatus);
 
         ImageView privHelp = FindViewById<ImageView>(Resource.Id.privHelp);
         privHelp.Click += PrivHelp_Click;
@@ -311,11 +295,11 @@ public class SettingsActivity : ThemeableActivity
 
         ImageView UpnpStatusView = FindViewById<ImageView>(Resource.Id.UPnPStatus);
         SetUpnpStatusView(UpnpStatusView);
-        UpnpStatusView.Click += ImageView_Click;
+        // UpnpStatusView.Click += ImageView_Click;
 
         sharingSubLayout1 = FindViewById<ViewGroup>(Resource.Id.dlChangeSharedDirectoryLayout);
         sharingSubLayout2 = FindViewById<ViewGroup>(Resource.Id.sharingSubLayout2);
-        UpdateSharingViewState();
+        // UpdateSharingViewState();
 
         listeningSubLayout2 = FindViewById<ViewGroup>(Resource.Id.listeningRow2);
         listeningSubLayout3 = FindViewById<ViewGroup>(Resource.Id.listeningRow3);
@@ -404,10 +388,10 @@ public class SettingsActivity : ThemeableActivity
         RunOnUiThread(() => uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged());
 
     private void SharingStatusUpdated(object sender, EventArgs e) =>
-        RunOnUiThread(() => UpdateShareImageView());
+        RunOnUiThread(() => { }); // UpdateShareImageView());
 
     private void OnPrivilegesChecked(object sender, EventArgs e) =>
-        RunOnUiThread(() => SetPrivStatusView(FindViewById<TextView>(ResourceConstant.Id.privStatusView)));
+        RunOnUiThread(() => SetPrivilegesStatusView(FindViewById<TextView>(ResourceConstant.Id.privStatusView)));
 
     private void OnUpnpDeviceMapped(object sender, EventArgs e)
     {
@@ -610,8 +594,8 @@ public class SettingsActivity : ThemeableActivity
         bool newState = SharingManager.MeetsCurrentSharingConditions();
         if (oldState != newState)
         {
-            SharingManager.SetUnsetSharingBasedOnConditions(true);
-            UpdateShareImageView();
+            SharingManager.SetUnsetSharingBasedOnConditions();
+            // UpdateShareImageView();
         }
         lock (SeekerApplication.SharedPrefLock)
         {
@@ -650,7 +634,7 @@ public class SettingsActivity : ThemeableActivity
         SetSharedFolderView();
         SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
         SharedCacheManager.SharedFileCache_Refreshed(null, (0, 0));
-        this.UpdateShareImageView();
+        // UpdateShareImageView();
     }
 
     private void MoreInfoDiagnostics_Click(object sender, EventArgs e)
@@ -787,7 +771,7 @@ public class SettingsActivity : ThemeableActivity
         recyclerViewFolders.Clickable = overrideDefault;
     }
 
-    private void SetSharedFolderView()
+    public void SetSharedFolderView()
     {
         if (UploadDirectoryManager.UploadDirectories.Count == 0)
         {
@@ -945,22 +929,21 @@ public class SettingsActivity : ThemeableActivity
     private void ShowChangeDialog(ChangeDialogType changeDialogType)
     {
         Logger.FirebaseInfo("ShowChangePortDialog");
-        AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-        if (changeDialogType == ChangeDialogType.ChangePort)
+        var builder = new AlertDialog.Builder(this, ResourceConstant.Style.MyAlertDialogTheme); //failed to bind....
+        switch (changeDialogType)
         {
-            builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
-        }
-        else if (changeDialogType == ChangeDialogType.ChangeDL)
-        {
-            builder.SetTitle(Resource.String.ChangeDownloadSpeed);
-        }
-        else if (changeDialogType == ChangeDialogType.ChangeUL)
-        {
-            builder.SetTitle(Resource.String.ChangeUploadSpeed);
-        }
-        else if (changeDialogType == ChangeDialogType.ConcurrentDL)
-        {
-            builder.SetTitle(Resource.String.MaxConcurrentIs);
+            case ChangeDialogType.ChangePort:
+                builder.SetTitle(GetString(ResourceConstant.String.change_port) + ":");
+                break;
+            case ChangeDialogType.ChangeDL:
+                builder.SetTitle(ResourceConstant.String.ChangeDownloadSpeed);
+                break;
+            case ChangeDialogType.ChangeUL:
+                builder.SetTitle(ResourceConstant.String.ChangeUploadSpeed);
+                break;
+            case ChangeDialogType.ConcurrentDL:
+                builder.SetTitle(ResourceConstant.String.MaxConcurrentIs);
+                break;
         }
         View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
         // Set up the input
@@ -1053,9 +1036,9 @@ public class SettingsActivity : ThemeableActivity
 
         });
 
-        EventHandler<DialogClickEventArgs> cancelHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+        EventHandler<DialogClickEventArgs> cancelHandler = (sender, _) =>
         {
-            if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+            if (sender is AlertDialog aDiag)
             {
                 aDiag.Dismiss();
             }
@@ -1063,9 +1046,9 @@ public class SettingsActivity : ThemeableActivity
             {
                 changeDialog.Dismiss();
             }
-        });
+        };
         
-        System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
+        EventHandler<TextView.EditorActionEventArgs> editorAction = (sender, e) =>
         {
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
                 e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
@@ -1090,11 +1073,11 @@ public class SettingsActivity : ThemeableActivity
             }
         };
 
-        input.EditorAction += editorAction;
+        input!.EditorAction += editorAction;
         input.FocusChange += Input_FocusChange;
 
-        builder.SetPositiveButton(Resource.String.okay, eventHandler);
-        builder.SetNegativeButton(Resource.String.cancel, cancelHandler);
+        builder.SetPositiveButton(ResourceConstant.String.okay, eventHandler);
+        builder.SetNegativeButton(ResourceConstant.String.cancel, cancelHandler);
 
         changeDialog = builder.Create();
         changeDialog.Show();
@@ -1112,15 +1095,18 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-    private static void SetPortViewText(TextView tv)
+    private void SetPortViewText(TextView tv)
     {
-        tv.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.port) + ": " + SeekerState.ListenerPort.ToString();
+        tv.Text = GetString(ResourceConstant.String.port) + ": " + SeekerState.ListenerPort;
     }
 
     private static void SetSpeedTextView(TextView tv, bool isUpload)
     {
-        int speedKbs = isUpload ? (SeekerState.SpeedLimitUploadBytesSec / 1024) : (SeekerState.SpeedLimitDownloadBytesSec / 1024);
-        tv.Text = speedKbs.ToString() + " kb/s";
+        var speedKbs = isUpload 
+            ? SeekerState.SpeedLimitUploadBytesSec / 1024
+            : SeekerState.SpeedLimitDownloadBytesSec / 1024;
+        
+        tv.Text = speedKbs + " kb/s";
     }
 
     private static void SetSpinnerPositionSpeed(Spinner spinner, bool isUpload)
@@ -1149,47 +1135,49 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-    private static void SetPrivStatusView(TextView tv)
+    private void SetPrivilegesStatusView(TextView tv)
     {
-        string privileges = SeekerApplication.ApplicationContext.GetString(Resource.String.privileges) + ": ";
+        var privileges = GetString(ResourceConstant.String.privileges) + ": ";
         tv.Text = privileges + PrivilegesManager.Instance.GetPrivilegeStatus();
     }
 
     private static void SetUpnpStatusView(ImageView iv)
     {
         // TODO: ???
-        Tuple<UPnpManager.ListeningIcon, string> info = UPnpManager.Instance.GetIconAndMessage();
+        var info = UPnpManager.Instance.GetIconAndMessage();
         if (iv == null) return;
-        if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+        if ((int)Build.VERSION.SdkInt >= 26)
         {
-            iv.TooltipText = info.Item2; //api26+ otherwise crash...
+            iv.TooltipText = info.Item2; // api26+ otherwise crash...
         }
         else
         {
             AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(iv, info.Item2);
         }
+        
         switch (info.Item1)
         {
             case UPnpManager.ListeningIcon.ErrorIcon:
-                iv.SetImageResource(Resource.Drawable.lan_disconnect);
+                iv.SetImageResource(ResourceConstant.Drawable.lan_disconnect);
                 break;
             case UPnpManager.ListeningIcon.OffIcon:
-                iv.SetImageResource(Resource.Drawable.network_off_outline);
+                iv.SetImageResource(ResourceConstant.Drawable.network_off_outline);
                 break;
             case UPnpManager.ListeningIcon.PendingIcon:
-                iv.SetImageResource(Resource.Drawable.lan_pending);
+                iv.SetImageResource(ResourceConstant.Drawable.lan_pending);
                 break;
             case UPnpManager.ListeningIcon.SuccessIcon:
-                iv.SetImageResource(Resource.Drawable.lan_connect);
+                iv.SetImageResource(ResourceConstant.Drawable.lan_connect);
                 break;
         }
     }
 
     private void ListeningMoreInfo_Click(object sender, EventArgs e)
     {
-        var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        var diag = builder.SetMessage(Resource.String.listening).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-        diag.Show();
+        new AlertDialog.Builder(this, ResourceConstant.Style.MyAlertDialogTheme)
+            .SetMessage(ResourceConstant.String.listening)!
+            .SetPositiveButton(ResourceConstant.String.close, (dialog, _) => (dialog as Dialog)!.Dismiss())!
+            .Show();
     }
 
     public void MoreInfoForceFilesystem_Click(object sender, EventArgs e)
@@ -1211,16 +1199,14 @@ public class SettingsActivity : ThemeableActivity
 
     private static bool HasManageStoragePermission(Context context)
     {
-        bool hasExternalStoragePermissions = false;
-        if ((int)Android.OS.Build.VERSION.SdkInt >= 30)
+        if ((int)Build.VERSION.SdkInt >= 30)
         {
-            hasExternalStoragePermissions = Android.OS.Environment.IsExternalStorageManager;
+            return Android.OS.Environment.IsExternalStorageManager;
         }
-        else
-        {
-            hasExternalStoragePermissions = ContextCompat.CheckSelfPermission(context, Android.Manifest.Permission.ManageExternalStorage) != Android.Content.PM.Permission.Denied;
-        }
-        return hasExternalStoragePermissions;
+
+        var status = ContextCompat
+            .CheckSelfPermission(context, Android.Manifest.Permission.ManageExternalStorage);
+        return status != Permission.Denied;
     }
 
     private void ForceFilesystemPermission_Click(object sender, EventArgs e)
@@ -1229,18 +1215,19 @@ public class SettingsActivity : ThemeableActivity
 
         if (hasExternalStoragePermissions)
         {
-            Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long).Show();
+            this.ShowLongToast(ResourceConstant.String.permission_already_successfully_granted);
+            return;
         }
-        else
-        {
-            Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
-            Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
-            allFilesPermission.SetData(packageUri);
-            this.StartActivityForResult(allFilesPermission, FORCE_REQUEST_STORAGE_MANAGER);
-        }
+
+        // TODO: Only reachable on Android 21
+        var allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+        var packageUri = Android.Net.Uri.FromParts("package", PackageName, null);
+        allFilesPermission.SetData(packageUri);
+        StartActivityForResult(allFilesPermission, FORCE_REQUEST_STORAGE_MANAGER);
     }
 
     public const string FromBrowseSelf = "FromBrowseSelf";
+    
     private void BrowseSelfButton_Click(object sender, EventArgs e)
     {
         BrowseSelf(false, false);
@@ -1426,79 +1413,9 @@ public class SettingsActivity : ThemeableActivity
         reconfigurationTask.ContinueWith(continueWithAction);
     }
 
-    private void MoreInfoButton_Click(object sender, EventArgs e)
-    {
-        var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        var diag = builder.SetMessage(Resource.String.sharing_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-        diag.Show();
-    }
-
     private void OnCloseClick(object sender, DialogClickEventArgs e)
     {
-        (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-    }
-
-    private void UpdateShareImageView()
-    {
-        Tuple<SharingManager.SharingIcons, string> info = SharingManager.GetSharingMessageAndIcon(out bool isParsing);
-        ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
-        ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
-        if (imageView == null || progressBar == null) return;
-        string toolTip = info.Item2;
-        int numParsed = SeekerState.NumberParsed;
-        if (isParsing && numParsed != 0)
-        {
-            if (numParsed == int.MaxValue) //our signal we are finishing up (i.e. creating token index)
-            {
-                toolTip = toolTip + $" ({SeekerApplication.ApplicationContext.GetString(Resource.String.finishingUp)})";
-            }
-            else
-            {
-                toolTip = toolTip + String.Format($" ({SeekerApplication.ApplicationContext.GetString(Resource.String.XFilesParsed)})", numParsed);
-            }
-        }
-        if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
-        {
-            imageView.TooltipText = toolTip; //api26+ otherwise crash...
-            progressBar.TooltipText = toolTip;
-        }
-        else
-        {
-            AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(imageView, toolTip);
-            AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(progressBar, toolTip);
-        }
-        
-        switch (info.Item1)
-        {
-            case SharingManager.SharingIcons.On:
-                imageView.SetImageResource(Resource.Drawable.ic_file_upload_black_24dp);
-                break;
-            case SharingManager.SharingIcons.Error:
-                imageView.SetImageResource(Resource.Drawable.ic_error_outline_white_24dp);
-                break;
-            case SharingManager.SharingIcons.CurrentlyParsing:
-                imageView.SetImageResource(Resource.Drawable.exclamation_thick);
-                break;
-            case SharingManager.SharingIcons.Off:
-                imageView.SetImageResource(Resource.Drawable.ic_sharing_off_black_24dp);
-                break;
-            case SharingManager.SharingIcons.OffDueToNetwork:
-                imageView.SetImageResource(Resource.Drawable.network_strength_off_outline);
-                break;
-        }
-
-        switch (info.Item1)
-        {
-            case SharingManager.SharingIcons.CurrentlyParsing:
-                progressBar.Visibility = ViewStates.Visible;
-                break;
-            default:
-                progressBar.Visibility = ViewStates.Invisible;
-                break;
-        }
-
-        // in case new errors to update.
-        this.uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged();
+        (sender as AlertDialog)?.Dismiss();
     }
 
     public override bool OnContextItemSelected(IMenuItem item)
@@ -1526,52 +1443,6 @@ public class SettingsActivity : ThemeableActivity
             this.uploadsRecyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
             Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
-        }
-    }
-
-
-    private void ShareCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-    {
-        SeekerState.SharingOn = e.IsChecked;
-        SharingManager.SetUnsetSharingBasedOnConditions(true);
-        if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !SharingManager.IsSharingSetUpSuccessfully())
-        {
-            //try to set up sharing...
-            SharingManager.SetUpSharing(UpdateShareImageView);
-        }
-        UpdateShareImageView();
-        UpdateSharingViewState();
-        SetSharedFolderView();
-        this.uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged(); //so that the views rebind as unclickable.
-    }
-
-    private void UpdateSharingViewState()
-    {
-        //this isnt winforms where disabling parent, disables all children..
-
-        if (SeekerState.SharingOn)
-        {
-            sharingSubLayout1.Enabled = true;
-            sharingSubLayout1.Alpha = 1.0f;
-            sharingSubLayout2.Enabled = true;
-            sharingSubLayout2.Alpha = 1.0f;
-            addFolderButton.Clickable = true;
-            clearAllFoldersButton.Clickable = true;
-            browseSelfButton.Clickable = true;
-            browseSelfButton.LongClickable = true;
-            rescanSharesButton.Clickable = true;
-        }
-        else
-        {
-            sharingSubLayout1.Enabled = false;
-            sharingSubLayout1.Alpha = 0.5f;
-            sharingSubLayout2.Enabled = false;
-            sharingSubLayout2.Alpha = 0.5f;
-            addFolderButton.Clickable = false;
-            clearAllFoldersButton.Clickable = false;
-            browseSelfButton.Clickable = false;
-            browseSelfButton.LongClickable = false;
-            rescanSharesButton.Clickable = false;
         }
     }
 
@@ -1666,12 +1537,6 @@ public class SettingsActivity : ThemeableActivity
         }
     }
 
-    private void ImageView_Click(object sender, EventArgs e)
-    {
-        UpdateShareImageView();
-        (sender as View).PerformLongClick();
-    }
-
     private void RestoreDefaults_Click(object sender, EventArgs e)
     {
         SeekerState.NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
@@ -1690,7 +1555,7 @@ public class SettingsActivity : ThemeableActivity
         // TODO: (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
         // TODO: (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
         // TODO: (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
-        (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
+        // TODO: (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
         // TODO: (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
         // TODO: (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
@@ -2233,7 +2098,7 @@ public class SettingsActivity : ThemeableActivity
             }
             this.RunOnUiThread(new Action(() =>
             {
-                UpdateShareImageView(); //for is parsing..
+                // UpdateShareImageView(); //for is parsing..
                 SetSharedFolderView();
             }));
             try
@@ -2252,14 +2117,14 @@ public class SettingsActivity : ThemeableActivity
                     
                 SharedCacheManager.ClearLegacyParsedCacheResults();
                 SharedCacheManager.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
-                SharingManager.SetUnsetSharingBasedOnConditions(true);
+                SharingManager.SetUnsetSharingBasedOnConditions();
                 if (!(e is DirectoryAccessFailure))
                 {
                     Logger.FirebaseDebug("error parsing: " + e.Message + "  " + e.StackTrace);
                 }
                 this.RunOnUiThread(new Action(() =>
                 {
-                    UpdateShareImageView();
+                    // UpdateShareImageView();
                     SetSharedFolderView();
                     if (!(e is DirectoryAccessFailure))
                     {
@@ -2280,10 +2145,10 @@ public class SettingsActivity : ThemeableActivity
                 ContentResolver!.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
             }
             //setup soulseek client with handlers if all conditions met
-            SharingManager.SetUnsetSharingBasedOnConditions(true, true);
+            SharingManager.SetUnsetSharingBasedOnConditions(true);
             this.RunOnUiThread(new Action(() =>
             {
-                UpdateShareImageView();
+                // UpdateShareImageView();
                 SetSharedFolderView();
                 int dirs = SeekerState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
                 int files = SeekerState.SharedFileCache.FileCount;
@@ -2322,13 +2187,10 @@ public class SettingsActivity : ThemeableActivity
     /// <summary>
     /// We always use the previous metadata info if its there. so we always kind of "rescan"
     /// </summary>
-    /// <param name="newlyAddedUriIfApplicable"></param>
-    /// <param name="requestCode"></param>
-    /// <param name="fromLegacyPicker"></param>
-    /// <param name="rescanClicked"></param>
-    private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
+    private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, 
+        bool rescanClicked = false, bool reselectCase = false)
     {
-        Action parseDatabaseAndUpdateUiAction = new Action(() =>
+        Action parseDatabaseAndUpdateUiAction = () =>
         {
             try
             {
@@ -2338,16 +2200,16 @@ public class SettingsActivity : ThemeableActivity
             {
                 if (rescanClicked)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
+                    this.ShowLongToast(ResourceConstant.String.SharedFolderIssuesAllFailed);
                 }
                 else
                 {
                     throw;
                 }
             }
-        });
+        };
 
-        System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUiAction(); });
+        System.Threading.ThreadPool.QueueUserWorkItem(_ => { parseDatabaseAndUpdateUiAction(); });
     }
 
     public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)

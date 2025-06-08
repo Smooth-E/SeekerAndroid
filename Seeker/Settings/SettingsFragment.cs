@@ -61,12 +61,21 @@ public class SettingsFragment : PreferenceFragmentCompat
     private DropDownPreference appLanguage;
     private DropDownPreference appTheme;
 
+    private SwitchPreferenceCompat enableSharing;
+    private TwoIconPreference aboutSharing;
+    private TwoIconPreference sharedFolders;
+    private TwoIconPreference clearSharedFolders;
+    private TwoIconPreference rescanShares;
+    private TwoIconPreference browseSelf;
+
     public override void OnCreatePreferences(Bundle savedInstanceState, string rootKey)
     {
         settingsActivity = RequireActivity() as SettingsActivity;
 
         SetPreferencesFromResource(ResourceConstant.Xml.seeker_preferences, rootKey);
 
+        // Category: Downloads
+        
         dataDirectoryUriPreference = FindPreference<Preference>(ResourceConstant.String.key_data_directory_uri);
         dataDirectoryUriPreference.PreferenceChange += (_, _) => UpdateDataDirectoryUriPreferenceSummary();
         dataDirectoryUriPreference.PreferenceClick += (_, _) =>
@@ -123,6 +132,8 @@ public class SettingsFragment : PreferenceFragmentCompat
             ResourceConstant.String.key_about_file_backed_downloads);
         aboutFileBackedDownloads.PreferenceClick += (_, _) => ShowAboutFileBackedDownloadsDialog();
 
+        // Category: Searching and browsing
+        
         maxSearchResults = FindPreference<SeekBarPreference>(ResourceConstant.String.key_max_search_results);
         maxSearchResults.PreferenceChange += (_, args) =>
             SeekerState.NumberSearchResults = Convert.ToInt32(args.NewValue);
@@ -157,6 +168,8 @@ public class SettingsFragment : PreferenceFragmentCompat
         clearSearchHistory = FindPreference<Preference>(ResourceConstant.String.key_clear_search_history);
         clearSearchHistory.PreferenceClick += (_, _) => SeekerState.ClearSearchHistoryInvoke();
 
+        // Category: Seeker background service
+        
         startServiceOnStartup = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_start_seeker_service_on_startup);
         startServiceOnStartup.PreferenceChange += (_, args) =>
@@ -170,6 +183,8 @@ public class SettingsFragment : PreferenceFragmentCompat
         aboutService = FindPreference<Preference>(ResourceConstant.String.key_about_seeker_service);
         aboutService.PreferenceClick += (_, _) => OnAboutSeekerServicePreferenceClicked();
 
+        // Category: Communication
+        
         allowPrivateRoomInvites = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_allow_private_room_invites);
         allowPrivateRoomInvites.PreferenceClick += (_, _) => OnAllowPrivateRoomInvitationsClicked();
@@ -211,6 +226,8 @@ public class SettingsFragment : PreferenceFragmentCompat
         awayOnInactivity.PreferenceChange += (_, args) =>
             SeekerState.AutoAwayOnInactivity = Convert.ToBoolean(args.NewValue);
 
+        // Category: Application
+        
         perAppLanguage = FindPreference<TwoIconPreference>(ResourceConstant.String.key_per_app_language);
         appLanguage = FindPreference<DropDownPreference>(ResourceConstant.String.key_language);
 
@@ -236,6 +253,13 @@ public class SettingsFragment : PreferenceFragmentCompat
             ThemeUtils.UpdateNightModePreference(RequireActivity(), option);
             SeekerState.DayNightMode = AppCompatDelegate.DefaultNightMode;
         };
+        
+        // Category: Sharing
+
+        enableSharing = FindPreference<SwitchPreferenceCompat>(ResourceConstant.String.key_enable_sharing);
+        
+        aboutSharing = FindPreference<TwoIconPreference>(ResourceConstant.String.key_about_sharing);
+        aboutSharing.PreferenceClick += (_, _) => ShowAboutSharingDialog();
     }
 
     private T FindPreference<T>(int keyId) where T : Preference => FindPreference(GetString(keyId)) as T;
@@ -546,5 +570,56 @@ public class SettingsFragment : PreferenceFragmentCompat
         }
         
         SeekerState.RecentUsersManager.SaveRecentUsers();
+    }
+
+    private void OnSharingEnabledChanged(bool value)
+    {
+        SeekerState.SharingOn = value;
+        SharingManager.SetUnsetSharingBasedOnConditions();
+        
+        var setUpSuccessfully = SharingManager.IsSharingSetUpSuccessfully();
+        if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !setUpSuccessfully)
+        {
+            // try to set up sharing...
+            SharingManager.SetUpSharing(RequireActivity(), UpdateSharingCategory);
+        }
+        
+        settingsActivity.SetSharedFolderView();
+        
+        // so that the views rebind as unclickable.
+        // this.uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged();
+    }
+
+    private void UpdateSharingCategory()
+    {
+        enableSharing.Checked = SeekerState.SharingOn;
+        
+        var summary = SharingManager.GetStatusSummary(RequireActivity());
+        var numParsed = SeekerState.NumberParsed;
+        if (SeekerState.IsParsing && numParsed != 0)
+        {
+            if (numParsed == int.MaxValue) // our signal we are finishing up (i.e. creating token index)
+            {
+                summary += $" ({GetString(ResourceConstant.String.finishingUp)})";
+            }
+            else
+            {
+                summary += string.Format($" ({GetString(ResourceConstant.String.XFilesParsed)})", numParsed);
+            }
+        }
+
+        enableSharing.Summary = summary;
+    
+        // in case new errors to update.
+        // uploadsRecyclerViewFoldersAdapter?.NotifyDataSetChanged();
+    }
+    
+    private void ShowAboutSharingDialog()
+    {
+        new AlertDialog.Builder(RequireActivity(), ResourceConstant.Style.MyAlertDialogTheme)
+            .SetTitle(ResourceConstant.String.preference_about_sharing)!
+            .SetMessage(ResourceConstant.String.about_sharing_dialog)!
+            .SetPositiveButton(ResourceConstant.String.close, (dialog, _) => (dialog as Dialog)!.Dismiss())!
+            .Show();
     }
 }

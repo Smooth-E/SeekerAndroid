@@ -49,4 +49,12 @@
     <string translatable="false" name="key_theme_variant_gray">gray</string>
     <string translatable="false" name="key_theme_variant_amoled_purple">amoled_purple</string>
     <string translatable="false" name="key_theme_variant_amoled_gray">amoled_gray</string>
+    <string translatable="false" name="key_enable_sharing">enable_sharing</string>
+    <string translatable="false" name="key_about_sharing">about_sharing</string>
+    <string translatable="false" name="key_shared_folders_preference">shared_folders_preference</string>
+    <string translatable="false" name="key_shared_folders">shared_folders</string>
+    <string translatable="false" name="key_add_shared_folder">add_shared_folder</string>
+    <string translatable="false" name="key_clear_shared_folders">clear_shared_folders</string>
+    <string translatable="false" name="key_rescan_shares">rescan_shares</string>
+    <string translatable="false" name="key_browse_self">browse_self</string>
 </resources>

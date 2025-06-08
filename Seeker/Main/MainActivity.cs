@@ -350,7 +350,7 @@ public class MainActivity : ThemeableActivity
         // if we have all the conditions to share, then set sharing up.
         if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !SharingManager.IsSharingSetUpSuccessfully())
         {
-            SharingManager.SetUpSharing();
+            SharingManager.SetUpSharing(this);
         }
         else if (SeekerState.NumberOfSharedDirectoriesIsStale)
         {

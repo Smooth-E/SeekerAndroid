@@ -26,7 +26,7 @@ public class ConnectionReceiver : BroadcastReceiver
             if (changed)
             {
                 Logger.Debug("metered state changed.. lets set up our handlers and inform server..");
-                SharingManager.SetUnsetSharingBasedOnConditions(true);
+                SharingManager.SetUnsetSharingBasedOnConditions();
                 SeekerState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
             }
 #if DEBUG

@@ -28,7 +28,7 @@
     <string name="listening">Questa impostazione consente a Seeker di accettare connessioni in ingresso, in modo da poter connettersi ai client senza porte aperte.
 \n\nQuesto significa che finché rimaniamo in ascolto con successo (indicato tramite \"Verifica Stato\") riceveremo più risultati di ricerca, saremo in grado di scaricare da più persone, di caricare a più persone, ecc.
 \n\nSeeker tenterà di inoltrare automaticamente le porte tramite UPnP (questo è ciò che fa il client desktop ufficiale). Se non sei collegato al Wifi questo non funzionerà, se sei coollegato ad una VPN cerca come effettuare il Port Forwarding con la tua VPN specifica, mentre se il router non è abilitato UPnP è necessario inoltrare manualmente la porta.</string>
-    <string name="sharing_dialog">Alcune cose da notare sulla condivisione dei file. Quando una directory di caricamento viene selezionata per la prima volta, l\'app deve leggere i file e analizzarli in modo da rendere più facile effettuare le ricerche successive e sfogliare le richieste. Questo può richiedere qualche minuto. Assicurarsi che i file che si sta condividendo non hanno alcuna informazione privata o sensibile in essi (fondamentalmente utilizzare le stesse precauzioni che si userebbero per il client ufficiale di Soulseek).</string>
+    <string name="about_sharing_dialog">Alcune cose da notare sulla condivisione dei file. Quando una directory di caricamento viene selezionata per la prima volta, l\'app deve leggere i file e analizzarli in modo da rendere più facile effettuare le ricerche successive e sfogliare le richieste. Questo può richiedere qualche minuto. Assicurarsi che i file che si sta condividendo non hanno alcuna informazione privata o sensibile in essi (fondamentalmente utilizzare le stesse precauzioni che si userebbero per il client ufficiale di Soulseek).</string>
     <string name="privileges_more_info">I \"privilegi\" consentono di supportare il creatore di Soulseek (Nir) e il server centrale su cui dipende questa app.
 \n\nPermette anche di essere posizionati più avanti rispetto agli utenti non privilegiati nella coda di download.
 \n\nNota: qualsiasi donazione non va al creatore di questo client android non ufficiale, Seeker. Attualmente non accetto donazioni.</string>
@@ -146,9 +146,9 @@
     <string name="clear_search_history">Svuota cronologia</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
     <string name="night_mode_options">Modalità notte: </string>
-    <string name="enable_sharing">Abilita Condivisione</string>
+    <string name="preference_enable_sharing">Abilita Condivisione</string>
     <string name="set_shared_folder">Imposta cartella condivisa</string>
-    <string name="browse_yourself">Sfoglia te stesso</string>
+    <string name="preference_browse_self">Sfoglia te stesso</string>
     <string name="enable_listening">Enable Listening</string>
     <string name="change_port">Cambia Porta</string>
     <string name="port">Porta</string>
@@ -290,12 +290,12 @@
     <string name="added_to_wishlist">Aggiunta ricerca \"{0}\" alla lista dei desideri</string>
     <string name="wishlist_tab_target">Cannot change target for wishlist search</string>
     <string name="search_tab_error">Desired Search tab no longer exists</string>
-    <string name="error_sharing">Error Parsing Files, could not set Shared Directory</string>
-    <string name="success_sharing">Sharing successfully set up</string>
-    <string name="sharing_off">Sharing is off</string>
+    <string name="message_sharing_setup_error">Error Parsing Files, could not set Shared Directory</string>
+    <string name="message_sharing_setup_success">Sharing successfully set up</string>
+    <string name="preference_enable_sharing_summary_off">Sharing is off</string>
     <string name="sharing_currently_parsing">Currently parsing files...</string>
-    <string name="sharing_disabled_failure_parsing">Sharing disabled. Failed to parse shares.</string>
-    <string name="sharing_disabled_share_not_set">Sharing disabled. Share Directory is not set.</string>
+    <string name="preference_enable_sharing_summary_parsing_failed">Sharing disabled. Failed to parse shares.</string>
+    <string name="preference_enable_sharing_summary_no_dir">Sharing disabled. Share Directory is not set.</string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
     <string name="change_target">Change Target</string>
     <string name="change_result_style">Change Result Style</string>
@@ -608,9 +608,9 @@
     <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
     <string name="DayVarient_">Day Varient: </string>
     <string name="NightVarient_">Night Varient: </string>
-    <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
-    <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
+    <string name="preference_shared_folders_summary_none">No Shared Folders. Tap \'Add\' to get started.</string>
+    <string name="preference_rescan_shares">Rescan Shares</string>
+    <string name="preference_pause_sharing_on_metered_summary">Pause Sharing if on Metered (Mobile) Connection</string>
     <string name="LimitDownloadSpeed">Limit Download Speed</string>
     <string name="LimitUploadSpeed">Limit Upload Speed</string>
     <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>

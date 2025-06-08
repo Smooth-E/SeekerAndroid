@@ -281,5 +281,65 @@
                 app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/preference_category_sharing"
+            app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+                app:key="@string/key_enable_sharing"
+                app:title="@string/preference_enable_sharing"
+                android:summary="@string/preference_enable_sharing_summary_off"
+                android:defaultValue="false"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:key="@string/key_about_sharing"
+                android:title="@string/preference_about_sharing"
+                android:summary="@string/preference_about_sharing_summary"
+                app:secondaryIcon="@drawable/help_circle_outline"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:dependency="@string/key_enable_sharing"
+                android:key="@string/key_shared_folders_preference"
+                android:title="@string/preference_shared_folders"
+                android:summary="@string/preference_shared_folders_summary_none"
+                app:secondaryIcon="@drawable/baseline_folder_white_24"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:dependency="@string/key_enable_sharing"
+                android:key="@string/key_add_shared_folder"
+                android:title="@string/preference_add_shared_folder"
+                android:summary="@string/preference_add_shared_folder_summary"
+                app:secondaryIcon="@drawable/baseline_add_white_24"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:dependency="@string/key_enable_sharing"
+                android:key="@string/key_clear_shared_folders"
+                android:title="@string/preference_clear_shared_folders"
+                android:summary="@string/preference_clear_shared_folders_summary"
+                app:secondaryIcon="@drawable/ic_remove_circle"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:dependency="@string/key_enable_sharing"
+                android:key="@string/key_rescan_shares"
+                android:title="@string/preference_rescan_shares"
+                android:summary="@string/preference_rescan_shares_summary"
+                app:secondaryIcon="@drawable/ic_autorenew"
+                app:iconSpaceReserved="false"/>
+
+        <Seeker.Components.TwoIconPreference
+                android:dependency="@string/key_browse_self"
+                android:key="@string/key_browse_self"
+                android:title="@string/preference_browse_self"
+                android:summary="@string/preference_browse_self_summary"
+                app:secondaryIcon="@drawable/ic_person_search"
+                app:iconSpaceReserved="false"/>
+            
+    </PreferenceCategory>
     
 </PreferenceScreen>

@@ -2738,7 +2738,7 @@ namespace Seeker
         {
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            SharingManager.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
+            SharingManager.TransferAddedUiNotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             DownloadQueue.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
@@ -2784,7 +2784,7 @@ namespace Seeker
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             DownloadQueue.TransferItemQueueUpdated -= TranferQueueStateChanged;
-            SharingManager.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
+            SharingManager.TransferAddedUiNotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
 

@@ -4,7 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.Widget;
+using _Microsoft.Android.Resource.Designer;
+using Android.Content;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Exceptions;
 using Seeker.Helpers;
@@ -26,7 +27,7 @@ public static class SharingManager
     }
     
     // TODO: Give this event a more self-explanatory name
-    public static event EventHandler<TransferItem> TransferAddedUINotify;
+    public static event EventHandler<TransferItem> TransferAddedUiNotify;
     
     /// <summary>
     /// Inform server the number of files we are sharing or 0,0 if not sharing...
@@ -75,22 +76,19 @@ public static class SharingManager
                 {
                     if (SeekerState.SharedFileCache != null)
                     {
-                        Logger.Debug("We need to Tell server we are sharing "
-                                     + SeekerState.SharedFileCache.DirectoryCount
-                                     + " dirs and "
-                                     + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer()
-                                     + " files on next log in");
+                        var dirs = SeekerState.SharedFileCache.DirectoryCount;
+                        var files = SeekerState.SharedFileCache.GetNonHiddenFileCountForServer();
+                        var msg = $"We need to Tell server we are sharing {dirs} dirs and {files} files on next log in";
+                        Logger.Debug(msg);
                     }
                     else
                     {
-                        Logger.Debug("we meet sharing conditions " + 
-                                     "but our shared file cache is not successfully set up");
+                        Logger.Debug("we meet sharing conditions but our shared file cache is not successfully set up");
                     }
                 }
                 else
                 {
-                    Logger.Debug("We need to Tell server we are sharing 0 dirs" +
-                                 " and 0 files on next log in");
+                    Logger.Debug("We need to Tell server we are sharing 0 dir and 0 files on next log in");
                 }
 
                 SeekerState.NumberOfSharedDirectoriesIsStale = true;
@@ -106,7 +104,6 @@ public static class SharingManager
     /// <summary>
     /// Has set things up properly and has sharing on + their network settings currently allow it.
     /// </summary>
-    /// <returns></returns>
     public static bool MeetsCurrentSharingConditions()
     {
         return MeetsSharingConditions() && SeekerState.IsNetworkPermitting();
@@ -117,86 +114,42 @@ public static class SharingManager
         return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized;
     }
     
-    public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
+    public static string GetStatusSummary(Context context)
     {
-        isParsing = false;
         if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
         {
             // try to parse this into a path: SeekerState.ShareDataDirectoryUri
-            if (MeetsCurrentSharingConditions())
-            {
-                return new Tuple<SharingIcons, string>(
-                    SharingIcons.On,
-                    SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing)
-                );
-            }
-            else
-            {
-                // TODO: Use a string resource here
-                return new Tuple<SharingIcons, string>(
-                    SharingIcons.OffDueToNetwork,
-                    "Sharing disabled on metered connection"
-                );
-            }
+            return context.GetString(MeetsCurrentSharingConditions() 
+                ? ResourceConstant.String.message_sharing_setup_success 
+                : ResourceConstant.String.preference_enable_sharing_summary_off_on_metered);
         }
-        else if (MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
+
+        if (MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
         {
-            if (SeekerState.SharedFileCache == null)
-            {
-                return new Tuple<SharingIcons, string>(SharingIcons.Off, "Not yet initialized.");
-            }
-            else
-            {
-                return new Tuple<SharingIcons, string>(
-                    SharingIcons.Error,
-                    SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set)
-                );
-            }
+            return SeekerState.SharedFileCache == null 
+                ? context.GetString(ResourceConstant.String.preference_enable_sharing_summary_not_yet_initialized) 
+                : context.GetString(ResourceConstant.String.preference_enable_sharing_summary_no_dir);
         }
-        else if (!SeekerState.SharingOn)
+
+        if (!SeekerState.SharingOn)
         {
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.Off,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off)
-            );
+            return context.GetString(ResourceConstant.String.preference_enable_sharing_summary_off);
         }
-        else if (SeekerState.IsParsing)
+
+        if (SeekerState.IsParsing)
         {
-            isParsing = true;
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.CurrentlyParsing,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing)
-            );
+            return context.GetString(ResourceConstant.String.sharing_currently_parsing);
         }
-        else if (SeekerState.FailedShareParse)
+
+        if (SeekerState.FailedShareParse)
         {
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.Error,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing)
-            );
+            return context.GetString(ResourceConstant.String.preference_enable_sharing_summary_parsing_failed);
         }
-        else if (UploadDirectoryManager.UploadDirectories.Count == 0)
-        {
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.Error,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set)
-            );
-        }
-        else if (UploadDirectoryManager.AreAllFailed())
-        {
-            // TODO: get error
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.Error,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)
-            );
-        }
-        else
-        {
-            return new Tuple<SharingIcons, string>(
-                SharingIcons.Error,
-                SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)
-            );
-        }
+
+        return UploadDirectoryManager.UploadDirectories.Count == 0 
+            ? context.GetString(ResourceConstant.String.preference_enable_sharing_summary_no_dir) 
+            // TODO: Get error if UploadDirectoryManager.AreAllFailed()
+            : context.GetString(ResourceConstant.String.sharing_disabled_error);
     }
     
     /// <summary>
@@ -226,123 +179,97 @@ public static class SharingManager
         SeekerState.SoulseekClient.Options.NullSharedHandlers();
     }
     
-    public static void SetUpSharing(Action uiUpdateAction = null)
+    private static void SetUpSharedFileCache(Context context, Action uiUpdateAction)
     {
-        Action setUpSharedFileCache = () =>
+        var errorMessage = string.Empty;
+        var success = false;
+        
+        Logger.Debug("We meet sharing conditions, lets set up the sharedFileCache for 1st time");
+
+        try
         {
-            string errorMessage = string.Empty;
-            bool success = false;
-            Logger.Debug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
-            
+            // we check the cache which has ALL the parsed results in it. much different from rescanning.
+            success = SharedCacheManager
+                .InitializeDatabase(null, true, out errorMessage);
+        }
+        catch (Exception e)
+        {
+            Logger.Debug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
+            SetUnsetSharingBasedOnConditions(true);
+
+            if (e is not DirectoryAccessFailure)
+            {
+                Logger.FirebaseDebug($"MainActivity error parsing: {e.Message}\n{e.StackTrace}");
+            }
+
+            context.ShowLongToast(ResourceConstant.String.message_sharing_setup_error);
+        }
+
+        if (success && SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized)
+        {
+            Logger.Debug("database full initialized.");
+            context.ShowShortToast(ResourceConstant.String.message_sharing_setup_success);
+
             try
             {
-                // we check the cache which has ALL of the parsed results in it. much different from rescanning.
-                success = SharedCacheManager
-                    .InitializeDatabase(null, true, out errorMessage);
+                // setup soulseek client with handlers if all conditions met
+                SetUnsetSharingBasedOnConditions();
             }
             catch (Exception e)
             {
-                Logger.Debug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
-                SetUnsetSharingBasedOnConditions(false, true);
-
-                if (!(e is DirectoryAccessFailure))
-                {
-                    Logger.FirebaseDebug("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
-                }
-
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                {
-                    Toast.MakeText(
-                        SeekerState.ActiveActivityRef,
-                        SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing),
-                        ToastLength.Long
-                    ).Show();
-                }));
+                Logger.FirebaseDebug("MainActivity error setting handlers: " + e.Message + "  " + e.StackTrace);
             }
-
-            if (success
-                && SeekerState.SharedFileCache != null
-                && SeekerState.SharedFileCache.SuccessfullyInitialized)
+        }
+        else if (!success)
+        {
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                Logger.Debug("database full initialized.");
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(
-                        SeekerState.ActiveActivityRef,
-                        SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing),
-                        ToastLength.Short
-                    )?.Show();
-                });
+                var message = string.IsNullOrEmpty(errorMessage)
+                    ? context.GetString(ResourceConstant.String.message_sharing_setup_error)
+                    : errorMessage;
+                context.ShowShortToast(message);
+            });
+        }
 
-                try
-                {
-                    // setup soulseek client with handlers if all conditions met
-                    SetUnsetSharingBasedOnConditions(false);
-                }
-                catch (Exception e)
-                {
-                    Logger.FirebaseDebug("MainActivity error setting handlers: "
-                                         + e.Message + "  " + e.StackTrace);
-                }
-            }
-            else if (!success)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                {
-                    if (string.IsNullOrEmpty(errorMessage))
-                    {
-                        Toast.MakeText(
-                            SeekerState.ActiveActivityRef,
-                            SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing),
-                            ToastLength.Short
-                        ).Show();
-                    }
-                    else
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, errorMessage, ToastLength.Short)
-                            ?.Show();
-                    }
-                }));
-            }
+        if (uiUpdateAction != null)
+        {
+            SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
+        }
 
-            if (uiUpdateAction != null)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
-            }
-
-            SeekerState.AttemptedToSetUpSharing = true;
-        };
-        ThreadPool.QueueUserWorkItem(_ => { setUpSharedFileCache(); });
+        SeekerState.AttemptedToSetUpSharing = true;
     }
     
-    /// <summary>
-    /// Do this on any changes (like in Settings) but also on Login.
-    /// </summary>
-    /// <param name="informServerOfChangeIfThereIsAChange"></param>
+    public static void SetUpSharing(Context context, Action uiUpdateAction = null)
+    {
+        ThreadPool.QueueUserWorkItem(_ => SetUpSharedFileCache(context, uiUpdateAction));
+    }
+    
+    /// <summary>Do this on any changes (like in Settings) but also on Login.</summary>
     /// <param name="force">force if we are chaning the upload directory...</param>
-    public static void SetUnsetSharingBasedOnConditions(
-        bool informServerOfChangeIfThereIsAChange,
-        bool force = false)
+    public static void SetUnsetSharingBasedOnConditions(bool force = false)
     {
         // when settings gets recreated can get nullref here.
-        bool wasShared = SeekerState.SoulseekClient.Options.SearchResponseResolver != null;
-        if (SharingManager.MeetsCurrentSharingConditions())
+        var wasShared = SeekerState.SoulseekClient.Options.SearchResponseResolver != null;
+        if (MeetsCurrentSharingConditions())
         {
-            SharingManager.TurnOnSharing();
+            TurnOnSharing();
             if (!wasShared || force)
             {
                 Logger.Debug("sharing state changed to ON");
-                SharingManager.InformServerOfSharedFiles();
+                InformServerOfSharedFiles();
             }
         }
         else
         {
-            SharingManager.TurnOffSharing();
-            if (wasShared)
+            TurnOffSharing();
+            
+            if (!wasShared)
             {
-                Logger.Debug("sharing state changed to OFF");
-                SharingManager.InformServerOfSharedFiles();
+                return;
             }
+            
+            Logger.Debug("sharing state changed to OFF");
+            InformServerOfSharedFiles();
         }
     }
     
@@ -355,16 +282,13 @@ public static class SharingManager
     /// <returns>A Task resolving an IEnumerable of Soulseek.Directory.</returns>
     private static Task<BrowseResponse> BrowseResponseResolver(string username, IPEndPoint endpoint)
     {
-        if (SeekerApplication.IsUserInIgnoreList(username))
-        {
-            return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
-        }
-
-        return Task.FromResult(SeekerState.SharedFileCache.GetBrowseResponseForUser(username));
+        return Task.FromResult(SeekerApplication.IsUserInIgnoreList(username) 
+            ? new BrowseResponse([]) 
+            : SeekerState.SharedFileCache.GetBrowseResponseForUser(username));
     }
     
     /// <summary>
-    ///     Creates and returns a <see cref="Soulseek.Directory"/> in response to a remote request.
+    /// Creates and returns a <see cref="Soulseek.Directory"/> in response to a remote request.
     /// </summary>
     /// <param name="username">The username of the requesting user.</param>
     /// <param name="endpoint">The IP endpoint of the requesting user.</param>
@@ -554,7 +478,7 @@ public static class SharingManager
 
         if (!exists) // else the state will simply be updated a bit later. 
         {
-            TransferAddedUINotify?.Invoke(null, transferItem);
+            TransferAddedUiNotify?.Invoke(null, transferItem);
         }
 
         // accept all download requests, and begin the upload immediately.

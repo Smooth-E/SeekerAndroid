@@ -28,7 +28,7 @@
     <string name="listening">Цей параметр дозволяє Seeker приймати вхідні підключення, щоб ми могли підключатися до клієнтів без відкритих портів.
 \n\nНа практиці це означає, що поки ми успішно прослуховуємо (вказується через «Перевірити статус»), ми отримуватимемо більше результатів пошуку, зможемо завантажувати від більшої кількості людей, вивантажувати для більшої кількості людей тощо.
 \n\nSeeker спробує автоматично перенаправити порти через UPnP (це те, що робить офіційний клієнт для робочого столу). Якщо ви НЕ використовуєте Wi-Fi, це не працюватиме, якщо ви використовуєте VPN, будь ласка, знайдіть, як перенаправити порт для вашого конкретного VPN, якщо ваш маршрутизатор не ввімкнено UPnP, ви повинні вручну перенаправити порт.</string>
-    <string name="sharing_dialog">Кілька речей, про які слід пам’ятати про спільний доступ до файлів. Коли вперше встановлено папку для вивантаження, додаток має прочитати файли та проаналізувати їх таким чином, щоб це було зручно для наступних пошуків і запитів перегляду. Це може зайняти кілька хвилин. Переконайтеся, що файли, яким ви надаєте спільний доступ, не містять жодної конфіденційної інформації (загалом використовуйте те ж саме рішення, що й для офіційного клієнта Soulseek).</string>
+    <string name="about_sharing_dialog">Кілька речей, про які слід пам’ятати про спільний доступ до файлів. Коли вперше встановлено папку для вивантаження, додаток має прочитати файли та проаналізувати їх таким чином, щоб це було зручно для наступних пошуків і запитів перегляду. Це може зайняти кілька хвилин. Переконайтеся, що файли, яким ви надаєте спільний доступ, не містять жодної конфіденційної інформації (загалом використовуйте те ж саме рішення, що й для офіційного клієнта Soulseek).</string>
     <string name="privileges_more_info">Привілеї дозволяють підтримувати творця Soulseek (Nir) і центральний сервер, від якого залежить ця програма.
 \n\nЦе також дозволяє стати в чергу перед непривілейованими користувачами в черзі завантаження.
 \n\nУвага: жодні донати не надходять творцю цього неофіційного клієнта для Android, Seeker. Зараз я не приймаю донатів.</string>
@@ -146,9 +146,9 @@
     <string name="clear_search_history">Очистити історію пошуку</string>
     <string name="file_backed_downloads">Файл резервного завантаження</string>
     <string name="night_mode_options">Тема: </string>
-    <string name="enable_sharing">Увімкнути спільний доступ</string>
+    <string name="preference_enable_sharing">Увімкнути спільний доступ</string>
     <string name="set_shared_folder">Папка спільного доступу</string>
-    <string name="browse_yourself">Переглянути</string>
+    <string name="preference_browse_self">Переглянути</string>
     <string name="enable_listening">Увімкнути прослуховування</string>
     <string name="change_port">Змінити порт</string>
     <string name="port">Порт</string>
@@ -290,12 +290,12 @@
     <string name="added_to_wishlist">Пошуковий запит «{0}» додано до «Вибране»</string>
     <string name="wishlist_tab_target">Неможливо змінити мету для пошуку у вибраному</string>
     <string name="search_tab_error">Вкладки«Потрібний пошук» більше не існує</string>
-    <string name="error_sharing">Помилка аналізу файлів, не вдалося встановити спільний каталог</string>
-    <string name="success_sharing">Спільний доступ налаштовано</string>
-    <string name="sharing_off">Спільний доступ вимкнено</string>
+    <string name="message_sharing_setup_error">Помилка аналізу файлів, не вдалося встановити спільний каталог</string>
+    <string name="message_sharing_setup_success">Спільний доступ налаштовано</string>
+    <string name="preference_enable_sharing_summary_off">Спільний доступ вимкнено</string>
     <string name="sharing_currently_parsing">Наразі аналізуються файли...</string>
-    <string name="sharing_disabled_failure_parsing">Спільний доступ вимкнено. Не вдалося проаналізувати спільні ресурси.</string>
-    <string name="sharing_disabled_share_not_set">Спільний доступ вимкнено. Спільний каталог не встановлено.</string>
+    <string name="preference_enable_sharing_summary_parsing_failed">Спільний доступ вимкнено. Не вдалося проаналізувати спільні ресурси.</string>
+    <string name="preference_enable_sharing_summary_no_dir">Спільний доступ вимкнено. Спільний каталог не встановлено.</string>
     <string name="sharing_disabled_error">Помилка: Спільний доступ вимкнено.</string>
     <string name="change_target">Змінити мету</string>
     <string name="change_result_style">Змінити вигляд результату</string>
@@ -608,9 +608,9 @@
     <string name="AwayOnInactivity">Автоматично встановлювати для статусу значення «Пішов» у разі бездіяльності</string>
     <string name="DayVarient_">Денний варіант: </string>
     <string name="NightVarient_">Нічний варіант: </string>
-    <string name="NoSharedAdd">Немає спільних папок. Натисніть «Додати», щоб почати.</string>
-    <string name="RescanShares">Повторне сканування</string>
-    <string name="PauseSharingIfMetered">Призупинити спільний доступ, якщо використовується лічильний (мобільний) зв\'язок</string>
+    <string name="preference_shared_folders_summary_none">Немає спільних папок. Натисніть «Додати», щоб почати.</string>
+    <string name="preference_rescan_shares">Повторне сканування</string>
+    <string name="preference_pause_sharing_on_metered_summary">Призупинити спільний доступ, якщо використовується лічильний (мобільний) зв\'язок</string>
     <string name="LimitDownloadSpeed">Обмеження швидкості завантаження</string>
     <string name="LimitUploadSpeed">Обмеження швидкості вивантаження</string>
     <string name="LimitConcurrentDownloads">Обмеження одночасних завантажень</string>

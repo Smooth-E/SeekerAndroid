@@ -28,7 +28,7 @@
     <string name="listening">Esta configuración permite a Seeker aceptar conexiones entrantes, para que podamos conectarnos a clientes sin puertos abiertos.
 \n\nLo que esto significa en la práctica es que mientras escuchemos con éxito (indicado a través de \"Estado de verificación\") recibiremos más resultados de búsqueda. ser capaz de descargar de más personas, subir a más personas, etc.
 \n\nEl Buscador intentará reenviar automáticamente puertos a través de UPnP (esto es lo que hace el cliente oficial de escritorio). Si NO estás en Wifi no funcionará, si está en una VPN, busque cómo redirigir su VPN específica, si su router no está habilitado UPnP entonces debe reenviar manualmente el puerto.</string>
-    <string name="sharing_dialog">Unas pocas cosas a tener en cuenta sobre el intercambio de archivos. Cuando se establece un directorio de subidas la aplicación tiene que leer los archivos y analizarlos de una manera fácil para las búsquedas posteriores y las solicitudes de búsqueda. Esto puede tardar unos minutos. Asegúrese de que los archivos que está compartiendo no tienen ninguna información privada o confidencial en ellos (básicamente use el mismo criterio que haría para el cliente oficial de soulseek).</string>
+    <string name="about_sharing_dialog">Unas pocas cosas a tener en cuenta sobre el intercambio de archivos. Cuando se establece un directorio de subidas la aplicación tiene que leer los archivos y analizarlos de una manera fácil para las búsquedas posteriores y las solicitudes de búsqueda. Esto puede tardar unos minutos. Asegúrese de que los archivos que está compartiendo no tienen ninguna información privada o confidencial en ellos (básicamente use el mismo criterio que haría para el cliente oficial de soulseek).</string>
     <string name="privileges_more_info">Los privilegios permiten apoyar al creador de Soulseek (Nir) y al servidor central del que depende esta aplicación.
 \n\nTambién permite que uno se ponga en cola por delante de los usuarios no privilegiados en la cola de descarga.
 \n\nNota: cualquier donación no va al creador de este cliente no oficial de android, Seeker. Actualmente no acepto donaciones.</string>
@@ -148,9 +148,9 @@ Ranuras de subida: {0}
     <string name="clear_search_history">Borrar el historial de búsqueda</string>
     <string name="file_backed_downloads">Archivar descargas respaldadas</string>
     <string name="night_mode_options">Opción modo nocturno: </string>
-    <string name="enable_sharing">Habilitar compartir</string>
+    <string name="preference_enable_sharing">Habilitar compartir</string>
     <string name="set_shared_folder">Seleccione la carpeta compartida</string>
-    <string name="browse_yourself">Navegar por ti</string>
+    <string name="preference_browse_self">Navegar por ti</string>
     <string name="enable_listening">Activar escucha</string>
     <string name="change_port">Cambiar puerto</string>
     <string name="port">Puerto</string>
@@ -292,12 +292,12 @@ Ranuras de subida: {0}
     <string name="added_to_wishlist">Se añadió la consulta de búsqueda\"{0}\" a la lista de deseos</string>
     <string name="wishlist_tab_target">No se puede cambiar el objetivo de la búsqueda en la lista de deseos</string>
     <string name="search_tab_error">La pestaña de búsqueda deseada ya no existe</string>
-    <string name="error_sharing">Error al analizar archivos, no se pudo establecer el directorio compartido</string>
-    <string name="success_sharing">Compartir configurado correctamente</string>
-    <string name="sharing_off">Compartir está apagado</string>
+    <string name="message_sharing_setup_error">Error al analizar archivos, no se pudo establecer el directorio compartido</string>
+    <string name="message_sharing_setup_success">Compartir configurado correctamente</string>
+    <string name="preference_enable_sharing_summary_off">Compartir está apagado</string>
     <string name="sharing_currently_parsing">Analizando archivos actualmente...</string>
-    <string name="sharing_disabled_failure_parsing">Compartir desactivado. Fallo al analizar compartidas.</string>
-    <string name="sharing_disabled_share_not_set">Compartir deshabilitado. No se ha establecido el Directorio Compartir.</string>
+    <string name="preference_enable_sharing_summary_parsing_failed">Compartir desactivado. Fallo al analizar compartidas.</string>
+    <string name="preference_enable_sharing_summary_no_dir">Compartir deshabilitado. No se ha establecido el Directorio Compartir.</string>
     <string name="sharing_disabled_error">Error: Compartir desactivado.</string>
     <string name="change_target">Cambiar objetivo</string>
     <string name="change_result_style">Cambiar el estilo de resultado</string>
@@ -609,9 +609,9 @@ Ranuras de subida: {0}
     <string name="AwayOnInactivity">Establecer automáticamente el estado ausente en inactividad</string>
     <string name="DayVarient_">Variante diurna: </string>
     <string name="NightVarient_">Variante nocturna: </string>
-    <string name="NoSharedAdd">No hay Carpetas Compartidas. Pulse \'Añadir\' para empezar.</string>
-    <string name="RescanShares">Volver a escanear archivos compartidos</string>
-    <string name="PauseSharingIfMetered">Pausar el uso compartido si se encuentra en conexión Medida (Móvil)</string>
+    <string name="preference_shared_folders_summary_none">No hay Carpetas Compartidas. Pulse \'Añadir\' para empezar.</string>
+    <string name="preference_rescan_shares">Volver a escanear archivos compartidos</string>
+    <string name="preference_pause_sharing_on_metered_summary">Pausar el uso compartido si se encuentra en conexión Medida (Móvil)</string>
     <string name="LimitDownloadSpeed">Limitar velocidad de descarga</string>
     <string name="LimitUploadSpeed">Limitar velocidad de subida</string>
     <string name="LimitConcurrentDownloads">Máximo número de descargas simultáneas</string>

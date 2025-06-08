@@ -28,7 +28,7 @@
     <string name="listening">Эта настройка позволяет Seeker принимать входящие подключения, чтобы мы могли подключаться к клиентам без открытых портов.
 \n\nНа практике это означает, что до тех пор, пока мы успешно прослушиваем (отображается в \"Проверить Статус\"), мы получим больше результатов поиска, быть в состоянии загрузить от других людей, загружать для большего количества пользователей и т. д.
 \n\nSeeker будет пытаться автоматически пересылать порты через UPnP (именно это делает официальный клиент для рабочего стола). Если вы НЕ используете Wifi - он не будет работать. Если вы используете VPN, то, пожалуйста, найдите способ перенаправления портов для вашего конкретного VPN. Если ваш маршрутизатор не включен UPnP, то вам будет необходимо указать порт вручную.</string>
-    <string name="sharing_dialog">Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).</string>
+    <string name="about_sharing_dialog">Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).</string>
     <string name="privileges_more_info">Привилегии позволяют поддерживать создателя Soulseek (Nir) и центральный сервер, от которого зависит это приложение.
 \n\nЭто также позволяет опережать в очереди на загрузку пользователей, не имеющих привилегий.
 \n\n\nПримечание: любые пожертвования не идут создателю этого неофициального клиента для андроид, Seeker. В настоящее время я не принимаю пожертвования.</string>
@@ -148,9 +148,9 @@
     <string name="clear_search_history">Очистить историю поиска</string>
     <string name="file_backed_downloads">Файл резервных загрузок</string>
     <string name="night_mode_options">Ночной режим: </string>
-    <string name="enable_sharing">Включить доступ к файлам</string>
+    <string name="preference_enable_sharing">Включить доступ к файлам</string>
     <string name="set_shared_folder">Папка общего доступа</string>
-    <string name="browse_yourself">Просмотр себя</string>
+    <string name="preference_browse_self">Просмотр себя</string>
     <string name="enable_listening">Включить прослушивание</string>
     <string name="change_port">Сменить порт</string>
     <string name="port">Порт</string>
@@ -292,12 +292,12 @@
     <string name="added_to_wishlist">Добавлен поисковый запрос \"{0}\" в Избранные</string>
     <string name="wishlist_tab_target">Не удается изменить область для поиска в Избранных</string>
     <string name="search_tab_error">Данной вкладки поиска больше не существует</string>
-    <string name="error_sharing">Ошибка разбора файлов, не удалось установить общую директорию</string>
-    <string name="success_sharing">Совместное использование успешно установлено</string>
-    <string name="sharing_off">Функция общего доступа отключена</string>
+    <string name="message_sharing_setup_error">Ошибка разбора файлов, не удалось установить общую директорию</string>
+    <string name="message_sharing_setup_success">Совместное использование успешно установлено</string>
+    <string name="preference_enable_sharing_summary_off">Функция общего доступа отключена</string>
     <string name="sharing_currently_parsing">Идет анализ файлов...</string>
-    <string name="sharing_disabled_failure_parsing">Совместное использование отключено. Не удалось разобрать ресурсы.</string>
-    <string name="sharing_disabled_share_not_set">Функция общего доступа отключена. Каталог общего доступа не установлен.</string>
+    <string name="preference_enable_sharing_summary_parsing_failed">Совместное использование отключено. Не удалось разобрать ресурсы.</string>
+    <string name="preference_enable_sharing_summary_no_dir">Функция общего доступа отключена. Каталог общего доступа не установлен.</string>
     <string name="sharing_disabled_error">Ошибка: Функция общего доступа отключена.</string>
     <string name="change_target">Сменить область поиска</string>
     <string name="change_result_style">Изменить стиль результатов</string>
@@ -610,9 +610,9 @@
     <string name="AwayOnInactivity">Автоматически переводить статус в режим \"Отсутствие\"</string>
     <string name="DayVarient_">Дневной скин: </string>
     <string name="NightVarient_">Ночной скин: </string>
-    <string name="NoSharedAdd">Нет общих папок. Нажмите \'Добавить\', чтобы начать.</string>
-    <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">Приостановить совместный доступ при подключении по счетчику (мобильное соединение)</string>
+    <string name="preference_shared_folders_summary_none">Нет общих папок. Нажмите \'Добавить\', чтобы начать.</string>
+    <string name="preference_rescan_shares">Rescan Shares</string>
+    <string name="preference_pause_sharing_on_metered_summary">Приостановить совместный доступ при подключении по счетчику (мобильное соединение)</string>
     <string name="LimitDownloadSpeed">Ограничение скорости закачки</string>
     <string name="LimitUploadSpeed">Ограничить скорость раздачи</string>
     <string name="LimitConcurrentDownloads">Ограничить одновременные загрузки</string>
