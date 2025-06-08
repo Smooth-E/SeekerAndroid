@@ -1,4 +1,6 @@
-﻿using Android.OS;
+﻿using Android.Content;
+using Android.Content.Res;
+using Android.OS;
 
 namespace Seeker.Utils;
 
@@ -26,8 +28,8 @@ public static class AndroidPlatform
     //  api 30+ we have bit rate
     //  api 31+ (Android 12) we have sample rate and bit depth - proposed change?  I don't think this made it in...
 
-    // for the built in media retreiver (which requires actually reading the file) we have duration, bit rate,
-    // with sample rate and bit depth for api31+
+    // for the built-in media retreiver (which requires actually reading the file) we have duration, bit rate,
+    // with sample rate and bit-depth for api31+
 
     // the library tag lib sharp can get us everything, tho it is 1 MB extra.
     
@@ -36,4 +38,7 @@ public static class AndroidPlatform
     public static bool HasMediaStoreBitRateColumn() => Build.VERSION.SdkInt >= BuildVersionCodes.R;
     
     public static bool HasProperPerAppLanguageSupport() => Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu;
+
+    public static bool IsInLightMode(Context context) =>
+        context.Resources!.Configuration!.UiMode.HasFlag(UiMode.NightNo);
 }

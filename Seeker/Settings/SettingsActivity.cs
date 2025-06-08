@@ -170,22 +170,6 @@ public class SettingsActivity : ThemeableActivity
         enableDiagnostics.Checked = DiagnosticFile.Enabled;
         enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
         
-        Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
-        dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
-        String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.CLASSIC_PURPLE, ThemeHelper.RED, ThemeHelper.BLUE };
-        ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
-        dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
-        SetSpinnerPositionDayVarient(dayVarientSpinner);
-        dayVarientSpinner.ItemSelected += DayVarient_ItemSelected;
-        
-        Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
-        nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
-        String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.CLASSIC_PURPLE, ThemeHelper.GREY, ThemeHelper.BLUE, ThemeHelper.AMOLED_CLASSIC_PURPLE, ThemeHelper.AMOLED_GREY };
-        ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
-        nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
-        SetSpinnerPositionNightVarient(nightVarientSpinner);
-        nightVarientSpinner.ItemSelected += NightVarient_ItemSelected;
-        
         ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
         imageView.Click += ImageView_Click;
         UpdateShareImageView();
@@ -1686,82 +1670,6 @@ public class SettingsActivity : ThemeableActivity
     {
         UpdateShareImageView();
         (sender as View).PerformLongClick();
-    }
-
-
-    private void DayVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
-    {
-        var oldVarient = SeekerState.DayModeVarient;
-        SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
-        if (oldVarient != SeekerState.DayModeVarient)
-        {
-            lock (SeekerApplication.SharedPrefLock)
-            {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutInt(KeyConsts.M_DayVarient, (int)(SeekerState.DayModeVarient));
-                bool success = editor.Commit();
-            }
-            SeekerApplication.SetActivityTheme(this);
-            //if we are in day mode and the day varient is truly changed we need to recreate all activities
-            if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
-            {
-                SeekerApplication.RecreateActivities();
-            }
-        }
-    }
-
-    private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
-    {
-        var oldVarient = SeekerState.NightModeVarient;
-        switch (e.Position)
-        {
-            case 3:
-                SeekerState.NightModeVarient = ThemeHelper.NightThemeType.AmoledClassicPurple;
-                break;
-            case 4:
-                SeekerState.NightModeVarient = ThemeHelper.NightThemeType.AmoledGrey;
-                break;
-            default:
-                SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)(e.Position);
-                break;
-        }
-        if (oldVarient != SeekerState.NightModeVarient)
-        {
-            lock (SeekerApplication.SharedPrefLock)
-            {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutInt(KeyConsts.M_NightVarient, (int)(SeekerState.NightModeVarient));
-                bool success = editor.Commit();
-            }
-            SeekerApplication.SetActivityTheme(this);
-            //if we are in day mode and the day varient is truly changed we need to recreate all activities
-            if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
-            {
-                SeekerApplication.RecreateActivities();
-            }
-        }
-    }
-    
-    private void SetSpinnerPositionDayVarient(Spinner s)
-    {
-        s.SetSelection((int)(SeekerState.DayModeVarient));
-    }
-    
-
-    private void SetSpinnerPositionNightVarient(Spinner s)
-    {
-        switch (SeekerState.NightModeVarient)
-        {
-            case ThemeHelper.NightThemeType.AmoledClassicPurple:
-                s.SetSelection(3);
-                break;
-            case ThemeHelper.NightThemeType.AmoledGrey:
-                s.SetSelection(4);
-                break;
-            default:
-                s.SetSelection((int)(SeekerState.NightModeVarient));
-                break;
-        }
     }
 
     private void RestoreDefaults_Click(object sender, EventArgs e)

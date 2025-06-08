@@ -1,55 +1,41 @@
-﻿using Android.Content;
+﻿using _Microsoft.Android.Resource.Designer;
+using Android.Content;
 using Android.OS;
 using AndroidX.AppCompat.App;
-using System;
+using AndroidX.Preference;
 using Seeker.Utils;
+using Object = Java.Lang.Object;
 
-namespace Seeker
+namespace Seeker.Main;
+
+public class ThemeableActivity : AppCompatActivity
 {
-    //TODOORG seperate class
-    public class ThemeableActivity : AppCompatActivity
+    protected override void OnCreate(Bundle savedInstanceState)
     {
-        private WeakReference<ThemeableActivity> ourWeakRef;
-        protected override void OnDestroy()
+        SetTheme(ThemeUtils.GetThemeResource(this));
+        
+        base.OnCreate(savedInstanceState);
+
+        var listener = new ThemeChangeListener(this);
+        PreferenceManager.GetDefaultSharedPreferences(this)!.RegisterOnSharedPreferenceChangeListener(listener);
+    }
+    
+    private class ThemeChangeListener(ThemeableActivity activity) 
+        : Object, ISharedPreferencesOnSharedPreferenceChangeListener
+    {
+        public void OnSharedPreferenceChanged(ISharedPreferences sharedPreferences, string key)
         {
-            base.OnDestroy();
-            SeekerApplication.Activities.Remove(ourWeakRef);
-            if (SeekerApplication.Activities.Count == 0)
+            var lightMode = AndroidPlatform.IsInLightMode(activity);
+            var updateTheme =
+                lightMode && key == activity.GetString(ResourceConstant.String.key_light_theme_variant)
+                || !lightMode && key == activity.GetString(ResourceConstant.String.key_dark_theme_variant);
+            
+            if (!updateTheme)
             {
-                Logger.Debug("----- On Destory ------ Last Activity ------");
-                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, true);
+                return;
             }
-            else
-            {
-                Logger.Debug("----- On Destory ------ NOT Last Activity ------");
-                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
-            }
+            
+            activity.Recreate();
         }
-
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            SeekerApplication.SetActivityTheme(this);
-            ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
-
-            SeekerApplication.Activities.Add(ourWeakRef);
-            base.OnCreate(savedInstanceState);
-        }
-
-        protected override void AttachBaseContext(Context @base)
-        {
-            if (!AndroidPlatform.HasProperPerAppLanguageSupport() && SeekerState.Language != SeekerState.FieldLangAuto)
-            {
-                var config = new Android.Content.Res.Configuration();
-                config.Locale = LocaleUtils.LocaleFromString(SeekerState.Language);
-                var baseContext = @base.CreateConfigurationContext(config);
-                base.AttachBaseContext(baseContext);
-            }
-            else
-            {
-                base.AttachBaseContext(@base);
-            }
-
-        }
-
     }
 }

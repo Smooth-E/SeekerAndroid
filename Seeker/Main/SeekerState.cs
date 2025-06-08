@@ -55,8 +55,6 @@ namespace Seeker
 
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
-        public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
-        public static ThemeHelper.DayThemeType DayModeVarient = ThemeHelper.DayThemeType.ClassicPurple;
         public static bool RememberSearchHistory = true;
         public static SoulseekClient SoulseekClient = null;
         public static String Username = null;

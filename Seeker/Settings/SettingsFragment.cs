@@ -243,7 +243,7 @@ public class SettingsFragment : PreferenceFragmentCompat
     private void UpdateDataDirectoryUriPreferenceSummary()
     {
         string summary;
-        if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
+        if (SeekerState.RootDocumentFile == null) // even in API<21 we do set this RootDocumentFile
         {
             if (SeekerState.UseLegacyStorage())
             {
@@ -418,9 +418,9 @@ public class SettingsFragment : PreferenceFragmentCompat
 
     private void ShowAboutFileBackedDownloadsDialog()
     {
-        new AlertDialog.Builder(RequireActivity(), ResourceConstant.Style.MyAlertDialogTheme)
-            .SetTitle(ResourceConstant.String.preference_about_file_backed_downloads_dialog_title)
-            .SetMessage(ResourceConstant.String.memory_file_backed)
+        new AlertDialog.Builder(RequireActivity(), ResourceConstant.Style.MyAlertDialogTheme)!
+            .SetTitle(ResourceConstant.String.preference_about_file_backed_downloads_dialog_title)!
+            .SetMessage(ResourceConstant.String.memory_file_backed)!
             .SetPositiveButton(ResourceConstant.String.okay, (sender, _) => (sender as Dialog)!.Dismiss())
             .Show();
     }

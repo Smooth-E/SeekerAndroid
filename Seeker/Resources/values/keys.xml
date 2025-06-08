@@ -37,8 +37,16 @@
     <string translatable="false" name="key_away_on_inactivity">away_on_inactivity</string>
     <string translatable="false" name="key_per_app_language">per_app_language</string>
     <string translatable="false" name="key_language">language</string>
-    <string translatable="false" name="key_app_theme">night_mode</string>
+    <string translatable="false" name="key_app_theme">app_theme</string>
     <string translatable="false" name="key_app_theme_system">system</string>
     <string translatable="false" name="key_app_theme_light">light</string>
     <string translatable="false" name="key_app_theme_dark">dark</string>
+    <string translatable="false" name="key_light_theme_variant">light_theme_variant</string>
+    <string translatable="false" name="key_dark_theme_variant">dark_theme_variant</string>
+    <string translatable="false" name="key_theme_variant_purple">purple</string>
+    <string translatable="false" name="key_theme_variant_red">red</string>
+    <string translatable="false" name="key_theme_variant_blue">blue</string>
+    <string translatable="false" name="key_theme_variant_gray">gray</string>
+    <string translatable="false" name="key_theme_variant_amoled_purple">amoled_purple</string>
+    <string translatable="false" name="key_theme_variant_amoled_gray">amoled_gray</string>
 </resources>

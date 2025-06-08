@@ -43,87 +43,11 @@
                     android:id="@+id/preference_fragment_holder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
-            
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/dayModeVarientLayout"
-                    android:orientation="horizontal">
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/DayVarient_"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="0.4"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_gravity="center_vertical"
-                        android:paddingStart="10dp"
-                        android:textColor="?attr/normalTextColorNonTinted"
-                        android:paddingEnd="10dp"
-                        android:id="@+id/dayModeVarientText"/>
-
-                <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="0.4"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_toEndOf="@+id/dayModeVarientText"
-                        android:id="@+id/dayVarientSpinner"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/dayModeVarientLayout"
-                    android:layout_marginTop="2dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/nightModeVarientLayout"
-                    android:orientation="horizontal">
-
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/NightVarient_"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="0.4"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:paddingStart="10dp"
-                        android:textColor="?attr/normalTextColorNonTinted"
-                        android:paddingEnd="10dp"
-                        android:id="@+id/nightVarientText"/>
-
-                <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="0.4"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:layout_toEndOf="@+id/nightVarientText"
-                        android:id="@+id/nightVarientSpinner"/>
-
-            </LinearLayout>
 
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="6dp"
-                    android:layout_below="@id/nightModeVarientLayout"
                     android:id="@+id/sharingLayoutParent"
                     android:background="@drawable/border_group_box"
                     android:orientation="vertical">

@@ -1,12 +1,10 @@
 ﻿using Seeker.Helpers;
 using Android.App;
-using Android.Content;
-using Android.Graphics;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
 using System;
-using Seeker.Main;
+using _Microsoft.Android.Resource.Designer;
 using Seeker.Utils;
 
 namespace Seeker
@@ -143,73 +141,24 @@ namespace Seeker
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            return inflater.Inflate(Resource.Layout.search_intent_dialog, container); //container is parent
+            // container is parent
+            return inflater.Inflate(ResourceConstant.Layout.search_intent_dialog, container);
         }
 
-        /// <summary>
-        /// Called after on create view
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="savedInstanceState"></param>
+        /// <summary>Called after on create view</summary>
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
+            // after opening up my soulseek app on my phone,
+            // 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
-            this.SetStyle((int)DialogFragmentStyle.Normal, 0);
-            //this.Dialog.SetTitle(OurRoomName);
-
-            //listViewTickers = view.FindViewById<ListView>(Resource.Id.listViewTickers);
+            const int attr = ResourceConstant.Attribute.the_rounded_corner_dialog_background_drawable;
+            var drawable = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, attr);
+            Dialog!.Window!.SetBackgroundDrawable(drawable);
+            SetStyle((int)DialogFragmentStyle.Normal, 0);
             SetupEventHandlers();
 
 
-        }
-    }
-
-    /**
-    This is a dummy activity used to solve the following problem.
-
-    By default when launch the action send intent, the activity will be launched in a new task.
-    For example, in Spotify, share, Seeker will have a new task.  
-    Now before this (1) we ALWAYS had just 1 task (so potential for new bugs and 
-    (2) having multiple tasks seems messy, if the user does the feature 10 times, they get 10 tasks in their recent tasks.
-    One solution to this is to set LaunchMode = SingleTask on the MainActivity.  But that has the side effect that
-    it changes the behavior for other things i.e. open MainActivity > Open Chatrooms > Users in Room > Search User Files >
-    press back, now instead of going back to Users in Room the activity gets finished.
-    This fix solves the issue without the unintented changes of making MainActivity a SingleTask activity.
-
-    **/
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = true)]
-    [IntentFilter(new[] { Intent.ActionSend },
-    Categories = new[] { Intent.CategoryDefault }, DataMimeType = "text/plain", Label = "Search Here")]
-    public class SearchDialogDummyActivity : ThemeableActivity
-    {
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            SeekerApplication.SetActivityTheme(this);
-            if (Intent != null && SearchSendIntentHelper.IsFromActionSend(Intent))
-            {
-                Intent intent = new Intent(this, typeof(MainActivity));
-                intent.PutExtra(SearchSendIntentHelper.FromSearchDialogDummyActivity, SearchSendIntentHelper.FromSearchDialogDummyActivity);
-                string mainText = Intent.GetStringExtra(Intent.ExtraText);
-                string subject = Intent.GetStringExtra(Intent.ExtraSubject);
-                
-                if (mainText != null)
-                {
-                    intent.PutExtra(Intent.ExtraText, mainText);
-                }
-                
-                if (subject != null)
-                {
-                    intent.PutExtra(Intent.ExtraSubject, subject);
-                }
-                
-                Logger.Debug("SearchDialogDummyActivity launch intent");
-                StartActivity(intent);
-                Finish();
-            }
-            base.OnCreate(savedInstanceState);
         }
     }
 }

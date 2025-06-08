@@ -235,32 +235,51 @@
     </PreferenceCategory>
     
     <PreferenceCategory
-        android:title="@string/preference_category_application"
-        app:iconSpaceReserved="false">
+            android:title="@string/preference_category_application"
+            app:iconSpaceReserved="false">
         
         <Seeker.Components.TwoIconPreference
-            android:key="@string/key_per_app_language"
-            android:title="@string/preference_language"
-            android:summary="@string/preference_per_app_language_summary"
-            app:secondaryIcon="@drawable/chevron_right"
-            app:iconSpaceReserved="false"/>
+                android:key="@string/key_per_app_language"
+                android:title="@string/preference_language"
+                android:summary="@string/preference_per_app_language_summary"
+                app:secondaryIcon="@drawable/chevron_right"
+                app:iconSpaceReserved="false"/>
         
         <DropDownPreference
-            android:key="@string/key_language"
-            android:title="@string/preference_language"
-            android:entries="@array/language_names"
-            android:entryValues="@array/language_keys"
-            app:useSimpleSummaryProvider="true"
-            app:iconSpaceReserved="false"/>
+                android:key="@string/key_language"
+                android:title="@string/preference_language"
+                android:entries="@array/language_names"
+                android:entryValues="@array/language_keys"
+                app:useSimpleSummaryProvider="true"
+                app:iconSpaceReserved="false"/>
 
         <DropDownPreference
-            android:key="@string/key_app_theme"
-            android:title="@string/preference_app_theme"
-            android:entries="@array/app_theme_names"
-            android:entryValues="@array/app_theme_keys"
-            app:useSimpleSummaryProvider="true"
-            app:iconSpaceReserved="false"/>
+                android:key="@string/key_app_theme"
+                android:title="@string/preference_app_theme"
+                android:entries="@array/app_theme_names"
+                android:entryValues="@array/app_theme_keys"
+                android:defaultValue="@string/key_app_theme_system"
+                app:useSimpleSummaryProvider="true"
+                app:iconSpaceReserved="false"/>
+
+        <DropDownPreference
+                android:key="@string/key_light_theme_variant"
+                android:title="@string/preference_light_theme_variant"
+                android:entries="@array/light_theme_variant_names"
+                android:entryValues="@array/light_theme_variant_keys"
+                android:defaultValue="@string/key_theme_variant_purple"
+                app:useSimpleSummaryProvider="true"
+                app:iconSpaceReserved="false"/>
         
+        <DropDownPreference
+                android:key="@string/key_dark_theme_variant"
+                android:title="@string/preference_dark_theme_variant"
+                android:entries="@array/dark_theme_variant_names"
+                android:entryValues="@array/dark_theme_variant_keys"
+                android:defaultValue="@string/key_theme_variant_purple"
+                app:useSimpleSummaryProvider="true"
+                app:iconSpaceReserved="false"/>
+
     </PreferenceCategory>
     
 </PreferenceScreen>

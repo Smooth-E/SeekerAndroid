@@ -37,4 +37,32 @@
         <item>@string/key_app_theme_light</item>
         <item>@string/key_app_theme_dark</item>
     </string-array>
+    
+    <string-array name="light_theme_variant_names">
+        <item>@string/theme_variant_purple</item>
+        <item>@string/theme_variant_red</item>
+        <item>@string/theme_variant_blue</item>
+    </string-array>
+    
+    <string-array name="light_theme_variant_keys">
+        <item>@string/key_theme_variant_purple</item>
+        <item>@string/key_theme_variant_red</item>
+        <item>@string/key_theme_variant_blue</item>
+    </string-array>
+    
+    <string-array name="dark_theme_variant_names">
+        <item>@string/theme_variant_purple</item>
+        <item>@string/theme_variant_gray</item>
+        <item>@string/theme_variant_blue</item>
+        <item>@string/theme_variant_amoled_purple</item>
+        <item>@string/theme_variant_amoled_gray</item>
+    </string-array>
+
+    <string-array name="dark_theme_variant_keys">
+        <item>@string/key_theme_variant_purple</item>
+        <item>@string/key_theme_variant_gray</item>
+        <item>@string/key_theme_variant_blue</item>
+        <item>@string/key_theme_variant_amoled_purple</item>
+        <item>@string/key_theme_variant_amoled_gray</item>
+    </string-array>
 </resources>

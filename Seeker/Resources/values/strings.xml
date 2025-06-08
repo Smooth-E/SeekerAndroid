@@ -706,8 +706,6 @@ The standard way of requesting folder access does not always persist permissions
     <string name="NoUsersFound">No Users Found</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
-    <string name="DayVarient_">Day Varient: </string>
-    <string name="NightVarient_">Night Varient: </string>
     <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
     <string name="RescanShares">Rescan Shares</string>
     <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
@@ -920,4 +918,12 @@ The standard way of requesting folder access does not always persist permissions
     <string name="app_theme_system">Follow system</string>
     <string name="app_theme_light">Light</string>
     <string name="app_theme_dark">Dark</string>
+    <string name="preference_light_theme_variant">Light theme</string>
+    <string name="preference_dark_theme_variant">Dark theme</string>
+    <string name="theme_variant_purple">Purple</string>
+    <string name="theme_variant_red">Red</string>
+    <string name="theme_variant_blue">Blue</string>
+    <string name="theme_variant_gray">Gray</string>
+    <string name="theme_variant_amoled_purple">Purple (Amoled)</string>
+    <string name="theme_variant_amoled_gray">Gray (Amoled)</string>
 </resources>

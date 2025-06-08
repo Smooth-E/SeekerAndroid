@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using AndroidX.Activity;
+using Seeker.Main;
 using Seeker.Managers;
 using Seeker.Utils;
 
@@ -40,9 +41,6 @@ namespace Seeker
 
             var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
-
-            //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-
             SetContentView(Resource.Layout.wizard_activity_layout);
 
 

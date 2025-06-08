@@ -2,18 +2,14 @@
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
 using Android.Widget;
 using AndroidX.Core.App;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using _Microsoft.Android.Resource.Designer;
 using AndroidX.AppCompat.App;
-using Seeker.Helpers;
-using Seeker.Settings;
 using Seeker.Utils;
 
 namespace Seeker.Messages
@@ -24,22 +20,12 @@ namespace Seeker.Messages
         public static bool IsInitialized = false;
         public static EventHandler<Message> MessageReceived;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> RootMessages = null; //this is for when the user logs in as different people
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>> Messages = null;//new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>> Messages = null;
         public static string MessagesUsername = string.Empty;
 
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UnreadUsernames = null;//basically a concurrent hashset.
-
-
-        //static MessageController()
-        //{
-        //    lock (MessageListLockObject)
-        //    {
-        //        Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-        //        RestoreMessagesFromSharedPrefs
-        //    }
-        //}
-
+        
         public static void Initialize()
         {
             SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
@@ -176,53 +162,30 @@ namespace Seeker.Messages
 
         private static Color GetNiceAndroidBlueNotifColor(bool useNightColors, Context contextToUse)
         {
-            var newTheme = contextToUse.Resources.NewTheme();
-            newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
+            var newTheme = contextToUse.Resources!.NewTheme();
+            const int attr = ResourceConstant.Attribute.android_default_notification_blue_color;
+            newTheme!.ApplyStyle(ThemeUtils.GetThemeResource(contextToUse, useNightColors), true);
+            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, attr, newTheme);
         }
 
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
         {
+#pragma warning disable CA1416 // PRAGMA: Call reachable only on Android 21
             //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.S)
             {
-                if (useNightColors)
-                {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SeekerState.ActiveActivityRef.Theme);
-                }
-                else
-                {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SeekerState.ActiveActivityRef.Theme);
-                }
+                var color = useNightColors
+                    ? Android.Resource.Color.SystemAccent1200
+                    : Android.Resource.Color.SystemAccent1600;
+                
+                return contextToUse.Resources!.GetColor(color, SeekerState.ActiveActivityRef.Theme);
             }
-            else
-            {
-                //todo
-                var newTheme = contextToUse.Resources.NewTheme();
-                newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-                return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
-            }
-        }
+#pragma warning restore CA1416
 
-        private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
-        {
-            //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
-            {
-                return GetOtherTextColor(useNightColors, contextToUse);
-            }
-            else
-            {
-                //todo
-                if (useNightColors)
-                {
-                    return Color.White;
-                }
-                else
-                {
-                    return Color.Black;
-                }
-            }
+            var newTheme = contextToUse.Resources!.NewTheme();
+            const int attr = ResourceConstant.Attribute.android_default_notification_complementary_color;
+            newTheme!.ApplyStyle(ThemeUtils.GetThemeResource(contextToUse, useNightColors), true);
+            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, attr, newTheme);
         }
 
         public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended, bool useNightColors, Context contextToUse)
@@ -263,10 +226,8 @@ namespace Seeker.Messages
 
 
             ssb.Append(spannableString);
-            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
-            string msgToShow = "\n" + messageNotifExtended.MessageText;
+            var msgToShow = "\n" + messageNotifExtended.MessageText;
             var spannableString2 = new Android.Text.SpannableString(msgToShow);
-            //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
             ssb.Append(spannableString2);
             return ssb;
         }

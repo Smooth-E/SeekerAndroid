@@ -31,7 +31,6 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
 using Soulseek;
@@ -61,7 +60,6 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
     public static readonly object SharedPrefLock = new();
     public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
     public new static Application ApplicationContext;
-    public static readonly List<WeakReference<ThemeableActivity>> Activities = [];
         
     private const bool AUTO_CONNECT_ON = true;
 
@@ -871,25 +869,6 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         return (int)Build.VERSION.SdkInt >= 21 
             ? context.Resources?.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme) 
             : context.Resources?.GetDrawable(drawableRes);
-    }
-
-    public static void RecreateActivities()
-    {
-        foreach (var weakRef in Activities)
-        {
-            if (weakRef.TryGetTarget(out var themeableActivity))
-            {
-                themeableActivity.Recreate();
-            }
-        }
-    }
-
-    public static void SetActivityTheme(Activity activity)
-    {
-        // useless returns the same thing every time
-        activity.SetTheme(activity.Resources!.Configuration!.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes)
-            ? ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient)
-            : ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient));
     }
         
     /// <summary>Add To User List and save user list to shared prefs.  false if already added</summary>
