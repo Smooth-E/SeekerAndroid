@@ -15,11 +15,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using _Microsoft.Android.Resource.Designer;
+using Android.Text;
 using AndroidX.Core.Util;
 using Seeker.Components;
 using Seeker.Main;
 using Seeker.Settings;
 using Seeker.Utils;
+using ClipboardManager = Android.Content.ClipboardManager;
 
 namespace Seeker
 {
@@ -175,14 +177,15 @@ namespace Seeker
             if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
             {
                 var matches = MagnetLinkRegex.Matches(msgText);
-                //add in our spans.
+                // add in our spans.
                 if (matches.Count > 0)
                 {
                     foreach (var match in matches)
                     {
                         var m = match as System.Text.RegularExpressions.Match;
-                        var ourMagnetSpan = new MagnetLinkClickableSpan(m.Value);
-                        messageText.SetSpan(ourMagnetSpan, m.Index, m.Index + m.Length, Android.Text.SpanTypes.InclusiveExclusive);
+                        var ourMagnetSpan = new MagnetLinkClickableSpan(textView.Context!, m.Value);
+                        const SpanTypes flags = SpanTypes.InclusiveExclusive;
+                        messageText.SetSpan(ourMagnetSpan, m.Index, m.Index + m.Length, flags);
                     }
                 }
             }

@@ -13,7 +13,6 @@ namespace Seeker.Components;
 public class MaterialProgressBarPassThrough : LinearLayout
 {
     private bool disposed;
-    private bool init = false;
     
     public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs, int defStyle) 
         : base(context, attrs, defStyle)
@@ -24,19 +23,9 @@ public class MaterialProgressBarPassThrough : LinearLayout
     public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs) : base(context, attrs)
     {
         Logger.Debug("MaterialProgressBarPassThrough disposed" + disposed);
-        var c = new ContextThemeWrapper(context, ResourceConstant.Style.MaterialThemeForChip);
-        LayoutInflater.From(c)?.Inflate(
-            ResourceConstant.Layout.material_progress_bar_pass_through, this, true);
-    }
-
-    public static MaterialProgressBarPassThrough inflate(ViewGroup parent)
-    {
-        var c = new ContextThemeWrapper(parent.Context, ResourceConstant.Style.MaterialThemeForChip);
-        
-        var itemView = (MaterialProgressBarPassThrough)LayoutInflater.From(c)?.Inflate(
-            ResourceConstant.Layout.material_progress_bar_pass_through_dummy, parent, false);
-
-        return itemView;
+        var wrapper = new ContextThemeWrapper(context, ResourceConstant.Style.MaterialThemeForChip);
+        const int resource = ResourceConstant.Layout.material_progress_bar_pass_through;
+        LayoutInflater.From(wrapper)?.Inflate(resource, this, true);
     }
 
     public MaterialProgressBarPassThrough(IntPtr handle, JniHandleOwnership transfer) : base(handle, transfer)
@@ -44,6 +33,7 @@ public class MaterialProgressBarPassThrough : LinearLayout
         // Intentional no-op
     }
     
+    // ReSharper disable once IntroduceOptionalParameters.Global
     public MaterialProgressBarPassThrough(Context context) : this(context, null)
     {
         // Intentional no-op
