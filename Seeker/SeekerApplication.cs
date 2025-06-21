@@ -54,15 +54,14 @@ namespace Seeker;
 
 [Application]
 // ReSharper disable once ClassNeverInstantiated.Global - used in manifest
-public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer)
-    : Application(javaReference, transfer)
+public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer) : Application(javaReference, transfer)
 {
     public static readonly object SharedPrefLock = new();
     public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
     public new static Application ApplicationContext;
         
     private const bool AUTO_CONNECT_ON = true;
-
+    
     public override void OnCreate()
     {
         base.OnCreate();

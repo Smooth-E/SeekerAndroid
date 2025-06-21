@@ -35,6 +35,7 @@ using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
+using AndroidX.Preference;
 using AndroidX.RecyclerView.Widget;
 using Common;
 using Seeker.Components;
