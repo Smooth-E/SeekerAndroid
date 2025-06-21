@@ -30,7 +30,6 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
@@ -185,8 +184,7 @@ public class SettingsActivity : ThemeableActivity
         uploadsRecyclerViewFoldersAdapter = new UploadsRecyclerViewAdapter(this, UploadDirectoryManager.UploadDirectories);
 
         var llm = new LinearLayoutManager(this);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewFolders.Context,
-            llm.Orientation);
+        var dividerItemDecoration = new DividerItemDecoration(recyclerViewFolders.Context, llm.Orientation);
         recyclerViewFolders.AddItemDecoration(dividerItemDecoration);
 
         recyclerViewFolders.SetLayoutManager(llm);
@@ -1901,23 +1899,33 @@ public class SettingsActivity : ThemeableActivity
     
     public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
     {
-        var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-        builder.SetTitle(Resource.String.FolderError);
-        string diagMessage = SeekerApplication.ApplicationContext.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
-        var diag = builder.SetMessage(diagMessage)
-            .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) =>
-            { //puts it slightly right
-                this.RemoveUploadDirFolder(uploadInfo);
-                this.OnCloseClick(sender, e);
+        var builder = new AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+        builder.SetTitle(ResourceConstant.String.FolderError);
+        
+        var diagMessage = GetString(ResourceConstant.String.ErrorForFolder) 
+                          + uploadInfo.GetLastPathSegment()
+                          + System.Environment.NewLine
+                          + UploadDirectoryManager.GetErrorString(this, uploadInfo.ErrorState)
+                          + System.Environment.NewLine;
+        
+        var diag = builder!
+            .SetMessage(diagMessage)!
+            .SetNegativeButton(Resource.String.RemoveFolder, (sender, e) =>
+            { 
+                // puts it slightly right
+                RemoveUploadDirFolder(uploadInfo);
+                OnCloseClick(sender, e);
             })
-            .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) =>
-            { //puts it rightmost
+            .SetPositiveButton(Resource.String.Reselect, (sender, e) =>
+            { 
+                // puts it rightmost
                 UploadDirToReplaceOnReselect = uploadInfo;
-                this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
-                this.OnCloseClick(sender, e);
+                ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
+                OnCloseClick(sender, e);
             })
             .SetNeutralButton(Resource.String.cancel, OnCloseClick) //puts it leftmost
             .Create();
+        
         diag.Show();
     }
 
@@ -2073,21 +2081,20 @@ public class SettingsActivity : ThemeableActivity
 
 
 
-            if (UploadDirectoryManager.UploadDirectories.Where(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
+            var anyNewlyAdded = UploadDirectoryManager.UploadDirectories
+                .Any(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString());
+            
+            if (anyNewlyAdded)
             {
-                //error!!
-                this.RunOnUiThread(new Action(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded, ToastLength.Long).Show();
-                }));
+                // error!!
+                this.ShowLongToast(ResourceConstant.String.ErrorAlreadyAdded);
                 return;
-                //throw new Exception("Directory is already added!");
             }
 
             UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
         }
 
-        UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+        UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates(this);
         if (UploadDirectoryManager.AreAllFailed())
         {
             throw new DirectoryAccessFailure("All Failed");
@@ -2130,7 +2137,7 @@ public class SettingsActivity : ThemeableActivity
             try
             {
 
-                success = SharedCacheManager.InitializeDatabase(null, false, out string errorMessage);
+                success = SharedCacheManager.InitializeDatabase(this, false, out var errorMessage);
                 if (!success)
                 {
                     throw new Exception("Failed to parse shared files: " + errorMessage);

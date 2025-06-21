@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using _Microsoft.Android.Resource.Designer;
 using Android.Content;
 using Android.Provider;
 using AndroidX.DocumentFile.Provider;
@@ -18,35 +19,35 @@ public static class UploadDirectoryManager
     public static List<string> PresentableNameLockedDirectories = [];
     public static List<string> PresentableNameHiddenDirectories = [];
     
-    public static string GetCompositeErrorString()
+    public static string GetCompositeErrorString(Context context)
     {
         if (UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.CannotWrite))
         {
-            return GetErrorString(UploadDirectoryError.CannotWrite);
+            return GetErrorString(context, UploadDirectoryError.CannotWrite);
         }
 
         if (UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.DoesNotExist))
         {
-            return GetErrorString(UploadDirectoryError.DoesNotExist);
+            return GetErrorString(context, UploadDirectoryError.DoesNotExist);
         }
 
         return UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.Unknown)
-            ? GetErrorString(UploadDirectoryError.Unknown)
+            ? GetErrorString(context, UploadDirectoryError.Unknown)
             : null;
     }
 
-    public static string GetErrorString(UploadDirectoryError errorCode)
+    public static string GetErrorString(Context context, UploadDirectoryError errorCode)
     {
         switch (errorCode)
         {
             case UploadDirectoryError.CannotWrite:
-                return SeekerApplication.ApplicationContext.GetString(Resource.String.PermissionErrorShared);
+                return context.GetString(ResourceConstant.String.PermissionErrorShared);
             case UploadDirectoryError.DoesNotExist:
                 // this is a permission error the overwhelming majority of the time.
                 // hence "not accessible" rather than "does not exist"
-                return SeekerApplication.ApplicationContext.GetString(Resource.String.FolderNotAccessible);
+                return context.GetString(ResourceConstant.String.FolderNotAccessible);
             case UploadDirectoryError.Unknown:
-                return SeekerApplication.ApplicationContext.GetString(Resource.String.UnknownErrorShared);
+                return context.GetString(ResourceConstant.String.UnknownErrorShared);
             case UploadDirectoryError.NoError:
             default:
                 return "No Error.";
@@ -65,21 +66,26 @@ public static class UploadDirectoryManager
             if (!string.IsNullOrEmpty(legacyUploadDataDirectory))
             {
                 // legacy case. lets upgrade it.
-                UploadDirectoryInfo uploadDir =
-                    new UploadDirectoryInfo(legacyUploadDataDirectory, fromTree, false, false, null);
-                UploadDirectories = new List<UploadDirectoryInfo>();
-                UploadDirectories.Add(uploadDir);
+                var uploadDir = new UploadDirectoryInfo(
+                    legacyUploadDataDirectory,
+                    fromTree,
+                    false,
+                    false,
+                    null
+                );
+                
+                UploadDirectories = [ uploadDir ];
 
                 //save new
                 SaveToSharedPreferences(sharedPreferences);
                 //clear old
-                var editor = sharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UploadDirectoryUri, string.Empty);
-                editor.Commit();
+                sharedPreferences.Edit()!
+                    .PutString(KeyConsts.M_UploadDirectoryUri, string.Empty)!
+                    .Commit();
             }
             else
             {
-                UploadDirectories = new List<UploadDirectoryInfo>();
+                UploadDirectories = [];
             }
         }
         else
@@ -90,89 +96,81 @@ public static class UploadDirectoryManager
 
     public static void SaveToSharedPreferences(ISharedPreferences sharedPreferences)
     {
-        using (System.IO.MemoryStream mem = new System.IO.MemoryStream())
+        using (new System.IO.MemoryStream())
         {
-            string userDirsString = SerializationHelper.SerializeToString(UploadDirectories);
+            var userDirsString = SerializationHelper.SerializeToString(UploadDirectories);
             lock (sharedPreferences)
             {
-                var editor = sharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SharedDirectoryInfo, userDirsString);
-                editor.Commit();
+                sharedPreferences.Edit()!
+                    .PutString(KeyConsts.M_SharedDirectoryInfo, userDirsString)!
+                    .Commit();
             }
         }
     }
 
-    public static bool IsFromTree(string presentablePath)
+    public static bool IsFromTree()
     {
         if (UploadDirectories.All(dir => dir.UploadDataDirectoryUriIsFromTree))
         {
             return true;
         }
 
-        if (UploadDirectories.All(dir => !dir.UploadDataDirectoryUriIsFromTree))
-        {
-            return false;
-        }
-
-        return true; //todo
+        return UploadDirectories.Any(dir => dir.UploadDataDirectoryUriIsFromTree);
     }
 
     public static bool AreAnyFromLegacy()
     {
-        return UploadDirectories.Where(dir => !dir.UploadDataDirectoryUriIsFromTree).Any();
+        return UploadDirectories.Any(dir => !dir.UploadDataDirectoryUriIsFromTree);
     }
 
     /// <summary>
     /// If so then we turn off sharing. If only 1+ failed we let the user know, but keep sharing on.
     /// </summary>
-    /// <returns></returns>
     public static bool AreAllFailed()
     {
         return UploadDirectories.All(dir => dir.HasError());
     }
-
-
+    
     public static bool DoesNewDirectoryHaveUniqueRootName(UploadDirectoryInfo newDirInfo, bool updateItToHaveUniqueName)
     {
-        bool isUnique = true;
-        List<string> currentRootNames = new List<string>();
-        foreach (UploadDirectoryInfo dirInfo in UploadDirectories)
+        var currentRootNames = new List<string>();
+        foreach (var dirInfo in UploadDirectories.Where(dirInfo => !dirInfo.IsSubdir && (dirInfo != newDirInfo)))
         {
-            if (dirInfo.IsSubdir || (dirInfo == newDirInfo))
-            {
-                continue;
-            }
-
-            StorageUtils.GetAllFolderInfo(dirInfo, out _, out _, out _, 
-                out _, out var presentableName);
+            StorageUtils.GetAllFolderInfo(dirInfo, 
+                out _,
+                out _,
+                out _,
+                out _,
+                out var presentableName
+            );
                 
             currentRootNames.Add(presentableName);
         }
 
         StorageUtils.GetAllFolderInfo(newDirInfo, out _, out _, out _, 
             out _, out var presentableNameNew);
-        
-        if (currentRootNames.Contains(presentableNameNew))
-        {
-            isUnique = false;
-            if (updateItToHaveUniqueName)
-            {
-                while (currentRootNames.Contains(presentableNameNew))
-                {
-                    presentableNameNew = presentableNameNew + " (1)";
-                }
 
-                newDirInfo.DisplayNameOverride = presentableNameNew;
-            }
+        if (!currentRootNames.Contains(presentableNameNew))
+        {
+            return true;
         }
 
-        return isUnique;
+        if (!updateItToHaveUniqueName)
+        {
+            return false;
+        }
+        
+        while (currentRootNames.Contains(presentableNameNew))
+        {
+            presentableNameNew += " (1)";
+        }
+
+        newDirInfo.DisplayNameOverride = presentableNameNew;
+
+        return false;
     }
 
-    /// <summary>
-    /// If only 1+ failed we let the user know, but keep sharing on.
-    /// </summary>
-    /// <returns></returns>
+    /// <summary>If only 1+ failed we let the user know, but keep sharing on.</summary>
     public static bool AreAnyFailed()
     {
         return UploadDirectories.Any(dir => dir.HasError());
@@ -182,69 +180,61 @@ public static class UploadDirectoryManager
     /// I think this should just return "external" (TODO - implement and test)
     /// https://developer.android.google.cn/reference/android/provider/MediaStore#VOLUME_EXTERNAL
     /// </summary>
-    /// <returns></returns>
     public static HashSet<string> GetInterestedVolNames()
     {
-        HashSet<string> interestedVolnames = new HashSet<string>();
-        foreach (var uploadDir in UploadDirectories)
+        var interestedVolnames = new HashSet<string>();
+        var dirs = UploadDirectories
+            .Where(uploadDir => !uploadDir.IsSubdir && uploadDir.UploadDirectory != null);
+        
+        foreach (var uploadDir in dirs)
         {
-            if (!uploadDir.IsSubdir && uploadDir.UploadDirectory != null)
+            var lastPathSegment = CommonHelpers
+                .GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory, out var msdCase);
+            
+            if (msdCase)
             {
-                string lastPathSegment =
-                    CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory,
-                        out bool msdCase);
-                if (msdCase)
+                interestedVolnames.Add(string.Empty); // primary
+            }
+            else
+            {
+                var volName = StorageUtils.GetVolumeName(lastPathSegment, true, out _);
+
+                //this is for if the chosen volume is not primary external
+                if ((int)Android.OS.Build.VERSION.SdkInt < 29)
                 {
-                    interestedVolnames.Add(string.Empty); // primary
+                    interestedVolnames.Add("external");
+                    return interestedVolnames;
                 }
-                else
-                {
-                    string volName = StorageUtils.GetVolumeName(lastPathSegment, true, out _);
 
-                    //this is for if the chosen volume is not primary external
-                    if ((int)Android.OS.Build.VERSION.SdkInt < 29)
-                    {
-                        interestedVolnames.Add("external");
-                        return interestedVolnames;
-                    }
-
-                    // TODO: Check for Android API level here
-                    var volumeNames = 
-                        MediaStore.GetExternalVolumeNames(SeekerState.ActiveActivityRef); // added in 29
+                // TODO: Check for Android API level here
+                var volumeNames = 
+                    MediaStore.GetExternalVolumeNames(SeekerState.ActiveActivityRef); // added in 29
                     
-                    string chosenVolume = null;
-                    if (volName != null)
+                string chosenVolume = null;
+                if (volName != null)
+                {
+                    var volToCompare = volName.Replace(":", "");
+                    foreach (var mediaStoreVolume in volumeNames)
                     {
-                        string volToCompare = volName.Replace(":", "");
-                        foreach (string mediaStoreVolume in volumeNames)
+                        if (mediaStoreVolume.Equals(volToCompare, StringComparison.CurrentCultureIgnoreCase))
                         {
-                            if (mediaStoreVolume.ToLower() == volToCompare.ToLower())
-                            {
-                                chosenVolume = mediaStoreVolume;
-                            }
+                            chosenVolume = mediaStoreVolume;
                         }
                     }
-
-                    if (chosenVolume == null)
-                    {
-                        interestedVolnames.Add(string.Empty); // primary
-                    }
-                    else
-                    {
-                        interestedVolnames.Add(chosenVolume);
-                    }
                 }
+
+                interestedVolnames.Add(chosenVolume ?? string.Empty); // primary
             }
         }
 
         return interestedVolnames;
     }
 
-    public static void UpdateWithDocumentFileAndErrorStates()
+    public static void UpdateWithDocumentFileAndErrorStates(Context context)
     {
         foreach (var uploadDirectoryInfo in UploadDirectories)
         {
-            Android.Net.Uri uploadDirUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+            var uploadDirUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
             try
             {
                 uploadDirectoryInfo.ErrorState = UploadDirectoryError.NoError;
@@ -252,14 +242,13 @@ public static class UploadDirectoryManager
                 {
                     if (uploadDirUri?.Path != null)
                     {
-                        uploadDirectoryInfo.UploadDirectory =
-                            DocumentFile.FromFile(new Java.IO.File(uploadDirUri.Path));
+                        var file = new Java.IO.File(uploadDirUri.Path);
+                        uploadDirectoryInfo.UploadDirectory = DocumentFile.FromFile(file);
                     }
                 }
                 else
                 {
-                    uploadDirectoryInfo.UploadDirectory =
-                        DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, uploadDirUri);
+                    uploadDirectoryInfo.UploadDirectory = DocumentFile.FromTreeUri(context, uploadDirUri!);
                     if (uploadDirectoryInfo.UploadDirectory?.Exists() != true)
                     {
                         uploadDirectoryInfo.UploadDirectory = null;
@@ -272,35 +261,40 @@ public static class UploadDirectoryManager
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
+                var errorIfo = $"{exception.Message}\n{exception.StackTrace}";
+                Logger.Debug($"UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates: {errorIfo}");
                 uploadDirectoryInfo.ErrorState = UploadDirectoryError.Unknown;
             }
         }
 
-        for (int i = 0; i < UploadDirectories.Count; i++)
+        for (var i = 0; i < UploadDirectories.Count; i++)
         {
-            UploadDirectoryInfo uploadDirectoryInfo = UploadDirectories[i];
+            var uploadDirectoryInfo = UploadDirectories[i];
             var ourUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
 
-            for (int j = 0; j < UploadDirectories.Count; j++)
+            for (var j = 0; j < UploadDirectories.Count; j++)
             {
-                if (i != j)
+                if (i == j)
                 {
-                    if (ourUri.LastPathSegment.Contains(Android.Net.Uri
-                            .Parse(UploadDirectories[j].UploadDataDirectoryUri).LastPathSegment))
-                    {
-                        uploadDirectoryInfo.IsSubdir = true;
-                    }
+                    continue;
+                }
+
+                var uploadDirPath = Android.Net.Uri.Parse(UploadDirectories[j].UploadDataDirectoryUri);
+                if (ourUri!.LastPathSegment!.Contains(uploadDirPath!.LastPathSegment!))
+                {
+                    uploadDirectoryInfo.IsSubdir = true;
                 }
             }
         }
 
         PresentableNameLockedDirectories.Clear();
         PresentableNameHiddenDirectories.Clear();
-        for (int i = 0; i < UploadDirectories.Count; i++)
+        
+        for (var i = 0; i < UploadDirectories.Count; i++)
         {
-            UploadDirectoryInfo uploadDirectoryInfo = UploadDirectories[i];
+            var uploadDirectoryInfo = UploadDirectories[i];
             if (!uploadDirectoryInfo.IsLocked && !uploadDirectoryInfo.IsHidden)
             {
                 continue;
@@ -321,36 +315,35 @@ public static class UploadDirectoryManager
             else
             {
                 // find our topmost parent so we can get the effective presentable name
-                
                 var ourUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
 
-                UploadDirectoryInfo ourTopLevelParent = null;
-
-                for (int j = 0; j < UploadDirectories.Count; j++)
-                {
-                    if (i != j)
+                var ourTopLevelParent = UploadDirectories
+                    .Where((_, j) => i != j)
+                    .FirstOrDefault(t =>
                     {
-                        if (!UploadDirectories[j].IsSubdir && ourUri.LastPathSegment.Contains(Android.Net.Uri
-                                .Parse(UploadDirectories[j].UploadDataDirectoryUri).LastPathSegment))
+                        if (t.IsSubdir)
                         {
-                            ourTopLevelParent = UploadDirectories[j];
-                            break;
+                            return false;
                         }
-                    }
+
+                        var segment = Android.Net.Uri.Parse(t.UploadDataDirectoryUri)!.LastPathSegment;
+                        return ourUri!.LastPathSegment!.Contains(segment!);
+                    });
+
+                // Check for error, otherwise pointless + causes null ref
+                if (uploadDirectoryInfo.HasError() || ourTopLevelParent!.HasError())
+                {
+                    continue;
+                }
+                
+                if (uploadDirectoryInfo.IsLocked)
+                {
+                    PresentableNameLockedDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
                 }
 
-                if (!uploadDirectoryInfo.HasError() &&
-                    !ourTopLevelParent.HasError()) //otherwise pointless + causes nullref
+                if (uploadDirectoryInfo.IsHidden)
                 {
-                    if (uploadDirectoryInfo.IsLocked)
-                    {
-                        PresentableNameLockedDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
-                    }
-
-                    if (uploadDirectoryInfo.IsHidden)
-                    {
-                        PresentableNameHiddenDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
-                    }
+                    PresentableNameHiddenDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
                 }
             }
         }

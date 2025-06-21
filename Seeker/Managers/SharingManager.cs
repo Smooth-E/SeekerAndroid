@@ -238,7 +238,7 @@ public static class SharingManager
             {
                 // we check the cache which has ALL of the parsed results in it. much different from rescanning.
                 success = SharedCacheManager
-                    .InitializeDatabase(null, true, out errorMessage);
+                    .InitializeDatabase(true, out errorMessage);
             }
             catch (Exception e)
             {
@@ -395,7 +395,7 @@ public static class SharingManager
         }
 
         DocumentFile fullDir = null;
-        if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(fullDirUri.Item2)) //todo
+        if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree()) //todo
         {
             fullDir = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(fullDirUri.Item2).Path));
         }
@@ -524,7 +524,7 @@ public static class SharingManager
             }
         }
 
-        if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(filename)) // IsFromTree method!
+        if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree()) // IsFromTree method!
         {
             ourFile = DocumentFile.FromFile(new Java.IO.File(ourUri.Path));
         }

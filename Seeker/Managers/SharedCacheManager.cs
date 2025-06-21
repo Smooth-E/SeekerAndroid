@@ -303,8 +303,7 @@ new(b_BrowseResponse_hiddenPortion))
     /// </summary>
     /// <param name="dir"></param>
     /// <param name="checkCache"></param>
-    public static bool InitializeDatabase(UploadDirectoryInfo newlyAddedDirectoryIfApplicable,
-        bool checkCache, out string errorMsg)
+    public static bool InitializeDatabase(Context context, bool checkCache, out string errorMsg)
     {
         errorMsg = string.Empty;
         bool success = false;
@@ -341,7 +340,7 @@ new(b_BrowseResponse_hiddenPortion))
                 // !!!! but we still have things to do like make all files
                 // that start with said presentableDir to be locked / hidden. etc.
 
-                UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates(context);
                 if (UploadDirectoryManager.AreAllFailed())
                 {
                     throw new DirectoryAccessFailure("All Failed");
@@ -496,7 +495,7 @@ new(b_BrowseResponse_hiddenPortion))
             else
             {
                 Logger.Debug("Using cached results");
-                UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates(context);
 
                 if (UploadDirectoryManager.AreAllFailed())
                 {
@@ -546,7 +545,7 @@ new(b_BrowseResponse_hiddenPortion))
 
             if (e is DirectoryAccessFailure)
             {
-                errorMsg = "Shared Folder Error - " + UploadDirectoryManager.GetCompositeErrorString();
+                errorMsg = "Shared Folder Error - " + UploadDirectoryManager.GetCompositeErrorString(context);
             }
             else
             {
