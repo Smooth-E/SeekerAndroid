@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Android.Content;
 using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Exceptions;
@@ -226,7 +227,7 @@ public static class SharingManager
         SeekerState.SoulseekClient.Options.NullSharedHandlers();
     }
     
-    public static void SetUpSharing(Action uiUpdateAction = null)
+    public static void SetUpSharing(Context context, Action uiUpdateAction = null)
     {
         Action setUpSharedFileCache = () =>
         {
@@ -237,8 +238,7 @@ public static class SharingManager
             try
             {
                 // we check the cache which has ALL of the parsed results in it. much different from rescanning.
-                success = SharedCacheManager
-                    .InitializeDatabase(true, out errorMessage);
+                success = SharedCacheManager.InitializeDatabase(context, true, out errorMessage);
             }
             catch (Exception e)
             {

@@ -350,7 +350,7 @@ public class MainActivity : ThemeableActivity
         // if we have all the conditions to share, then set sharing up.
         if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !SharingManager.IsSharingSetUpSuccessfully())
         {
-            SharingManager.SetUpSharing();
+            SharingManager.SetUpSharing(this);
         }
         else if (SeekerState.NumberOfSharedDirectoriesIsStale)
         {
@@ -1910,7 +1910,8 @@ public class MainActivity : ThemeableActivity
         out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
     {
         var name = CommonHelpers.GetFileNameFromFile(fullFilename);
-        var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder();
+        var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders.Value
+                             && !SettingsActivity.UseIncompleteManualFolder();
         var useTempDir = SettingsActivity.UseTempDirectory();
         var useCustomDir = SettingsActivity.UseIncompleteManualFolder();
 

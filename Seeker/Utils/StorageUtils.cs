@@ -1020,12 +1020,12 @@ public static class StorageUtils
             }
 
             string intermediateFolder = @"/";
-            if (SeekerState.CreateCompleteAndIncompleteFolders)
+            if (SeekerState.CreateCompleteAndIncompleteFolders.Value)
             {
                 intermediateFolder = @"/Soulseek Complete/";
             }
 
-            if (SeekerState.CreateUsernameSubfolders)
+            if (SeekerState.CreateUsernameSubfolders.Value)
             {
                 // TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
                 intermediateFolder = intermediateFolder + username + @"/";
@@ -1099,7 +1099,7 @@ public static class StorageUtils
                 }
 
                 DocumentFile slskDir1;
-                if (SeekerState.CreateCompleteAndIncompleteFolders)
+                if (SeekerState.CreateCompleteAndIncompleteFolders.Value)
                 {
                     slskDir1 = rootdir.FindFile("Soulseek Complete"); // does Soulseek Complete folder exist
                     if (slskDir1 == null || !slskDir1.Exists())
@@ -1123,7 +1123,7 @@ public static class StorageUtils
                     slskDir1 = rootdir;
                 }
                 
-                if (SeekerState.CreateUsernameSubfolders)
+                if (SeekerState.CreateUsernameSubfolders.Value)
                 {
                     DocumentFile tempUsernameDir1;
                     lock (string.Intern("IfNotExistCreateAtomic_1"))

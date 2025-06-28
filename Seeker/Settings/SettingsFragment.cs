@@ -25,10 +25,6 @@ public class SettingsFragment : PreferenceFragmentCompat
     private SettingsActivity settingsActivity;
     
     private Preference dataDirectoryUriPreference;
-    private SwitchPreferenceCompat createCompleteIncompleteFolders;
-    private SwitchPreferenceCompat createUsernameSubfolders;
-    private SwitchPreferenceCompat createSubfoldersForSingleDownloads;
-    private SwitchPreferenceCompat useManualIncompleteDirectory;
     private Preference incompleteDirectoryUriPreference;
     private Preference clearIncompleteFolder;
     private SwitchPreferenceCompat fileBackedDownloads;
@@ -73,29 +69,11 @@ public class SettingsFragment : PreferenceFragmentCompat
             settingsActivity.ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
         UpdateDataDirectoryUriPreferenceSummary();
 
-        createCompleteIncompleteFolders = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_create_complete_and_incomplete_folders);
-        createCompleteIncompleteFolders.PreferenceChange += (_, args) =>
-        {
-            SeekerState.CreateCompleteAndIncompleteFolders = Convert.ToBoolean(args.NewValue);
+        SeekerState.CreateCompleteAndIncompleteFolders.ValueChanged += _ =>
             UpdateIncompleteDirectoryUriPreferenceSummary();
-        };
 
-        createUsernameSubfolders = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_create_username_subfolders);
-        createUsernameSubfolders.PreferenceChange += (_, args) =>
-            SeekerState.CreateUsernameSubfolders = Convert.ToBoolean(args.NewValue);
-
-        createSubfoldersForSingleDownloads = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_create_subfolders_for_single_downloads);
-        createSubfoldersForSingleDownloads.PreferenceChange += (_, args) =>
-            SeekerState.NoSubfolderForSingle = Convert.ToBoolean(args.NewValue);
-
-        useManualIncompleteDirectory = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_use_manual_incomplete_directory_uri);
-        useManualIncompleteDirectory.PreferenceChange += (_, args) =>
+        SeekerState.OverrideDefaultIncompleteLocations.ValueChanged += _ =>
         {
-            SeekerState.OverrideDefaultIncompleteLocations = Convert.ToBoolean(args.NewValue);
             settingsActivity.SetIncompleteDirectoryState();
             UpdateIncompleteDirectoryUriPreferenceSummary();
         };
@@ -275,13 +253,13 @@ public class SettingsFragment : PreferenceFragmentCompat
             summary = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.NotInUse);
         }
         // if doc file is null that means we could not write to it.
-        else if (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null)
+        else if (SeekerState.OverrideDefaultIncompleteLocations.Value && SeekerState.RootIncompleteDocumentFile != null)
         {
             summary = SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
         }
         else
         {
-            if (!SeekerState.CreateCompleteAndIncompleteFolders)
+            if (!SeekerState.CreateCompleteAndIncompleteFolders.Value)
             {
                 summary = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.AppLocalStorage);
             }
@@ -317,7 +295,7 @@ public class SettingsFragment : PreferenceFragmentCompat
         var doNotDelete = TransfersFragment.TransferItemManagerDL.GetInUseIncompleteFolderNames();
 
         var useDownloadDir = 
-            SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder();
+            SeekerState.CreateCompleteAndIncompleteFolders.Value && !SettingsActivity.UseIncompleteManualFolder();
         
         var useTempDir = SettingsActivity.UseTempDirectory();
         var useCustomDir = SettingsActivity.UseIncompleteManualFolder();

@@ -63,7 +63,7 @@ namespace Seeker
         public static bool AllowPrivateRoomInvitations = false;
         public static bool StartServiceOnStartup = true;
         public static bool IsStartUpServiceCurrentlyRunning = false;
-        public static bool NoSubfolderForSingle { get; set; } = false;
+        public static PersistentValue<bool> NoSubfolderForSingle;
 
         public static bool AllowUploadsOnMetered = true;
         public static bool CurrentConnectionIsUnmetered = true;
@@ -138,9 +138,9 @@ namespace Seeker
         public static volatile int ListenerPort = 33939;
         public static bool ListenerUPnpEnabled = true;
 
-        public static bool CreateCompleteAndIncompleteFolders = true;
-        public static bool CreateUsernameSubfolders = false;
-        public static bool OverrideDefaultIncompleteLocations = false;
+        public static PersistentValue<bool> CreateCompleteAndIncompleteFolders;
+        public static PersistentValue<bool> CreateUsernameSubfolders;
+        public static PersistentValue<bool> OverrideDefaultIncompleteLocations;
 
         public static bool PerformDeepMetadataSearch = true;
 
@@ -163,6 +163,18 @@ namespace Seeker
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
         public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
+        public static void Initialize(Context context)
+        {
+            CreateCompleteAndIncompleteFolders = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_create_complete_and_incomplete_folders, true);
+            CreateUsernameSubfolders = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_create_username_subfolders, false);
+            NoSubfolderForSingle = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_create_subfolders_for_single_downloads, false);
+            OverrideDefaultIncompleteLocations = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_use_manual_incomplete_directory_uri, false);
+        }
+        
         // TODOORG seperateclass models
         public struct SmartFilterState
         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using System.Text.Json;
 using Android.Content;
 using AndroidX.Preference;
@@ -7,7 +6,7 @@ using Object = Java.Lang.Object;
 
 namespace Seeker;
 
-public class PersistentValue<T> where T : ISerializable
+public class PersistentValue<T>
 {
     public string Key { get; }
     public T DefaultValue  { get; }
@@ -40,7 +39,6 @@ public class PersistentValue<T> where T : ISerializable
                     throw new PersistentValueTypeException();
             }
         }
-        
         set
         {
             var editor = preferences.Edit()!;
@@ -103,6 +101,12 @@ public class PersistentValue<T> where T : ISerializable
         {
             preferences.RegisterOnSharedPreferenceChangeListener(new PreferenceChangeListener(this));
         }
+    }
+
+    public PersistentValue(Context context, int key, T defaultValue, bool listen = true)
+        : this(context, context.GetString(key), defaultValue, listen)
+    {
+        // Intentional no-op
     }
 
     private enum PersistentValueType

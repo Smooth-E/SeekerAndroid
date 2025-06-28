@@ -667,13 +667,13 @@ public class SettingsActivity : ThemeableActivity
 
     public static bool UseIncompleteManualFolder()
     {
-        return SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null;
+        return SeekerState.OverrideDefaultIncompleteLocations.Value && SeekerState.RootIncompleteDocumentFile != null;
     }
     
     public void SetIncompleteDirectoryState()
     {
         // TODO: These will be handled with preference dependency
-        var overrideDefault = SeekerState.OverrideDefaultIncompleteLocations;
+        var overrideDefault = SeekerState.OverrideDefaultIncompleteLocations.Value;
         recyclerViewFolders.Clickable = overrideDefault;
     }
 
@@ -1427,7 +1427,7 @@ public class SettingsActivity : ThemeableActivity
         if (SharingManager.MeetsSharingConditions() && !SeekerState.IsParsing && !SharingManager.IsSharingSetUpSuccessfully())
         {
             //try to set up sharing...
-            SharingManager.SetUpSharing(UpdateShareImageView);
+            SharingManager.SetUpSharing(this, UpdateShareImageView);
         }
         UpdateShareImageView();
         UpdateSharingViewState();
@@ -1866,7 +1866,7 @@ public class SettingsActivity : ThemeableActivity
 
     public static bool UseTempDirectory()
     {
-        return !UseIncompleteManualFolder() && !SeekerState.CreateCompleteAndIncompleteFolders;
+        return !UseIncompleteManualFolder() && !SeekerState.CreateCompleteAndIncompleteFolders.Value;
     }
 
     private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
@@ -2409,9 +2409,6 @@ public class SettingsActivity : ThemeableActivity
     {
         lock (SeekerApplication.SharedPrefLock)
         {
-            SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, true);
-            SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_use_manual_incomplete_directory_uri, false);
-            SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(ResourceConstant.String.key_create_username_subfolders, false);
             SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(ResourceConstant.String.key_manual_incomplete_directory_uri, string.Empty);
         }
     }
@@ -2421,10 +2418,6 @@ public class SettingsActivity : ThemeableActivity
         lock (SeekerApplication.SharedPrefLock)
         {
             SeekerState.SharedPreferences.Edit()!
-                .PutBoolean(ResourceConstant.String.key_create_complete_and_incomplete_folders, SeekerState.CreateCompleteAndIncompleteFolders)!
-                .PutBoolean(ResourceConstant.String.key_use_manual_incomplete_directory_uri, SeekerState.OverrideDefaultIncompleteLocations)!
-                .PutBoolean(ResourceConstant.String.key_create_username_subfolders, SeekerState.CreateUsernameSubfolders)!
-                .PutBoolean(ResourceConstant.String.key_create_subfolders_for_single_downloads, SeekerState.NoSubfolderForSingle)!
                 .PutString(ResourceConstant.String.key_manual_incomplete_directory_uri, SeekerState.ManualIncompleteDataDirectoryUri)!
                 .Commit();
         }

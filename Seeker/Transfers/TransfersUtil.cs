@@ -1,5 +1,4 @@
-﻿using Android.Widget;
-using Soulseek;
+﻿using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +25,7 @@ namespace Seeker.Transfers
                 return new Task(() => { });
             }
 
-            Task task = new Task(() =>
+            var task = new Task(() =>
             {
                 EnqueueFiles(files, queuePaused, username);
             });
@@ -36,12 +35,25 @@ namespace Seeker.Transfers
 
         public static async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
         {
-            bool allExist = true; //only show the transfer exists if all transfers in question do already exist
+            var allExist = true; // only show the transfer exists if all transfers in question do already exist
             var isSingle = files.Count() == 1;
-            List<DownloadInfo> downloadInfos = new List<DownloadInfo>();
-            foreach (FullFileInfo file in files)
+            var downloadInfos = new List<DownloadInfo>();
+            
+            foreach (var file in files)
             {
-                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, out bool transferExists);
+                var dlInfo = AddTransfer(
+                    username,
+                    file.FullFileName,
+                    file.Size,
+                    int.MaxValue,
+                    file.Depth,
+                    queuePaused, 
+                    file.wasFilenameLatin1Decoded, 
+                    file.wasFolderLatin1Decoded,
+                    isSingle,
+                    out var transferExists
+                );
+                
                 downloadInfos.Add(dlInfo);
                 if (!transferExists)
                 {
@@ -62,11 +74,6 @@ namespace Seeker.Transfers
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="files"></param>
-        /// <param name="username"></param>
         /// <remarks>
         /// Previously we would fireoff DownloadFileAsync tasks one after another.
         /// This would cause files do download out of order and other side effects.
@@ -74,43 +81,31 @@ namespace Seeker.Transfers
         /// </remarks>
         private static async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
         {
-            for (int i = 0; i < dlInfos.Count; i++)
+            for (var i = 0; i < dlInfos.Count; i++)
             {
                 var dlInfo = dlInfos[i];
                 var file = files[i];
                 var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
                 var e = new DownloadAddedEventArgs(dlInfo);
-                Action<Task> continuationActionSaveFile = DownloadQueue.DownloadContinuationActionUi(e);
+                var continuationActionSaveFile = DownloadQueue.DownloadContinuationActionUi(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
+        
                 // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next 
                 await waitForNext;
             }
         }
-
-
-        /// <summary>
-        /// Adds a transfer to the database. Does not 
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="fname"></param>
-        /// <param name="size"></param>
-        /// <param name="queueLength"></param>
-        /// <param name="depth"></param>
-        /// <param name="queuePaused"></param>
-        /// <param name="wasLatin1Decoded"></param>
-        /// <param name="wasFolderLatin1Decoded"></param>
-        /// <param name="isSingle"></param>
-        /// <param name="errorExists"></param>
-        /// <returns></returns>
+        
+        /// <summary>Adds a transfer to the database. Does not</summary>
         public static DownloadInfo AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
-            System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
-            bool exists = false;
+            var cancellationTokenSource = new CancellationTokenSource();
+            var exists = false;
             TransferItem transferItem = null;
             DownloadInfo downloadInfo = null;
-            System.Threading.CancellationTokenSource oldCts = null;
+            CancellationTokenSource oldCts = null;
+            
             try
             {
 
@@ -125,16 +120,19 @@ namespace Seeker.Transfers
                 transferItem.QueueLength = downloadInfo.QueueLength;
                 transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
                 transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
-                if (isSingle && SeekerState.NoSubfolderForSingle)
+                
+                if (isSingle && SeekerState.NoSubfolderForSingle.Value)
                 {
-                    transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
+                    transferItem.TransferItemExtra = TransferItemExtras.NoSubfolder;
                 }
 
                 if (!queuePaused)
                 {
                     try
                     {
-                        TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                        // if its already there we don't add it...
+                        TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource,
+                            out oldCts);
                     }
                     catch (Exception errr)
                     {
@@ -142,6 +140,7 @@ namespace Seeker.Transfers
                         Logger.FirebaseDebug("concurrency issue: " + errr);
                     }
                 }
+                
                 transferItem = TransfersFragment.TransferItemManagerDL
                     .AddIfNotExistAndReturnTransfer(transferItem, out exists);
                 
@@ -165,15 +164,18 @@ namespace Seeker.Transfers
             {
                 if (!exists)
                 {
-                    TransfersFragment.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
+                    // if it did not previously exist then remove it...
+                    TransfersFragment.TransferItemManagerDL.Remove(transferItem);
                 }
                 else
                 {
                     errorExists = exists;
                 }
+                
                 if (oldCts != null)
                 {
-                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
+                    // put it back...
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _);
                 }
             }
             return downloadInfo;

@@ -82,7 +82,8 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityAction));
 
         SeekerState.SharedPreferences = PreferenceManager.GetDefaultSharedPreferences(this);
-            
+        SeekerState.Initialize(this);
+        
         SharedPreferencesUtils.RestoreSeekerState(this);
         SharedPreferencesUtils.RestoreListeningState();
         UPnpManager.RestoreUpnpState();
@@ -505,7 +506,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
             // we need to truncate the incomplete file and set our progress back to 0.
 
             fileStream.Close();
-            var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders 
+            var useDownloadDir = SeekerState.CreateCompleteAndIncompleteFolders.Value
                                  && !SettingsActivity.UseIncompleteManualFolder();
 
             var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
