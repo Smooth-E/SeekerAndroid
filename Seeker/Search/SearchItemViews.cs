@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using _Microsoft.Android.Resource.Designer;
 
 namespace Seeker
 {
@@ -123,15 +124,17 @@ namespace Seeker
             SearchItemViewMedium itemView = (SearchItemViewMedium)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmedium_dummy, parent, false);
             return itemView;
         }
-        private bool hideLocked = false;
+        
+        private bool hideLocked;
+        
         public void setupChildren()
         {
-            viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
-            viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
-            viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
-            viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            viewUsername = FindViewById<TextView>(ResourceConstant.Id.userNameTextView);
+            viewFoldername = FindViewById<TextView>(ResourceConstant.Id.folderNameTextView);
+            viewSpeed = FindViewById<TextView>(ResourceConstant.Id.speedTextView);
+            viewFileType = FindViewById<TextView>(ResourceConstant.Id.fileTypeTextView);
+            viewQueue = FindViewById<TextView>(ResourceConstant.Id.availability);
+            hideLocked = SeekerState.HideLockedResultsInSearch.Value;
         }
 
         public void setItem(SearchResponse item, int noop)
@@ -219,20 +222,22 @@ namespace Seeker
 
         public void setupChildren()
         {
-            viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
-            viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
-            viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
-            viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
-            imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
-            viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            viewUsername = FindViewById<TextView>(ResourceConstant.Id.userNameTextView);
+            viewFoldername = FindViewById<TextView>(ResourceConstant.Id.folderNameTextView);
+            viewSpeed = FindViewById<TextView>(ResourceConstant.Id.speedTextView);
+            viewFileType = FindViewById<TextView>(ResourceConstant.Id.fileTypeTextView);
+            viewToHideShow = FindViewById<LinearLayout>(ResourceConstant.Id.detailsExpandable);
+            imageViewExpandable = FindViewById<ImageView>(ResourceConstant.Id.expandableClick);
+            viewQueue = FindViewById<TextView>(ResourceConstant.Id.availability);
+            hideLocked = SeekerState.HideLockedResultsInSearch.Value;
         }
-        private bool hideLocked = false;
+        
+        private bool hideLocked;
+        
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.GetFiles(SeekerState.HideLockedResultsInSearch))
+            foreach (var f in item.GetFiles(SeekerState.HideLockedResultsInSearch.Value))
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 SetTextColor(tv, SeekerState.MainActivityRef);

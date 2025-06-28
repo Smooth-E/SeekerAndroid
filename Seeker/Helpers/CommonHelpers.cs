@@ -1141,7 +1141,7 @@ namespace Seeker
         {
             int numFiles = 0;
             long totalBytes = -1;
-            if (SeekerState.HideLockedResultsInSearch)
+            if (SeekerState.HideLockedResultsInSearch.Value)
             {
                 numFiles = searchResponse.FileCount;
                 totalBytes = searchResponse.Files.Sum(f => f.Size);
@@ -1156,7 +1156,7 @@ namespace Seeker
             string sizeString = GetHumanReadableSize(totalBytes);
 
             var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
-            if (!SeekerState.HideLockedResultsInSearch)
+            if (!SeekerState.HideLockedResultsInSearch.Value)
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
             }
@@ -1180,7 +1180,6 @@ namespace Seeker
 
         public static string GetSizeLengthAttrString(Soulseek.File f)
         {
-
             string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
             string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
@@ -1281,10 +1280,7 @@ namespace Seeker
                 return string.Format("{0}h{1}m{2}s", hours, minutes, sec);
             }
         }
-
-
-
-
+        
         /// <summary>
         /// Get all BUT the filename
         /// </summary>

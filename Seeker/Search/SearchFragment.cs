@@ -947,8 +947,10 @@ namespace Seeker
             }
             UpdateDrawableState(filterText, true);
 
-            Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
+            var showHideSmartFilters = rootView.FindViewById<Button>(ResourceConstant.Id.toggleSmartFilters)!;
+            showHideSmartFilters.Text = SeekerState.ShowSmartFilters.Value
+                ? GetString(ResourceConstant.String.HideSmartFilters)
+                : GetString(ResourceConstant.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
             return rootView;
@@ -956,10 +958,14 @@ namespace Seeker
 
         private void ShowHideSmartFilters_Click(object sender, EventArgs e)
         {
-            SeekerState.ShowSmartFilters = !SeekerState.ShowSmartFilters;
-            Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
-            if (SeekerState.ShowSmartFilters)
+            SeekerState.ShowSmartFilters.Value = !SeekerState.ShowSmartFilters.Value;
+            
+            var showHideSmartFilters = rootView.FindViewById<Button>(ResourceConstant.Id.toggleSmartFilters)!;
+            showHideSmartFilters.Text = SeekerState.ShowSmartFilters.Value
+                ? GetString(ResourceConstant.String.HideSmartFilters)
+                : GetString(ResourceConstant.String.ShowSmartFilters);
+            
+            if (SeekerState.ShowSmartFilters.Value)
             {
                 if (SearchTabHelper.CurrentlySearching)
                 {
@@ -1004,20 +1010,19 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// Are chips filtering out results..
-        /// </summary>
-        /// <returns></returns>
+        /// <summary>Are chips filtering out results</summary>
         private bool AreChipsFiltering()
         {
-            if (!SeekerState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            var dataCount = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count;
+            var noChipData = (dataCount ?? 0) == 0;
+            
+            if (!SeekerState.ShowSmartFilters.Value || noChipData)
             {
                 return false;
             }
-            else
-            {
-                return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems.Any(i => i.IsChecked);
-            }
+
+            return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems
+                .Any(i => i.IsChecked);
         }
 
         private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -1963,11 +1968,12 @@ namespace Seeker
             // if - in front then it must not contain this word
             // there are also several keywords
 
-            Logger.Debug("Words To Avoid: " + searchTab.WordsToAvoid.ToString());
-            Logger.Debug("Words To Include: " + searchTab.WordsToInclude.ToString());
+            Logger.Debug("Words To Avoid: " + searchTab.WordsToAvoid);
+            Logger.Debug("Words To Include: " + searchTab.WordsToInclude);
             Logger.Debug("Whether to Filer: " + searchTab.FilteredResults);
             Logger.Debug("FilterString: " + searchTab.FilterString);
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
+            
+            var hideLocked = SeekerState.HideLockedResultsInSearch.Value;
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
@@ -2304,7 +2310,7 @@ namespace Seeker
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.FileCount == 0 && SeekerState.HideLockedResultsInSearch || !SeekerState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
+            if (e.Response.FileCount == 0 && SeekerState.HideLockedResultsInSearch.Value || !SeekerState.HideLockedResultsInSearch.Value && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
@@ -2593,7 +2599,7 @@ namespace Seeker
                 Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
                 try
                 {
-                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(SeekerState.HideLockedResultsInSearch, resp);
+                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(SeekerState.HideLockedResultsInSearch.Value, resp);
                 }
                 catch (System.Exception e)
                 {
@@ -2887,7 +2893,7 @@ namespace Seeker
                 SoulseekClient_SearchResponseReceived(null, e, fromTab, fromWishlist);
             });
 
-            SearchOptions searchOptions = new SearchOptions(responseLimit: SeekerState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SeekerState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
+            SearchOptions searchOptions = new SearchOptions(responseLimit: SeekerState.NumberSearchResults.Value, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SeekerState.FreeUploadSlotsOnly.Value ? 1 : 0, responseReceived: searchResponseReceived);
             SearchScope scope = null;
             if (fromWishlist)
             {
@@ -3016,7 +3022,7 @@ namespace Seeker
 
                     if (fromTab == SearchTabHelper.CurrentTab)
                     {
-                        if (SeekerState.ShowSmartFilters)
+                        if (SeekerState.ShowSmartFilters.Value)
                         {
 #if DEBUG
                             try
@@ -3169,7 +3175,7 @@ namespace Seeker
             if (!fromWishlist)
             {
                 //add a new item to our search history
-                if (SeekerState.RememberSearchHistory)
+                if (SeekerState.RememberSearchHistory.Value)
                 {
                     if (!searchHistory.Contains(searchString))
                     {

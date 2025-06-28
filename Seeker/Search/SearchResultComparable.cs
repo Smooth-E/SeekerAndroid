@@ -154,14 +154,16 @@ namespace Seeker.Search
             }
             else if (searchResultSorting == SearchResultSorting.BitRate)
             {
-                //for fastest, only speed matters. if they pick this then even locked files are in the running.
-                x.GetDominantFileType(SeekerState.HideLockedResultsInSearch, out double xbitRate);
-                y.GetDominantFileType(SeekerState.HideLockedResultsInSearch, out double ybitRate);
-                if (xbitRate != ybitRate)
+                // for fastest, only speed matters. if they pick this then even locked files are in the running.
+                var hideLockedResults = SeekerState.HideLockedResultsInSearch.Value;
+                x!.GetDominantFileType(hideLockedResults, out var xBitRate);
+                y!.GetDominantFileType(hideLockedResults, out var yBitRate);
+                
+                if (xBitRate != yBitRate)
                 {
-                    if (xbitRate > ybitRate)
+                    if (xBitRate > yBitRate)
                     {
-                        //x is better
+                        // x is better
                         return -1;
                     }
                     else

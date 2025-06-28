@@ -169,7 +169,7 @@ namespace Seeker.Search
                         sw.Start();
 #endif
                         OldNumResults[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count;
-                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SeekerState.HideLockedResultsInSearch));
+                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SeekerState.HideLockedResultsInSearch.Value));
 #if DEBUG
                         sw.Stop();
                         Logger.Debug($"search response count: " +

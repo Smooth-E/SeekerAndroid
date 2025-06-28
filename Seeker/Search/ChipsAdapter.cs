@@ -25,7 +25,7 @@ namespace Seeker
         public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SeekerState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = SeekerState.HideLockedResultsInSearch;
+            bool hideHidden = SeekerState.HideLockedResultsInSearch.Value;
 
             //this is relevant to both
             if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)

@@ -2223,20 +2223,14 @@ public class MainActivity : ThemeableActivity
                 .PutString(KeyConsts.M_Password, SeekerState.Password)!
                 .PutString(ResourceConstant.String.key_data_directory_uri, SeekerState.SaveDataDirectoryUri)!
                 .PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree)!
-                .PutInt(ResourceConstant.String.key_max_search_results, SeekerState.NumberSearchResults)!
                 .PutString(ResourceConstant.String.key_app_theme, ThemeUtils.IntToNightModeOption(this, SeekerState.DayNightMode))!
                 .PutBoolean(ResourceConstant.String.key_auto_clear_complete_downloads, SeekerState.AutoClearCompleteDownloads)!
                 .PutBoolean(ResourceConstant.String.key_auto_clear_complete_uploads, SeekerState.AutoClearCompleteUploads)!
-                .PutBoolean(ResourceConstant.String.key_remember_search_history, SeekerState.RememberSearchHistory)!
                 .PutBoolean(ResourceConstant.String.key_remember_recent_users, SeekerState.ShowRecentUsers)!
                 .PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes)!
                 .PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed)!
-                .PutBoolean(ResourceConstant.String.key_free_upload_slots_only, SeekerState.FreeUploadSlotsOnly)!
-                .PutBoolean(ResourceConstant.String.key_hide_locked_in_search, SeekerState.HideLockedResultsInSearch)!
-                .PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse)!
                 .PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky)!
                 .PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString)!
-                .PutBoolean(ResourceConstant.String.key_file_backed_downloads, !SeekerState.MemoryBackedDownload)!
                 .PutInt(KeyConsts.M_SearchResultStyle, (int)SearchFragment.SearchResultStyle)!
                 .PutBoolean(ResourceConstant.String.key_notify_on_file_complete, !SeekerState.DisableDownloadToastNotification)!
                 .PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed)!
@@ -2260,17 +2254,11 @@ public class MainActivity : ThemeableActivity
         outState.PutString(KeyConsts.M_Password, SeekerState.Password);
         outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree);
         outState.PutString(GetString(ResourceConstant.String.key_data_directory_uri), SeekerState.SaveDataDirectoryUri);
-        outState.PutInt(GetString(ResourceConstant.String.key_max_search_results), SeekerState.NumberSearchResults);
         outState.PutString(GetString(ResourceConstant.String.key_app_theme), ThemeUtils.IntToNightModeOption(this, SeekerState.DayNightMode));
         outState.PutBoolean(GetString(ResourceConstant.String.key_auto_clear_complete_downloads), SeekerState.AutoClearCompleteDownloads);
         outState.PutBoolean(GetString(ResourceConstant.String.key_auto_clear_complete_uploads), SeekerState.AutoClearCompleteUploads);
-        outState.PutBoolean(GetString(ResourceConstant.String.key_remember_search_history), SeekerState.RememberSearchHistory);
         outState.PutBoolean(GetString(ResourceConstant.String.key_remember_recent_users), SeekerState.ShowRecentUsers);
-        outState.PutBoolean(GetString(ResourceConstant.String.key_file_backed_downloads), !SeekerState.MemoryBackedDownload);
         outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
-        outState.PutBoolean(GetString(ResourceConstant.String.key_free_upload_slots_only), SeekerState.FreeUploadSlotsOnly);
-        outState.PutBoolean(GetString(ResourceConstant.String.key_hide_locked_in_search), SeekerState.HideLockedResultsInSearch);
-        outState.PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse);
         outState.PutBoolean(GetString(ResourceConstant.String.key_notify_on_file_complete), SeekerState.DisableDownloadToastNotification);
         outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
         outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);

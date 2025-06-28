@@ -35,17 +35,17 @@ namespace Seeker
 
         public static bool NotifyOnFolderCompleted = true;
 
-        public static bool FreeUploadSlotsOnly = true;
+        public static PersistentValue<bool> FreeUploadSlotsOnly;
         public static bool DisableDownloadToastNotification = true;
         public const bool AutoRetryDownload = true;
 
-        public static bool HideLockedResultsInSearch = true;
-        public static bool HideLockedResultsInBrowse = true;
+        public static PersistentValue<bool> HideLockedResultsInSearch;
+        public static PersistentValue<bool> HideLockedResultsInBrowse;
 
         public static bool TransferViewShowSizes = false;
         public static bool TransferViewShowSpeed = false;
 
-        public static bool MemoryBackedDownload = false;
+        public static PersistentValue<bool> FileBackedDownloads;
         
         // this is for downloads that fail with the condition "User is Offline".
         // this will also autodownload when we first log in as well.
@@ -53,9 +53,9 @@ namespace Seeker
 
         public static bool AutoRequeueDownloadsAtStartup = true;
 
-        public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
+        public static PersistentValue<int> NumberSearchResults;
         public static int DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
-        public static bool RememberSearchHistory = true;
+        public static PersistentValue<bool> RememberSearchHistory;
         public static SoulseekClient SoulseekClient = null;
         public static String Username = null;
         public static String Password = null;
@@ -91,7 +91,7 @@ namespace Seeker
         public static bool SpeedLimitDownloadIsPerTransfer = true;
         public static bool SpeedLimitUploadIsPerTransfer = true;
 
-        public static bool ShowSmartFilters = true;
+        public static PersistentValue<bool> ShowSmartFilters;
         public static SmartFilterState SmartFilterOptions;
 
         public static volatile bool DownloadKeepAliveServiceRunning = false;
@@ -173,6 +173,20 @@ namespace Seeker
                 ResourceConstant.String.key_create_subfolders_for_single_downloads, false);
             OverrideDefaultIncompleteLocations = new PersistentValue<bool>(context,
                 ResourceConstant.String.key_use_manual_incomplete_directory_uri, false);
+            FileBackedDownloads = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_file_backed_downloads, true);
+            ShowSmartFilters = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_show_smart_filters, true);
+            NumberSearchResults = new PersistentValue<int>(context,
+                ResourceConstant.String.key_max_search_results, MainActivity.DEFAULT_SEARCH_RESULTS);
+            FreeUploadSlotsOnly = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_free_upload_slots_only, true);
+            HideLockedResultsInSearch = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_hide_locked_in_search, true);
+            HideLockedResultsInBrowse = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_hide_locked_in_browse, true);
+            RememberSearchHistory = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_remember_search_history, true);
         }
         
         // TODOORG seperateclass models

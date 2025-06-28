@@ -1564,18 +1564,18 @@ public class SettingsActivity : ThemeableActivity
 
     private void RestoreDefaults_Click(object sender, EventArgs e)
     {
-        SeekerState.NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
+        SeekerState.NumberSearchResults.Reset();
         SeekerState.AutoClearCompleteDownloads = false;
         SeekerState.AutoClearCompleteUploads = false;
-        SeekerState.RememberSearchHistory = true;
+        SeekerState.RememberSearchHistory.Reset();
         SeekerState.ShowRecentUsers = true;
         SeekerState.SharingOn = false;
-        SeekerState.FreeUploadSlotsOnly = true;
+        SeekerState.FreeUploadSlotsOnly.Reset();
         SeekerState.DisableDownloadToastNotification = true;
-        SeekerState.MemoryBackedDownload = false;
+        SeekerState.FileBackedDownloads.Reset();
         SeekerState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
-        SeekerState.HideLockedResultsInBrowse = true;
-        SeekerState.HideLockedResultsInSearch = true;
+        SeekerState.HideLockedResultsInBrowse.Reset();
+        SeekerState.HideLockedResultsInSearch.Reset();
         // TODO: (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SeekerState.AutoClearCompleteDownloads;
         // TODO: (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
         // TODO: (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;

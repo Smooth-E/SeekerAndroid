@@ -77,7 +77,7 @@ namespace Seeker
             //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
+            bool hideLocked = SeekerState.HideLockedResultsInSearch.Value;
             List<File> fullFilenameCollection = new List<File>();
             foreach (File f in d.Files)
             {
@@ -231,22 +231,28 @@ namespace Seeker
 
         private void UpdateListView()
         {
-            ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
-            List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
-            adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
-            if (!SeekerState.HideLockedResultsInSearch)
+            var listView = View!.FindViewById<ListView>(ResourceConstant.Id.listView1)!;
+            
+            var adapterList = new List<FileLockedUnlockedWrapper>();
+            adapterList.AddRange(searchResponse.Files.ToList()
+                .Select(x => new FileLockedUnlockedWrapper(x, false)));
+            
+            if (!SeekerState.HideLockedResultsInSearch.Value)
             {
-                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
+                adapterList.AddRange(searchResponse.LockedFiles.ToList()
+                    .Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
-            this.customAdapter = new DownloadCustomAdapter(SeekerState.MainActivityRef, adapterList);
-            this.customAdapter.Owner = this;
-            listView.Adapter = (customAdapter);
+            
+            customAdapter = new DownloadCustomAdapter(SeekerState.MainActivityRef, adapterList);
+            customAdapter.Owner = this;
+            listView.Adapter = customAdapter;
         }
 
         private void UpdateSubHeader()
         {
-            TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.ApplicationContext.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            var subHeader = View!.FindViewById<TextView>(ResourceConstant.Id.userHeaderSub)!;
+            subHeader.Text = SeekerApplication.ApplicationContext.GetString(ResourceConstant.String.Total_) 
+                             + " " + CommonHelpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -254,7 +260,7 @@ namespace Seeker
             try
             {
                 PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View, GravityFlags.Right);
-                popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
+                popup.SetOnMenuItemClickListener(this);
                 popup.Inflate(Resource.Menu.download_diag_options);
 
                 if (customAdapter.SelectedPositions.Count > 0)
@@ -560,7 +566,7 @@ namespace Seeker
 
             //str.Close();
             //end logging code
-            bool hideLocked = SeekerState.HideLockedResultsInBrowse;
+            bool hideLocked = SeekerState.HideLockedResultsInBrowse.Value;
             if (b.DirectoryCount == 0 && b.LockedDirectoryCount != 0 && hideLocked)
             {
                 errorMsgToToast = SeekerState.ActiveActivityRef.GetString(Resource.String.browse_onlylocked);
@@ -790,14 +796,14 @@ namespace Seeker
                 List<File> selectedFiles = new List<File>();
                 foreach (int position in this.customAdapter.SelectedPositions)
                 {
-                    var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, position);
+                    var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch.Value, position);
                     selectedFiles.Add(file);
                 }
                 return GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return GetFullFileInfos(searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch));
+                return GetFullFileInfos(searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch.Value));
             }
         }
 
@@ -914,7 +920,7 @@ namespace Seeker
         {
             try
             {
-                var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0);
+                var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch.Value, 0);
                 string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
@@ -922,12 +928,14 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
-                if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                
+                if (!SeekerState.HideLockedResultsInSearch.Value && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.ApplicationContext.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                    RequireActivity().ShowShortToast(ResourceConstant.String.GetFolderDoesntWorkForLockedShares);
                     stopRefreshing();
                     return;
                 }
+                
                 GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
@@ -946,22 +954,26 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = CommonHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0).Filename);
-                    Action<View> action = new Action<View>((v) =>
+                    var hideLocked = SeekerState.HideLockedResultsInSearch.Value;
+                    var filename = searchResponse.GetElementAtAdapterPosition(hideLocked, 0).Filename;
+                    var startingDir = CommonHelpers.GetDirectoryRequestFolderName(filename);
+                    
+                    var action = new Action<View>(_ =>
                     {
-                        this.Dismiss();
-                        ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        Dismiss();
+                        ((AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef.FindViewById(ResourceConstant.Id.pager)!).SetCurrentItem(3, true);
                     });
-                    if (!SeekerState.HideLockedResultsInSearch && SeekerState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    
+                    if (!SeekerState.HideLockedResultsInSearch.Value && SeekerState.HideLockedResultsInBrowse.Value && searchResponse.IsLockedOnly())
                     {
-                        //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
+                        // this is if the user has show locked in search results but hide in browse results,
+                        // then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
+                    
+                    RequestFilesApi(searchResponse.Username, View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
-                    //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
-                    //transferItems.CopyTo(tempArry);
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
                         searchResponse.QueueLength +

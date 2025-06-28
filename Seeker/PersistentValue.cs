@@ -109,6 +109,11 @@ public class PersistentValue<T>
         // Intentional no-op
     }
 
+    public void Reset()
+    {
+        Value = DefaultValue;
+    }
+
     private enum PersistentValueType
     {
         Bool,

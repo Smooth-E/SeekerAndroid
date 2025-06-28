@@ -207,7 +207,7 @@ namespace Seeker.Transfers
                 }
             };
             
-            if (SeekerState.MemoryBackedDownload)
+            if (!SeekerState.FileBackedDownloads.Value)
             {
                 dlTask =
                     SeekerState.SoulseekClient.DownloadAsync(
