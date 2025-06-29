@@ -30,7 +30,7 @@ namespace Seeker
 
 
         // Settings
-        public static bool AutoClearCompleteDownloads = false;
+        public static PersistentValue<bool> AutoClearCompleteDownloads;
         public static bool AutoClearCompleteUploads = false;
 
         public static bool NotifyOnFolderCompleted = true;
@@ -61,7 +61,7 @@ namespace Seeker
         public static String Password = null;
         public static bool SharingOn = false;
         public static bool AllowPrivateRoomInvitations = false;
-        public static bool StartServiceOnStartup = true;
+        public static PersistentValue<bool> StartServiceOnStartup;
         public static bool IsStartUpServiceCurrentlyRunning = false;
         public static PersistentValue<bool> NoSubfolderForSingle;
 
@@ -187,6 +187,10 @@ namespace Seeker
                 ResourceConstant.String.key_hide_locked_in_browse, true);
             RememberSearchHistory = new PersistentValue<bool>(context,
                 ResourceConstant.String.key_remember_search_history, true);
+            StartServiceOnStartup = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_start_seeker_service_on_startup, true);
+            AutoClearCompleteDownloads = new PersistentValue<bool>(context,
+                ResourceConstant.String.key_auto_clear_complete_downloads, false);
         }
         
         // TODOORG seperateclass models

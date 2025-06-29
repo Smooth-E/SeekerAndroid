@@ -1565,7 +1565,7 @@ public class SettingsActivity : ThemeableActivity
     private void RestoreDefaults_Click(object sender, EventArgs e)
     {
         SeekerState.NumberSearchResults.Reset();
-        SeekerState.AutoClearCompleteDownloads = false;
+        SeekerState.AutoClearCompleteDownloads.Reset();
         SeekerState.AutoClearCompleteUploads = false;
         SeekerState.RememberSearchHistory.Reset();
         SeekerState.ShowRecentUsers = true;

@@ -33,7 +33,6 @@ public static class SharedPreferencesUtils
         SeekerState.SaveDataDirectoryUriIsFromTree = prefs.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
         SeekerState.DayNightMode = ThemeUtils.NightModeOptionToInt(context, prefs.GetString(ResourceConstant.String.key_app_theme, context.GetString(ResourceConstant.String.key_app_theme_system)));
         SeekerState.Language = prefs.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
-        SeekerState.AutoClearCompleteDownloads = prefs.GetBoolean(ResourceConstant.String.key_auto_clear_complete_downloads, false);
         SeekerState.AutoClearCompleteUploads = prefs.GetBoolean(ResourceConstant.String.key_auto_clear_complete_uploads, false);
         SeekerState.ShowRecentUsers = prefs.GetBoolean(ResourceConstant.String.key_remember_recent_users, true);
 
@@ -61,7 +60,6 @@ public static class SharedPreferencesUtils
         SeekerState.RecentUsersManager = RecentUserManager.FromXmlString(prefs.GetString(KeyConsts.M_RecentUsersList, string.Empty));
         SeekerState.IgnoreUserList = UserListManager.FromString(prefs.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
         SeekerState.AllowPrivateRoomInvitations = prefs.GetBoolean(ResourceConstant.String.key_allow_private_room_invites, false);
-        SeekerState.StartServiceOnStartup = prefs.GetBoolean(ResourceConstant.String.key_start_seeker_service_on_startup, true);
         
         SeekerState.RestoreSmartFilterState(prefs);
 

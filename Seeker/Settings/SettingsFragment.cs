@@ -24,10 +24,8 @@ public class SettingsFragment : PreferenceFragmentCompat
     
     private Preference dataDirectoryUriPreference;
     private Preference incompleteDirectoryUriPreference;
-
-    private SwitchPreferenceCompat startServiceOnStartup;
+    
     private TwoIconPreference startStopService;
-    private Preference aboutService;
 
     private SwitchPreferenceCompat allowPrivateRoomInvites;
     private SwitchPreferenceCompat autoClearCompleteDownloads;
@@ -86,27 +84,17 @@ public class SettingsFragment : PreferenceFragmentCompat
         FindPreference<Preference>(ResourceConstant.String.key_clear_search_history)
             .PreferenceClick += (_, _) => SeekerState.ClearSearchHistoryInvoke();
 
-        startServiceOnStartup = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_start_seeker_service_on_startup);
-        startServiceOnStartup.PreferenceChange += (_, args) =>
-            SeekerState.StartServiceOnStartup = Convert.ToBoolean(args.NewValue);
-
         startStopService = FindPreference<TwoIconPreference>(
-            ResourceConstant.String.key_start_stop_seeker_service);
+                ResourceConstant.String.key_start_stop_seeker_service);
         startStopService.PreferenceClick += (_, _) => OnStartStopPreferenceClicked();
         UpdateStartStopServicePreference();
 
-        aboutService = FindPreference<Preference>(ResourceConstant.String.key_about_seeker_service);
-        aboutService.PreferenceClick += (_, _) => OnAboutSeekerServicePreferenceClicked();
+        FindPreference<Preference>(ResourceConstant.String.key_about_seeker_service)
+            .PreferenceClick += (_, _) => OnAboutSeekerServicePreferenceClicked();
 
         allowPrivateRoomInvites = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_allow_private_room_invites);
         allowPrivateRoomInvites.PreferenceClick += (_, _) => OnAllowPrivateRoomInvitationsClicked();
-
-        autoClearCompleteDownloads = FindPreference<SwitchPreferenceCompat>(
-            ResourceConstant.String.key_auto_clear_complete_downloads);
-        autoClearCompleteDownloads.PreferenceChange += (_, args) =>
-            SeekerState.AutoClearCompleteDownloads = Convert.ToBoolean(args.NewValue);
 
         autoClearCompleteUploads = FindPreference<SwitchPreferenceCompat>(
             ResourceConstant.String.key_auto_clear_complete_uploads);

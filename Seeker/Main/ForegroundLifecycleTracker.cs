@@ -46,7 +46,7 @@ public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivit
             HasAppEverStarted = true;
             try
             {
-                if (SeekerState.StartServiceOnStartup)
+                if (SeekerState.StartServiceOnStartup.Value)
                 {
                     Intent seekerKeepAliveService = new Intent(activity, typeof(SeekerKeepAliveService));
                     // so so so many people are in background when this starts....

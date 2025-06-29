@@ -577,7 +577,7 @@ public class SeekerApplication(IntPtr javaReference, JniHandleOwnership transfer
         // int indexRemoved = -1;
         // if 100% complete and autoclear
         // todo: autoclear on upload
-        if (((SeekerState.AutoClearCompleteDownloads && !isUpload) 
+        if (((SeekerState.AutoClearCompleteDownloads.Value && !isUpload) 
              || (SeekerState.AutoClearCompleteUploads && isUpload)) 
             && Math.Abs(percentComplete - 100) < .001) 
         {
